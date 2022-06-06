@@ -7,3 +7,8 @@ export const toolFormatSearch = <T extends {[key: string]: string}>(source?: str
 	});
 	return result as T;
 };
+
+
+export const toolFormatPath = (source: string): string[] => {
+	return source.split('/').filter(item => item !== '');
+}
