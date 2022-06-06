@@ -1,3 +1,3 @@
-# react template
+# plug chain swap
 
-simple project by react
+swap project by cosmo
