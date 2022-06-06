@@ -1,19 +1,24 @@
-import PageHome from '$pages/home';
+import PageHome from '$pages/main';
+import PagePoolsList from '$pages/pools_list';
+import PageSwap from '$pages/swap';
 import { PathRouteProps } from 'react-router-dom';
 
-export const enumRoutes: {
-	readonly [key: string]: {
-		readonly path: string;
-		readonly element: React.ReactNode;
-	}
-} = {
-	home: {
-		path: '/',
-		element: <PageHome />,
+
+export const routesList: (PathRouteProps & {
+	routes?: PathRouteProps[];
+})[] = [
+	{
+		path: 'swap',
+		element:	<PageHome />,
+		routes: [
+			{
+				path: 'swap',
+				element: <PageSwap />,
+			},
+			{
+				path: 'poolsList',
+				element: <PagePoolsList />,
+			},
+		],
 	},
-};
-
-
-export const routesList: PathRouteProps[] = [
-	{...enumRoutes.home, caseSensitive: true},
 ];

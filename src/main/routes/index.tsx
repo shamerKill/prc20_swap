@@ -1,13 +1,11 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { routesList } from './routes';
-import { FC, useContext } from 'react';
+import { FC, useContext, useEffect } from 'react';
 
 import { routeTypeStore } from '$database';
+import { routesList } from './routes';
 
 import './index.scss';
-
-export { enumRoutes } from './routes'
 
 export const RouterApp = () => {
 	return (
@@ -31,22 +29,41 @@ const RouteList: FC = () => {
 			store.type = 'back';
 		} else if (lastPath !== location.pathname) {
 			store.list.push(location.pathname);
+			store.type = 'go';
 		}
 	}
+
+	const routesListNode = (_list: typeof routesList) => {
+		return _list.map((item, index) => {
+			return (
+				<Route key={item.path + index} {...item}>
+					{ item.routes && item.routes.length > 0 && routesListNode(item.routes) }
+				</Route>
+			);
+		});
+	};
 
 	return (
 		<TransitionGroup component={null}>
 			<CSSTransition key={location.key} classNames={store.type === 'go' ? 'route-fade-go' : 'route-fade-back'} timeout={300}>
 				<Routes location={location}>
 					{
-						routesList.map((item, index) => {
-							return (
-								<Route key={item.path + index} {...item}></Route>
-							);
-						})
+						routesListNode(routesList)
 					}
+					<Route
+						path="*"
+						element={<Redirect to="swap/swap" />}
+					/>
 				</Routes>
 			</CSSTransition>
 		</TransitionGroup>
 	);
 };
+
+function Redirect({ to }: { to: string }) {
+  let navigate = useNavigate();
+  useEffect(() => {
+    navigate(to);
+  });
+  return null;
+}

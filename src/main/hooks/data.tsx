@@ -2,6 +2,9 @@ import { dataBaseError } from "$database";
 import { useCallback, useEffect, useState } from "react";
 
 // fetch data from server
+// func do function
+// defaultDo is default do function
+// args func args
 export const useCustomDataHook = <T extends any, A extends any>(
 	func: (...args: A[]) => Promise<T>, defaultDo: boolean = true, ...args: A[]
 ) => {
