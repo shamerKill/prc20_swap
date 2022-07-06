@@ -1,0 +1,22 @@
+.component-functional-button {
+	cursor: pointer;
+	&:active {
+		transform: translateY(1px)  translateX(1px);
+	}
+	&[disabled] {
+		position: relative;
+		overflow: hidden;
+		cursor: default;
+		filter: blur(2px);
+		&::after {
+			content: '';
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+			background-color: var(--color-background-color);
+			opacity: 0.5;
+		}
+	}
+}

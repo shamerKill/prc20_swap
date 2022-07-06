@@ -1,0 +1,20 @@
+:root, :root[theme=light] {
+	--color-main-background-color: #dadefb66;
+	--color-primary-color: #31d87f;
+	--color-background-color: #ffffff;
+	--color-hight-color: #161620;
+	--color-gray-color: #adacb7;
+}
+
+:root[theme=dart] {
+	--color-main-background-color: #dadefb66;
+	--color-primary-color: #31d87f;
+}
+
+:root {
+	--size-font-size: 16px;
+}
+
+* {
+	transition: background-color 0.1s;
+}

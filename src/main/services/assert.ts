@@ -1,0 +1,1 @@
+export const assertLogoImg = new URL('../../assets/images/swap_logo.png', import.meta.url);

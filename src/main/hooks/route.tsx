@@ -1,31 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-import { routeTypeStore } from "$database";
-import { toolFormatSearch } from "$tools";
+import { toolFormatPath, toolFormatSearch } from "$tools";
 
-
-const useCustomRoute = (path: string|number) => {
-	const navigate = useNavigate();
-	const store = useContext(routeTypeStore);
-
-	const backCall = useCallback(() => {
-		if (path === -1) store.type = 'back';
-		else store.type = 'go';
-		if (typeof path === 'number') navigate(path);
-		if (typeof path === 'string') navigate(path);
-	}, [navigate, store]);
-	return backCall;
-};
-
-export const useCustomRouteBack = () => {
-	return useCustomRoute(-1);
-};
-
-export const useCustomRouteGoTo = (path: string) => {
-	return useCustomRoute(path);
-}
-
+// 将route search转成可用对象
 export const useCustomFormatSearch = <T extends {[key: string]: string}>() => {
 	const [ search, setSearch ] = useState<T>();
 	const location = useLocation();
@@ -35,3 +13,14 @@ export const useCustomFormatSearch = <T extends {[key: string]: string}>() => {
 	}, [location.search]);
 	return search;
 };
+
+// 将route path转成可用数组
+export const useCustomRouteFormatPath = (): Array<string> => {
+	const [ routePaths, setRoutePaths ] = useState<Array<string>>([]);
+	const location = useLocation();
+	useEffect(() => {
+		const routeArr = toolFormatPath(location.pathname);
+		setRoutePaths(routeArr);
+	}, [location.pathname]);
+	return routePaths;
+}

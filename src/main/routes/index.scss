@@ -1,37 +1,37 @@
 .route-fade-go-enter {
 	opacity: 0;
-  transform: translate(100vw, 0);
+  position: absolute;
 }
 .route-fade-go-enter.route-fade-go-enter-active {
 	opacity: 1;
-  transform: translate(0, 0);
-  transition: transform 100ms ease, transform 200ms ease;
+  position: absolute;
+  transition: opacity 1000ms ease;
 }
 .route-fade-go-exit {
 	opacity: 1;
-  transform: translate(0, 0);
+  position: absolute;
 }
 .route-fade-go-exit.route-fade-go-exit-active {
 	opacity: 0;
-  transform: translate(-100vw, 0);
-  transition: transform 100ms ease, transform 200ms ease;
+  position: absolute;
+  transition: opacity 1000ms ease;
 }
 
 .route-fade-back-enter {
 	opacity: 0;
-  transform: translate(-100vw, 0);
+  position: absolute;
 }
 .route-fade-back-enter.route-fade-back-enter-active {
 	opacity: 1;
-  transform: translate(0, 0);
-  transition: transform 100ms ease, transform 200ms ease;
+  position: absolute;
+  transition: opacity 1000ms ease;
 }
 .route-fade-back-exit {
 	opacity: 1;
-  transform: translate(0, 0);
+  position: absolute;
 }
 .route-fade-back-exit.route-fade-back-exit-active {
 	opacity: 0;
-  transform: translate(100vw, 0);
-  transition: transform 100ms ease, transform 200ms ease;
+  position: absolute;
+  transition: opacity 1000ms ease;
 }

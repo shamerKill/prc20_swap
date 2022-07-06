@@ -1,4 +1,10 @@
 @import "./rest.scss";
+@import "./theme.scss";
+@import '../../assets/icons/iconfont/iconfont.css';
+
+html {
+	font-size: var(--size-font-size);
+}
 
 #root {
 	position: relative;

@@ -1,5 +1,7 @@
 import { RouterApp } from '$routes';
+import { initI18n } from '$tools';
 import { createRoot } from 'react-dom/client';
+
 
 const main = async () => {
 	createRoot(
@@ -10,4 +12,5 @@ const main = async () => {
 	);
 };
 
+initI18n();
 main();

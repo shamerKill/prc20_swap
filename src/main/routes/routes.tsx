@@ -1,3 +1,4 @@
+import PageInfo from '$pages/browser';
 import PageHome from '$pages/main';
 import PagePoolsList from '$pages/pools_list';
 import PageSwap from '$pages/swap';
@@ -19,6 +20,10 @@ export const routesList: (PathRouteProps & {
 				path: 'poolsList',
 				element: <PagePoolsList />,
 			},
+			{
+				path: 'browser',
+				element: <PageInfo />,
+			},
 		],
-	},
+	}
 ];
