@@ -1,6 +1,6 @@
+import { FC, useEffect } from 'react';
 import { getDemoData } from '$database';
 import { useCustomFetchDataHook } from '$hooks';
-import { FC, useEffect } from 'react';
 
 import './index.scss';
 

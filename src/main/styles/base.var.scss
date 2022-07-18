@@ -1,0 +1,8 @@
+$size-phone-max-width: 900px;
+
+// 判断是不是移动端
+@mixin media-phone {
+	@media (max-width: $size-phone-max-width) {
+		@content;
+	}
+}

@@ -1,9 +1,14 @@
+@import './base.var.scss';
+
 :root, :root[theme=light] {
 	--color-main-background-color: #dadefb66;
 	--color-primary-color: #31d87f;
 	--color-background-color: #ffffff;
 	--color-hight-color: #161620;
 	--color-gray-color: #adacb7;
+	--color-content-background-color: #161620;
+	--color-content-background-color-opacity5: #16162088;
+	--color-content-hight-color: #ffffff;
 }
 
 :root[theme=dart] {
@@ -13,8 +18,12 @@
 
 :root {
 	--size-font-size: 16px;
+	--transition-time: 0.3s;
+	@include media-phone {
+		--size-font-size: 14px;
+	}
 }
 
 * {
-	transition: background-color 0.1s;
+	transition: background-color var(--transition-time);
 }

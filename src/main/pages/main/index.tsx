@@ -2,17 +2,15 @@ import { FC, useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { map } from 'rxjs';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
-import { ComponentLayoutBase } from '$components';
+import { ComponentLayoutBase, ComponentFunctionalButton } from '$components';
 import { assertLogoImg } from '$services';
 import { accountStore } from '$database';
 import { useCustomRouteFormatPath } from '$hooks';
+import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath } from '$tools';
 
 import './index.scss';
-import ComponentFunctionalButton from '$components/functional/button';
-import { toolFormatPath } from '$tools';
-import { LANGUAGE_EN, LANGUAGE_ZH, hideAddressCenter } from '$tools';
-import { useTranslation } from 'react-i18next';
 
 const PageHome: FC = () => {
 	const { i18n, t } = useTranslation();
@@ -71,7 +69,7 @@ const PageHome: FC = () => {
 						walletLinking ?
 						(
 							<div className={classNames('main_base_connect', walletLinking && 'main_base_connected')}>
-								<p className={classNames('main_base_connect_account')}>{hideAddressCenter(accountAddress)}</p>
+								<p className={classNames('main_base_connect_account')}>{toolHideAddressCenter(accountAddress)}</p>
 							</div>
 						) : (
 							<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_connect', walletLinking && 'main_base_connected')} onClick={linkWallet}>

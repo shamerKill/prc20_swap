@@ -1,8 +1,13 @@
+@import '../../styles/base.var.scss';
+
 .main_base {
 	background-color: var(--color-main-background-color);
 	position: relative;
 	display: flex;
 	z-index: 1;
+	@include media-phone {
+		flex-direction: column;
+	};
 	&::before, &::after {
 		content: '';
 		display: block;
@@ -35,11 +40,18 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	@include media-phone {
+		padding-top: 0;
+		flex: 0;
+	}
 }
 .main_base_logo_box {
 	display: block;
 	width: 70%;
 	max-width: 12rem;
+	@include media-phone {
+		display: none;
+	}
 }
 .main_base_logo {
 	display: block;
@@ -48,6 +60,9 @@
 .main_base_center {
 	width: 100%;
 	padding: 0 10%;
+	@include media-phone {
+		margin: 0 auto;
+	}
 }
 .main_base_connect {
 	margin: 2rem auto 0;
@@ -62,6 +77,12 @@
 	max-width: 15rem;
 	min-width: 9rem;
 	overflow-x: scroll;
+	@include media-phone {
+		margin: 1rem auto;
+		&.main_base_connected {
+			display: none;
+		}
+	}
 }
 .main_base_connect_account {
 	font-size: 0.5rem;
@@ -81,6 +102,10 @@
 	align-items: flex-end;
 	flex-direction: column;
 	justify-content: right;
+	@include media-phone {
+		flex-direction: row;
+		flex: auto;
+	}
 }
 .main_base_nav_link {
 	width: 80%;
@@ -90,18 +115,44 @@
 	align-items: center;
 	height: 3rem;
 	padding-left: 10%;
-	border-top-left-radius: 2rem;
-	border-bottom-left-radius: 2rem;
-	background-color: transparent;
 	cursor: pointer;
-	transition: background-color 0.3s;
-	&.main_base_nav_active {
+	position: relative;
+	z-index: 1;
+	&::before {
+		content: '';
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		background-color: transparent;
+		transition: background-color var(--transition-time);
+		border-top-left-radius: 2rem;
+		border-bottom-left-radius: 2rem;
+		z-index: -1;
+	}
+	&.main_base_nav_active::before {
 		background-color: var(--color-background-color);
+		opacity: 0.5;
+	}
+	@include media-phone {
+		padding: 0;
+		width: 33.33%;
+		min-width: auto;
+		align-items: center;
+		justify-content: center;
+		&::before {
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+			border-top-left-radius: 1rem;
+			border-top-right-radius: 1rem;
+		}
 	}
 }
 .main_base_nav_link_icon .iconfont {
-	font-size: 2rem;
-	line-height: 2rem;
+	font-size: 2.2rem;
+	line-height: 3rem;
+	padding-right: 0.2rem;
 }
 .main_base_line {
 	width: 100%;
@@ -111,6 +162,9 @@
 	border: 0;
 	opacity: 0.2;
 	margin: 1rem 0;
+	@include media-phone {
+		display: none;
+	}
 }
 .main_base_language {
 	margin: 0 auto 2rem;
@@ -121,6 +175,19 @@
 	background: none;
 	align-items: center;
 	height: 2rem;
+	@include media-phone {
+		&.component-functional-button {
+			position: absolute;
+			bottom: 0;
+			margin-bottom: 0.2rem;
+			&[disabled] {
+				position: absolute;
+			}
+		}
+		&.main_base_language_linked {
+			display: none;
+		}
+	}
 }
 
 
@@ -128,14 +195,38 @@
 	padding: 3rem 1rem 3rem 0;
 	flex: 5;
 	overflow-y: scroll;
+	@include media-phone {
+		padding: 0;
+		padding-bottom: 2.5rem;
+		&.main_base_content_linked {
+			padding-bottom: 0;
+		}
+	}
 }
 .main_base_route {
-	background-color: #fff;
 	border-radius: 2rem;
 	min-height: 100%;
 	padding: 1rem;
 	overflow: hidden;
 	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+		background-color: var(--color-background-color);
+		opacity: 0.5;
+	}
+	@include media-phone {
+		border-radius: 0;
+		padding: 0.5rem;
+	}
 }
 
 .main_base_content_shadow {
@@ -157,67 +248,5 @@
 	}
 	100% {
 		opacity: 0;
-	}
-}
-
-
-@media (max-width: 540px) {
-	.main_base {
-		flex-direction: column;
-	}
-	.main_base_nav {
-		padding-top: 0;
-		flex: 0;
-	}
-	.main_base_logo_box {
-		display: none;
-	}
-	.main_base_center {
-		margin: 0 auto;
-	}
-	.main_base_connect {
-		margin: 1rem auto;
-	}
-	.main_base_line {
-		display: none;
-	}
-	.main_base_nav_group {
-		flex-direction: row;
-		flex: auto;
-	}
-	.main_base_nav_link {
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
-		border-top-left-radius: 1rem;
-		border-top-right-radius: 1rem;
-		padding: 0;
-		width: 33.33%;
-		min-width: auto;
-		align-items: center;
-		justify-content: center;
-	}
-	.main_base_content {
-		padding: 0;
-		padding-bottom: 2.5rem;
-	}
-	.main_base_content_linked {
-		padding-bottom: 0;
-	}
-	.main_base_route {
-		border-radius: 0;
-	}
-	.component-functional-button.main_base_language {
-		position: absolute;
-		bottom: 0;
-		margin-bottom: 0.2rem;
-		&[disabled] {
-			position: absolute;
-		}
-	}
-	.main_base_connected {
-		display: none;
-	}
-	.main_base_language_linked {
-		display: none;
 	}
 }

@@ -14,7 +14,7 @@ const getDefaultLanguage = () => {
   return LANGUAGE_EN;
 };
 
-export const initI18n = () => {
+export const toolInitI18n = () => {
 	i18n
   .use(initReactI18next)
   .init({

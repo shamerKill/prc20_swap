@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 import './index.scss';
 
-const ComponentFunctionalButton: FC<{
+export const ComponentFunctionalButton: FC<{
 	children?: ReactNode | ReactNode[];
 	className?: string;
 	loading?: boolean;
@@ -17,5 +17,3 @@ const ComponentFunctionalButton: FC<{
 		</button>
 	);
 };
-
-export default ComponentFunctionalButton;

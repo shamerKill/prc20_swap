@@ -1,0 +1,12 @@
+@import '../../../styles/base.var.scss';
+.com-slippage-content {
+	width: 80%;
+	@include media-phone {
+		max-width: 10rem;
+		padding-bottom: 1rem;
+	}
+	.com-slippage-img {
+		width: 100%;
+		display: block;
+	}
+}
