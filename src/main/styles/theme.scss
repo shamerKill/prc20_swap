@@ -3,12 +3,16 @@
 :root, :root[theme=light] {
 	--color-main-background-color: #dadefb66;
 	--color-primary-color: #31d87f;
+	--color-primary-color-opacity2: #31d87f20;
 	--color-background-color: #ffffff;
 	--color-hight-color: #161620;
 	--color-gray-color: #adacb7;
 	--color-content-background-color: #161620;
 	--color-content-background-color-opacity5: #16162088;
 	--color-content-hight-color: #ffffff;
+	--color-input-background-color: #f9f8fb;
+	--color-list-item-background-color: #e7eeec;
+	--color-error-color: #ff0000;
 }
 
 :root[theme=dart] {
