@@ -84,7 +84,8 @@ export const toolNumberStrToFloatForInt = (input: string, places: number): strin
 // 数字转百分比
 export const numberToPercentage = (input: number|string, addSign: boolean = true): string => {
 	const inputStr = typeof input === 'number' ? input : parseFloat(input);
-	return (inputStr * 100).toString() + (addSign ? '%' : '');
+	if (Number.isNaN(inputStr)) return input.toString();
+	return (inputStr * 1000 / 10).toString() + (addSign ? '%' : '');
 }
 
 // 百分比转数字

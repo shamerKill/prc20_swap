@@ -26,7 +26,6 @@ const ComponentSwapInputBox: FC<{
 	children, inputs, hintText, buttonOnClick, buttonText, loading
 }) => {
 	const {t} = useTranslation();
-	console.log(inputs);
 	return (
 		<div className={classNames('com-swap-input-box')}>
 			<div className={classNames('com-swap-input-list')}>

@@ -1,5 +1,8 @@
 import PageInfo from '$pages/browser';
+import PageFlowPools from '$pages/flow_pools';
 import PageHome from '$pages/main';
+import PagePoolsAdd from '$pages/pools_add';
+import PagePoolsDelete from '$pages/pools_delete';
 import PagePoolsList from '$pages/pools_list';
 import PageSwap from '$pages/swap';
 import { useEffect } from 'react';
@@ -22,8 +25,20 @@ export const routesList: (PathRouteProps & {
 				element: <PagePoolsList />,
 			},
 			{
+				path: 'poolsList/add',
+				element: <PagePoolsAdd />,
+			},
+			{
+				path: 'poolsList/delete',
+				element: <PagePoolsDelete />,
+			},
+			{
 				path: 'browser',
 				element: <PageInfo />,
+			},
+			{
+				path: 'flowPools',
+				element: <PageFlowPools />,
 			},
 		],
 	},

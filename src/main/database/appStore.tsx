@@ -1,5 +1,6 @@
 import { BehaviorSubject } from "rxjs";
 
+// 代币
 export interface InEvmToken {
 	symbol: string, // 代币单位
 	contractAddress: string, // 合约地址,主链币为空字符串
@@ -10,6 +11,13 @@ export interface InEvmToken {
 export interface InEvmBalanceToken extends InEvmToken {
 	balance: string, // 余额数量
 }
+// 流动池数据
+export type InSwapPoolInfo = {
+	id: string; // 流动池ID
+	tokenOne: InEvmBalanceToken; // 代币a
+	tokenTwo: InEvmBalanceToken; // 代币b
+	poolScale: string; // 占据资金池比例
+};
 
 // 判断是否已经连接账户
 export const accountStoreInit: {

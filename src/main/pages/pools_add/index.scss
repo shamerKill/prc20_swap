@@ -1,0 +1,203 @@
+@import '../../styles/base.var.scss';
+
+.page_pools_add {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 1rem 0;
+	@include media-phone {
+		padding: 3rem 0;
+	}
+	.pools_box_outer {
+		display: flex;
+		flex-direction: column;
+		max-height: 40rem;
+	}
+	.pools_box_inner {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+	.pools_head {
+		display: flex;
+		justify-content: space-between;
+		padding: 0.5rem 0;
+	}
+	.pools_title {
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+		padding-left: 1rem;
+		font-size: 1.2rem;
+		color: var(--color-content-hight-color);
+	}
+	.pools_add_btn {
+		background-color: var(--color-primary-color);
+		color: var(--color-hight-color);
+		padding: 0.5rem 1.5rem;
+		border-radius: 2rem;
+		font-size: 1rem;
+		.iconfont {
+			font-size: 1rem;
+			font-weight: bold;
+			padding-right: 0.3rem;
+		}
+	}
+	.pools_add_box {
+		flex: 1;
+		position: relative;
+	}
+	.pools_add_inner {
+		display: flex;
+		flex-direction: row;
+		padding: 2rem 3rem;
+		align-items: stretch;
+		@include media-phone {
+			flex-direction: column-reverse;
+			padding: 1rem;
+		}
+	}
+	.pools_add_box {
+		flex: 5;
+		border: 1px solid var(--color-content-background-color-opacity5);
+		border-radius: 1rem;
+		padding: 1rem 2rem;
+	}
+	.inner_info {
+		flex: 2;
+		padding-left: 1rem;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		display: flex;
+		@include media-phone {
+			flex-direction: column-reverse;
+		}
+	}
+	.inner_info_content {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		@include media-phone {
+			flex-direction: row;
+			justify-content: space-between;
+		}
+	}
+	.inner_info_line {
+		width: 90%;
+		height: 1px;
+		background-color: var(--color-content-background-color);
+		margin: 1rem 0;
+		opacity: 0.2;
+		@include media-phone {
+			display: none;
+		}
+	}
+	.inner_info_item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-bottom: 1.5rem;
+		flex: 1;
+		overflow: hidden;
+		@include media-phone {
+			padding-left: 0.2rem;
+			padding-right: 0.2rem;
+			box-sizing: border-box;
+		}
+	}
+	.inner_info_value {
+		padding-bottoM: 1rem;
+		position: relative;
+	}
+	.inner_info_value::after {
+		content: '';
+		position: absolute;
+		display: block;
+		bottom: 0.5rem;
+		left: -50%;
+		width: 200%;
+		height: 1px;
+		background-color: var(--color-content-background-color);
+		opacity: 0.2;
+	}
+	.inner_info_desc {
+		color: var(--color-gray-color);
+		font-size: 0.8rem;
+		white-space: nowrap;
+		overflow: scroll;
+		width: 100%;
+		@include media-phone {
+			padding-bottom: 0.5rem;
+		}
+	}
+	.pools_add_hold {
+		padding: 2rem 0 0;
+		max-width: 60rem;
+		width: 100%;
+		overflow: hidden;
+		.hold_head {
+			display: flex;
+			justify-content: space-between;
+			align-items: top;
+			padding: 0 1rem;
+		}
+		.hold_head_title {
+			padding-bottom: 1rem;
+			border-bottom: 3px solid var(--color-primary-color);
+		}
+		.hold_head_info {
+			display: flex;
+		}
+		.hold_head_logo {
+			width: 1.4rem;
+			height: 1.4rem;
+			border-radius: 50%;
+			background-color: var(--color-main-background-color);
+			&:nth-child(2) {
+				margin-left: -0.5rem;
+			}
+		}
+		.hold_head_symbol {
+			padding-left: 1rem;
+		}
+		.hold_content {
+			width: 100%;
+			border: 1px solid var(--color-gray-color);
+			border-radius: 0.5rem;
+			margin-top: -2px;
+			padding: 1rem;
+			position: relative;
+		}
+		.hold_content_head {
+			display: flex;
+			padding: 0 0.5rem;
+		}
+		.hold_content_title, .hold_content_text {
+			flex: 1;
+			color: var(--color-gray-color);
+			font-size: 0.9rem;
+			overflow: scroll;
+			&:nth-child(2) {
+				text-align: center;
+			}
+			&:nth-child(3) {
+				text-align: right;
+			}
+		}
+		.hold_content_info {
+			display: flex;
+			background-color: var(--color-background-color);
+			border-radius: 0.5rem;
+			margin-top: 1rem;
+			padding: 0.5rem;
+		}
+		.hold_content_text {
+			font-size: 1rem;
+			color: var(--color-hight-color);
+		}
+	}
+}

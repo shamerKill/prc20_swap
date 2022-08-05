@@ -1,18 +1,21 @@
 import classNames from 'classnames';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import './index.scss';
 
-export const ComponentLayoutLoading: FC<{showLoading: boolean}> = ({ showLoading }) => {
+export const ComponentLayoutLoading: FC<{showLoading: boolean, id?: string}> = ({ showLoading, id }) => {
 	const [showBox, setShowBox] = useState(false);
 	const [removeBox, setRemoveBox] = useState(false);
+	const updateDidStatus = useRef(showLoading);
+	const updateDidTimer = useRef<number>();
 	useEffect(() => {
 		setShowBox(showLoading);
 		if (showLoading == false) {
-			setTimeout(() => {
+			updateDidTimer.current = setTimeout(() => {
 				setRemoveBox(true);
 			}, 1000);
 		} else {
+			if (updateDidStatus.current === false) clearTimeout(updateDidTimer.current);
 			setRemoveBox(false);
 		}
 	}, [showLoading]);

@@ -107,6 +107,14 @@ const PageHome: FC = () => {
 							{t('browser')}
 						</span>
 					</div>
+					<div className={classNames('main_base_nav_link', routeGroup == 'flowPools' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/flowPools')}>
+						<span className={classNames('main_base_nav_link_icon')}>
+							<i className={classNames('iconfont', 'icon-liudongchi')}></i>
+						</span>
+						<span className={classNames('main_base_nav_link_text')}>
+							{t('流动性矿池')}
+						</span>
+					</div>
 				</div>
 				<hr className={classNames('main_base_line')} />
 					<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_language', walletLinking && 'main_base_language_linked')} onClick={changeLanguage}>

@@ -1,0 +1,32 @@
+.com-functional-slider {
+	margin-top: 1.8rem;
+	width: 100%;
+	border-radius: 0.2rem;
+	position: relative;
+	height: 1rem;
+	z-index: 2;
+	cursor: pointer;
+	&::before {
+		content: '';
+		width: 100%;
+		position: absolute;
+		top: 0.4;
+		left: 0;
+		z-index: -1;
+		height: 0.2rem;
+		background-image: linear-gradient(to right, #f92640, #188ef7, #30d782);
+	}
+	.com-functional-slider-input {
+		display: block;
+		position: absolute;
+		top: -0.4rem;
+		height: 1rem;
+		width: 1rem;
+		background-color: var(--color-primary-color);
+		border-radius: 1rem;
+		z-index: 5;
+		padding-right: 1rem;
+		box-sizing: border-box;
+		transition: left 0.1s;
+	}
+}
