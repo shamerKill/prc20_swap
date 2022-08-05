@@ -38,7 +38,7 @@ const PageHome: FC = () => {
 
 	const onRouteTab = async (link: string) => {
 		if (routeLoading) return;
-		if (toolFormatPath(link)[1] == routeGroup) return;
+		if (toolFormatPath(link)[1] == routeGroup&&link!='/swap/browser/uplugcn') return;
 		setRouteLoading(true);
 		await new Promise(resolve => setTimeout(resolve, 50));
 		navigate(link);
@@ -99,7 +99,7 @@ const PageHome: FC = () => {
 							{t('pool')}
 						</span>
 					</div>
-					<div className={classNames('main_base_nav_link', routeGroup == 'browser' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/browser')}>
+					<div className={classNames('main_base_nav_link', routeGroup == 'browser' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/browser/uplugcn')}>
 						<span className={classNames('main_base_nav_link_icon')}>
 							<i className={classNames('iconfont', 'icon-liulanqi')}></i>
 						</span>

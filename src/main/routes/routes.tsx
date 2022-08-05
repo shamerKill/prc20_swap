@@ -33,7 +33,7 @@ export const routesList: (PathRouteProps & {
 				element: <PagePoolsDelete />,
 			},
 			{
-				path: 'browser',
+				path: 'browser/:id',
 				element: <PageInfo />,
 			},
 			{
