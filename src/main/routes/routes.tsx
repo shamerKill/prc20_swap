@@ -21,7 +21,7 @@ export const routesList: (PathRouteProps & {
 				element: <PagePoolsList />,
 			},
 			{
-				path: 'browser',
+				path: 'browser/:id',
 				element: <PageInfo />,
 			},
 		],

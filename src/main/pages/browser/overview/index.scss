@@ -1,0 +1,95 @@
+@import '../../../styles/base.var.scss';
+.browser-overview{
+  display: flex;
+  align-items: center;
+  padding: 2.2rem 2.3rem;
+	@include media-phone {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem;
+  }
+  .info-item{
+    display: flex;
+    align-items: center;
+    padding-right: 2.8rem;
+    font-size: 1.12rem;
+    @include media-phone {
+      width: 100%;
+      padding: 0.5rem 0;
+      justify-content: space-between;
+    }
+    .coin-name{
+      color: var(--color-browser-title-color);
+      padding-right: 0.3rem;
+      font-size: 1.5rem;
+    }
+    .info-title{
+      color: var(--color-browser-tips-color);
+      display: flex;
+      align-items: center;
+    }
+    .info-value{
+      color: var(--color-browser-title-color);
+    }
+  }
+}
+.overview-info-detail{
+  margin: 0 2.3rem;
+  background: var(--color-main-background-color);
+  border-radius: 2.5rem;
+	@include media-phone {
+    margin: 0 0.5rem;
+    border-radius: 1rem;
+  }
+  .overview-info-title{
+    display: flex;
+    align-items: center;
+    padding-top: 1rem;
+    @include media-phone {
+      flex-direction: column;
+    }
+    &-item{
+      width: 50%;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      @include media-phone {
+        width: 100%;
+      }
+      &-title{
+        color: var(--color-browser-tips-color);
+        font-size: 1rem;
+      }
+      &-value{
+        color: var(--color-browser-title-color);
+        font-size: 1.6rem;
+        font-weight: bold;
+        padding-top: 0.5rem;
+        .rate{
+          color: var(--color-rate-up-color);
+          font-size: 1rem;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+  
+}
+.overview-charts-list{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20rem;
+	@include media-phone {
+		flex-direction: column;
+	}
+  &-item{
+    padding: 0.65rem;
+    width: 50%;
+    height: 100%;
+    @include media-phone {
+      width: 100%;
+    }
+  }
+}
