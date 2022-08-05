@@ -7,6 +7,9 @@ export interface InEvmToken {
 	logo: string, // 图标
 	minUnit: string, // 最小单位
 };
+export interface InEvmBalanceToken extends InEvmToken {
+	balance: string, // 余额数量
+}
 
 // 判断是否已经连接账户
 export const accountStoreInit: {
@@ -23,9 +26,7 @@ export const accountStoreInit: {
 export const accountStore = new BehaviorSubject(accountStoreInit);
 
 // 用户主链币余额
-export const accountBalance: ({
-	balance: string, // 余额数量
-} & InEvmToken)[] = [];
+export const accountBalance: InEvmBalanceToken[] = [];
 export const accountBalanceStore = new BehaviorSubject(accountBalance);
 
 // 用户所选兑换代币

@@ -3,6 +3,7 @@
 :root, :root[theme=light] {
 	--color-main-background-color: #dadefb66;
 	--color-primary-color: #31d87f;
+	--color-primary-color-opacity2: #31d87f20;
 	--color-background-color: #ffffff;
 	--color-hight-color: #161620;
 	--color-gray-color: #adacb7;
@@ -16,6 +17,9 @@
 	--color-table-background-color:#FBFBFD;
 	--color-table-background-color1:#F2F3FC;
 	--color-tab-gray-background: rgba(120, 120, 129, 0.2);
+	--color-input-background-color: #f9f8fb;
+	--color-list-item-background-color: #e7eeec;
+	--color-error-color: #ff0000;
 }
 
 :root[theme=dart] {

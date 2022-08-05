@@ -4,12 +4,24 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	.swap_head {
+		display: flex;
+		justify-content: space-between;
+	}
 	.swap_title {
 		padding-top: 0.5rem;
 		padding-bottom: 0.5rem;
 		padding-left: 1rem;
 		font-size: 1.2rem;
 		color: var(--color-content-hight-color);
+	}
+	.swap_setting_btn {
+		background-color: transparent;
+		color: var(--color-gray-color);
+		padding: 0.5rem;
+		.iconfont {
+			font-size: 1.8rem;
+		}
 	}
 	.swap_inner {
 		display: flex;
@@ -84,5 +96,272 @@
 		color: var(--color-gray-color);
 		font-size: 0.8rem;
 		white-space: nowrap;
+	}
+}
+
+
+.page_swap_high_setting {
+	width: 80vw;
+	max-width: 25rem;
+	.high_setting_title {
+		display: flex;
+		justify-content: space-between;
+	}
+	.high_setting_label {
+		font-size: 0.9rem;
+		color: var(--color-gray-color);
+	}
+	.hight_setting_tip_btn {
+		position: relative;
+		background-color: transparent;
+		&:hover .height_setting_tip_text {
+			display: block;
+		}
+		.height_setting_tip_text {
+			position: absolute;
+			z-index: 5;
+			padding: 0.3rem 0.5rem;
+			color: var(--color-content-hight-color);
+			font-size: 0.9;
+			white-space: nowrap;
+			right: -5rem;
+			display: none;
+			@include media-phone {
+				right: -10vw;
+			}
+			&::before {
+				content: '';
+				background-color: var(--color-hight-color);
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				opacity: 0.8;
+				z-index: -1;
+				border-radius: 0.5rem;
+			}
+		}
+	}
+	.setting_slip_list {
+		display: flex;
+		padding-top: 1rem;
+		padding-bottom: 1rem;
+		justify-content: space-between;
+	}
+	.setting_slip_item {
+		width: 5rem;
+		height: 1.8rem;
+		line-height: 1.8rem;
+		text-align: center;
+		font-size: 0.9rem;
+		border-radius: 0.3rem;
+		background-color: var(--color-list-item-background-color);
+	}
+	.setting_slip_item_select {
+		background-color: var(--color-hight-color);
+		color: var(--color-primary-color);
+	}
+	.setting_input_label {
+		background-color: var(--color-list-item-background-color);
+		border-radius: 0.3rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 30%;
+		max-width: 6rem;
+		padding: 0 0.5rem;
+		box-sizing: border-box;
+		border: 1px solid transparent;
+		&:hover {
+			border: 1px solid var(--color-primary-color);
+		}
+		&.setting_time_label {
+			width: 100%;
+			max-width: 100%;
+			height: 2rem;
+			margin-top: 1rem;
+			.setting_input_input {
+				text-align: center;
+			}
+			.setting_input_unit {
+				text-align: right;
+			}
+		}
+	}
+	.setting_input_input {
+		background-color: transparent;
+		display: block;
+		min-width: 4rem;
+		flex: 5;
+	}
+	.setting_input_unit {
+		display: block;
+		flex: 1;
+		font-size: 0.8rem;
+	}
+	.setting_slip_desc {
+		color: var(--color-error-color);
+		font-size: 0.8rem;
+		padding: 0 0 1rem;
+	}
+	.setting_button {
+		width: 100%;
+		margin-top: 1rem;
+		height: 2.4rem;
+		background-color: var(--color-primary-color);
+		font-weight: 100;
+		border-radius: 0.3rem;
+	}
+}
+.page_swap_token_select {
+	width: 80vw;
+	margin: 0 -1rem -1rem;
+	max-width: 25rem;
+	border-bottom-left-radius: 1rem;
+	border-bottom-right-radius: 1rem;
+	overflow: hidden;
+	position: relative;
+	.token_select_input {
+		margin: 0 2rem 1rem;
+		background-color: var(--color-input-background-color);
+		width: calc(100% - 4rem);
+		height: 3rem;
+		padding: 0 0.3rem;
+		box-sizing: border-box;
+		text-align: center;
+		border-radius: 0.5rem;;
+		border: 1px solid transparent;
+		&:hover, &:focus {
+			border: 1px solid var(--color-primary-color);
+		}
+	}
+	.token_select_list, .token_local_list {
+		height: 20rem;
+		border-top: 1px solid var(--color-main-background-color);
+		padding-top: 0.5rem;
+	}
+	.token_select_item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.8rem 1rem;
+		cursor: pointer;
+		&:hover {
+			background-color: var(--color-primary-color-opacity2);
+		}
+		&.token_select_item_select {
+			background-color: var(--color-primary-color-opacity2);
+		}
+	}
+	.token_select_logo {
+		width: 1.6rem;
+		height: 1.6rem;
+		background-color: var(--color-main-background-color);
+		border-radius: 1rem;
+		overflow: hidden;
+	}
+	.token_select_symbol {
+		flex: 1;
+		padding-left: 1rem;
+		font-weight: 900;
+	}
+	.token_select_balance {
+		color: var(--color-gray-color);
+		font-size: 0.8rem;
+	}
+	.token_select_add {
+		background-color: var(--color-hight-color);
+		color: var(--color-background-color);
+		padding: 0.2rem 0.5rem;
+		border-radius: 1rem;
+		font-size: 0.8rem;
+		margin-left: 0.5rem;
+	}
+	.token_select_button {
+		display: flex;
+		width: 110%;
+		margin-left: -5%;
+		height: 3rem;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--color-primary-color);
+		.iconfont {
+			padding-right: 0.5rem;
+		}
+		&.token_local_tip {
+			font-size: 0.8rem;
+			background-color: var(--color-input-background-color);
+			color: var(--color-gray-color);
+		}
+	}
+	.token_local_title {
+		display: flex;
+		padding: 0.5rem 1rem;
+		align-items: center;
+		font-size: 0.9rem;
+	}
+	.token_local_title_back {
+		background-color: transparent;
+		padding-right: 0.5rem;
+		cursor: pointer;
+		.iconfont {
+			font-size: 1.4rem;
+		}
+		&:hover {
+			.iconfont {
+				font-weight: bold;
+			}
+		}
+	}
+	.token_local_title_text {
+		color: var(--color-gray-color);
+		flex: 1;
+	}
+	.token_local_title_clear {
+		padding: 0.5rem 0 0.5rem 1rem;
+		background-color: transparent;
+		color: var(--color-primary-color);
+	}
+	.token_local_list {
+		overflow-y: scroll;
+	}
+	.token_local_delete {
+		background-color: var(--color-input-background-color);
+		color: var(--color-gray-color);
+		padding: 0.5rem;
+		border-radius: 2rem;
+	}
+	.token_delete_tip {
+		position: absolute;
+		top: 30%;
+		left: 50%;
+		z-index: 100;
+		width: 60%;
+		background-color: var(--color-background-color);
+		box-sizing: border-box;
+		padding: 1rem;
+		margin-left: -30%;
+		border: 1px solid var(--color-gray-color);
+		border-radius: 1rem;
+		box-shadow: 0.1rem 0.1rem 0.1rem 0.1rem var(--color-gray-color);
+		text-align: center;
+		display: none;
+		&.token_delete_tip_show {
+			display: block;
+		}
+	}
+	.token_delete_buttons {
+		padding-top: 1rem;
+		display: flex;
+		justify-content: space-between;
+	}
+	.token_delete_btn {
+		width: 45%;
+		height: 2rem;
+		border-radius: 0.5rem;
+		&.token_delete_sure {
+			color: var(--color-error-color);
+		}
 	}
 }

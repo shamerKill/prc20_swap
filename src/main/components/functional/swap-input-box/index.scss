@@ -1,3 +1,117 @@
-.com-swap-input {
-	
+@use "sass:math";
+@import '../../../styles/base.var.scss';
+
+.com-swap-input-box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+	.com-swap-input-list {
+		width: 100%;
+	}
+	.com-swap-input-inner {
+		width: 100%;
+		height: 90px;
+		background-color: var(--color-input-background-color);
+		border-radius: 0.5rem;
+		margin-bottom: 1rem;
+		position: relative;
+		padding: 0.5rem;
+		border: 2px solid transparent;
+		&:hover, &:focus {
+			border: 2px solid var(--color-primary-color);
+		}
+		.com-swap-label {
+			color: var(--color-gray-color);
+			font-size: 0.8rem;
+			display: flex;
+			justify-content: space-between;
+		}
+		.com-swap-input-step {
+			$size: 2.8rem;
+			position: absolute;
+			height: $size;
+			width: $size;
+			bottom: math.div(-($size + 1rem), 2);
+			left: 50%;
+			margin-left: math.div(-$size, 2);
+			background-color: var(--color-background-color);
+			box-shadow: 0 0 0.5rem 1px var(--color-main-background-color);
+			z-index: 10;
+			border-radius: 0.3rem;
+			font-size: 2rem;
+			color: var(--color-gray-color);
+			line-height: $size;
+			text-align: center;
+			filter: blur(1px);
+		}
+		.com-swap-content {
+			display: flex;
+			padding-top: 0.5rem;
+			align-items: center;
+		}
+		.com-swap-input {
+			display: block;
+			flex: 1;
+			height: 3rem;
+			padding: 0 0.5rem;
+			font-size: 1.2rem;
+			background-color: transparent;
+			min-width: 1rem;
+		}
+		.com-swap-button {
+			padding: 0.5rem 1rem;
+			background-color: var(--color-primary-color);
+			border-radius: 1rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			&:hover {
+				opacity: 0.9;
+			}
+			&.com-swap-button-selected {
+				background-color: var(--color-hight-color);
+				color: var(--color-background-color);
+				.com-swap-icon {
+					opacity: 0.6;
+				}
+			}
+		}
+		.com-swap-button-logo {
+			display: block;
+			width: 1rem;
+			height: 1rem;
+			padding-right: 0.5rem;
+		}
+		.com-swap-button-span {
+			display: block;
+		}
+		.com-swap-icon {
+			font-size: 0.5rem;
+			padding-left: 0.2rem;
+			display: block;
+			padding-top: 0.2rem;
+		}
+		&:nth-last-child(1) {
+			margin-bottom: 0;
+			.com-swap-input-step {
+				display: none;
+			}
+		}
+	}
+	.com-swap-hint {
+		padding: 0.5rem 0;
+		font-size: 0.6rem;
+		color: var(--color-gray-color);
+	}
+	.com-swap-btn {
+		background-color: var(--color-primary-color);
+		border-radius: 0.5rem;
+		height: 4em;
+		width: 100%;
+		@include media-phone {
+			height: 3em;
+		}
+	}
 }

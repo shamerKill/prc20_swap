@@ -1,5 +1,5 @@
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
-import { FC, useEffect } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { FC } from 'react';
 
 import { routesList } from './routes';
 
@@ -30,18 +30,6 @@ const RouteList: FC = () => {
 			{
 				routesListNode(routesList)
 			}
-			<Route
-				path="*"
-				element={<Redirect to="swap/swap" />}
-			/>
 		</Routes>
 	);
 };
-
-function Redirect({ to }: { to: string }) {
-  let navigate = useNavigate();
-  useEffect(() => {
-    navigate(to);
-  });
-  return null;
-}
