@@ -43,6 +43,7 @@
 	@include media-phone {
 		padding-top: 0;
 		flex: 0;
+		flex-wrap: wrap;
 	}
 }
 .main_base_logo_box {
@@ -104,7 +105,7 @@
 	justify-content: right;
 	@include media-phone {
 		flex-direction: row;
-		flex: auto;
+		justify-content: initial;
 	}
 }
 .main_base_nav_link {
@@ -137,10 +138,9 @@
 	}
 	@include media-phone {
 		padding: 0;
-		width: 33.33%;
-		min-width: auto;
 		align-items: center;
 		justify-content: center;
+		min-width: 40%;
 		&::before {
 			border-bottom-left-radius: 0;
 			border-bottom-right-radius: 0;
