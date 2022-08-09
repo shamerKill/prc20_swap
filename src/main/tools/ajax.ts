@@ -11,14 +11,14 @@ export const toolAjax = async <T>(url: string, option?: {
 	});
 };
 
-export const toolPost = async <T>(
+export const toolGet = async <T>(
 	url: string, search?: { [key in string]: string|number|boolean }
 ): Promise<T> => {
 	let fetchUrl = url;
 	if (search) fetchUrl += '?' + Object.keys(search).map(key => `${key}=${search[key]}`).join('&');
-	return toolAjax(fetchUrl, { method: 'POST' });
+	return toolAjax(fetchUrl, { method: 'GET' });
 };
 
-export const toolGet = async <T>(url: string, body: any): Promise<T> => {
-	return toolAjax(url, { body, method: 'GET' });
+export const toolPost = async <T>(url: string, body: any): Promise<T> => {
+	return toolAjax(url, { body, method: 'POST' });
 };
