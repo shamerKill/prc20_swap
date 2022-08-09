@@ -16,9 +16,9 @@ export const toolPost = async <T>(
 ): Promise<T> => {
 	let fetchUrl = url;
 	if (search) fetchUrl += '?' + Object.keys(search).map(key => `${key}=${search[key]}`).join('&');
-	return toolAjax(fetchUrl, { method: 'GET' });
+	return toolAjax(fetchUrl, { method: 'POST' });
 };
 
 export const toolGet = async <T>(url: string, body: any): Promise<T> => {
-	return toolAjax(url, { body, method: 'POST' });
+	return toolAjax(url, { body, method: 'GET' });
 };
