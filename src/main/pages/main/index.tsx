@@ -8,7 +8,7 @@ import { ComponentLayoutBase, ComponentFunctionalButton } from '$components';
 import { assertLogoImg } from '$services';
 import { accountStore } from '$database';
 import { useCustomRouteFormatPath } from '$hooks';
-import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath } from '$tools';
+import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet } from '$tools';
 
 import './index.scss';
 
@@ -21,11 +21,13 @@ const PageHome: FC = () => {
 	const [, routeGroup] = useCustomRouteFormatPath();
 	const [routeLoading, setRouteLoading] = useState(false);
 
+	// 连接钱包
 	const linkWallet = async () => {
 		setShowLoading(true);
-		await new Promise(resolve => setTimeout(resolve, 5000));
-		accountStore.next({ ...accountStore.value, isWallet: !accountStore.value.isWallet, accountAddress: 'gx1clpzp4rkmx8jv0zmp5a6537jukcvqdg5mqrf09' });
+		const result = await toolLinkWallet();
 		setShowLoading(false);
+		if (result === null) return;
+		accountStore.next(result);
 	}
 
 	const changeLanguage = async () => {

@@ -6,7 +6,7 @@ import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { ComponentSlippage } from '$components/functional/slippage';
 import { InEvmBalanceToken } from '$database';
-import { numberToPercentage } from '$tools';
+import { toolNumberToPercentage } from '$tools';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalHide, layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
@@ -151,7 +151,7 @@ const HighSettingModal: FC<{
 	const { t } = useTranslation();
 	// 选择
 	const onSlipClick = (target: number) => {
-		setSelectSlipMem(parseFloat(numberToPercentage(target.toString(), false)));
+		setSelectSlipMem(parseFloat(toolNumberToPercentage(target.toString(), false)));
 	};
 	// 确认设置
 	const onSubmit = () => {
@@ -177,9 +177,9 @@ const HighSettingModal: FC<{
 					defaultSlipList.map(item => (
 						<ComponentFunctionalButton
 							key={item}
-							className={classNames('setting_slip_item', (selectSlipMem.toString() == numberToPercentage(item, false))&&'setting_slip_item_select' )}
+							className={classNames('setting_slip_item', (selectSlipMem.toString() == toolNumberToPercentage(item, false))&&'setting_slip_item_select' )}
 							onClick={() => onSlipClick(item)}>
-							{numberToPercentage(item)}
+							{toolNumberToPercentage(item)}
 						</ComponentFunctionalButton>
 					))
 				}
@@ -194,7 +194,7 @@ const HighSettingModal: FC<{
 				</label>
 			</div>
 			{
-				selectSlipMem <= parseFloat(numberToPercentage(defaultSlipList[1], false)) && <p className={classNames('setting_slip_desc')}>{t('您设置的滑点容差较低，交易可能失败')}</p>
+				selectSlipMem <= parseFloat(toolNumberToPercentage(defaultSlipList[1], false)) && <p className={classNames('setting_slip_desc')}>{t('您设置的滑点容差较低，交易可能失败')}</p>
 			}
 			<div className={classNames('high_setting_title')}>
 				<p className={classNames('high_setting_label')}>

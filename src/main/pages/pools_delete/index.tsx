@@ -4,7 +4,7 @@ import { ComponentSlippage } from '$components/functional/slippage';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { InEvmBalanceToken } from '$database';
 import { useCustomFormatSearch } from '$hooks';
-import { numberToPercentage, percentageToNumber } from '$tools';
+import { toolNumberToPercentage, toolPercentageToNumber } from '$tools';
 import classNames from 'classnames';
 import { FC, MouseEventHandler, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ const PagePoolsDelete: FC = () => {
 	const onEditValue = (input: string) => {
 		if (input === '') input = '0';
 		const value = parseFloat(input);
-		if (value <= 100 && value >= 0) setDeleteScale(percentageToNumber(value.toFixed(1)));
+		if (value <= 100 && value >= 0) setDeleteScale(toolPercentageToNumber(value.toFixed(1)));
 		else if (value > 100) setDeleteScale('1');
 		else if (value < 0) setDeleteScale('0');
 		else setDeleteScale('0');
@@ -96,7 +96,7 @@ const PagePoolsDelete: FC = () => {
 									<input
 										id="poolDeleteInput"
 										type="number"
-										value={numberToPercentage(deleteScale, false)}
+										value={toolNumberToPercentage(deleteScale, false)}
 										onChange={e => onEditValue(e.target.value)}
 										className={classNames('pool_delete_num_input')} />
 									<span className={classNames('pool_delete_num_unit')}>%</span>
@@ -108,16 +108,16 @@ const PagePoolsDelete: FC = () => {
 										scaleItemList.map(item => (
 											<ComponentFunctionalButton
 												key={item}
-												onClick={() => onEditValue(numberToPercentage(item, false))}
+												onClick={() => onEditValue(toolNumberToPercentage(item, false))}
 												className={classNames('delete_scale_item', item === deleteScale && 'delete_scale_item_select')}>
-												{item === '1' ? 'MAX' : numberToPercentage(item)}
+												{item === '1' ? 'MAX' : toolNumberToPercentage(item)}
 											</ComponentFunctionalButton>
 										))
 									}
 								</div>
 								<ComFunctionSlider
-									value={parseFloat(numberToPercentage(deleteScale, false))}
-									onChange={value => setDeleteScale(percentageToNumber(value.toString()))}></ComFunctionSlider>
+									value={parseFloat(toolNumberToPercentage(deleteScale, false))}
+									onChange={value => setDeleteScale(toolPercentageToNumber(value.toString()))}></ComFunctionSlider>
 							</div>
 						</div>
 						<div className={classNames('pool_delete_split')}>
@@ -197,7 +197,7 @@ const PagePoolsDelete: FC = () => {
 							<div className={classNames('hold_content_info')}>
 								<p className={classNames('hold_content_text')}>{holderData?.from??'-'}</p>
 								<p className={classNames('hold_content_text')}>{holderData?.to??'-'}</p>
-								<p className={classNames('hold_content_text')}>{numberToPercentage(holderData?.scale??'0')}</p>
+								<p className={classNames('hold_content_text')}>{toolNumberToPercentage(holderData?.scale??'0')}</p>
 							</div>
 							<ComponentLayoutLoading showLoading={holderData === null}></ComponentLayoutLoading>
 						</div>

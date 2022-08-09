@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FC, useEffect, useState } from 'react';
-import { numberToPercentage } from '$tools';
+import { toolNumberToPercentage } from '$tools';
 import { accountStore, InSwapPoolInfo } from '$database';
 import { ComponentContentBox, ComponentFunctionalButton, ComponentLayoutLoading } from '$components';
 
@@ -106,7 +106,7 @@ const PagePoolsList: FC = () => {
 									<div className={classNames('pools_item_info_info')}>
 										<p className={classNames('pools_item_info_text')}>{item.tokenOne.balance??'-'}</p>
 										<p className={classNames('pools_item_info_text')}>{item.tokenTwo.balance??'-'}</p>
-										<p className={classNames('pools_item_info_text')}>{numberToPercentage(item.poolScale??'0')}</p>
+										<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
 									</div>
 								</div>
 							</div>

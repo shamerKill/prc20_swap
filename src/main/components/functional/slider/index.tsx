@@ -1,4 +1,4 @@
-import { numberToPercentage } from '$tools';
+import { toolNumberToPercentage } from '$tools';
 import classNames from 'classnames';
 import { FC, MouseEventHandler, useEffect, useRef, useState } from 'react';
 
@@ -43,7 +43,7 @@ const ComFunctionSlider: FC<{
 			left = boxWidth - innerWith / 2;
 		}
 		setLeftScale(() => {
-			const value = parseFloat(numberToPercentage(((left + innerWith / 2) / boxWidth).toFixed(2), false));
+			const value = parseFloat(toolNumberToPercentage(((left + innerWith / 2) / boxWidth).toFixed(2), false));
 			return value;
 		});
 	}
@@ -56,7 +56,7 @@ const ComFunctionSlider: FC<{
 			let scaleNum = parseFloat(scale.toFixed(2));
 			if (scaleNum > 1) scaleNum = 1;
 			else if (scaleNum < 0) scaleNum = 0;
-			const scaleP = parseFloat(numberToPercentage(scaleNum, false));
+			const scaleP = parseFloat(toolNumberToPercentage(scaleNum, false));
 			return scaleP;
 		});
 	}

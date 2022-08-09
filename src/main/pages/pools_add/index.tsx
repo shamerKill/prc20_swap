@@ -9,7 +9,7 @@ import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
 import { ComponentSlippage } from '$components/functional/slippage';
-import { numberToPercentage } from '$tools';
+import { toolNumberToPercentage } from '$tools';
 import { useCustomFormatSearch } from '$hooks';
 
 const PagePoolsAdd: FC = () => {
@@ -167,7 +167,7 @@ const PagePoolsAdd: FC = () => {
 							<div className={classNames('hold_content_info')}>
 								<p className={classNames('hold_content_text')}>{holderData?.from??'-'}</p>
 								<p className={classNames('hold_content_text')}>{holderData?.to??'-'}</p>
-								<p className={classNames('hold_content_text')}>{numberToPercentage(holderData?.scale??'0')}</p>
+								<p className={classNames('hold_content_text')}>{toolNumberToPercentage(holderData?.scale??'0')}</p>
 							</div>
 							<ComponentLayoutLoading showLoading={holderData === null}></ComponentLayoutLoading>
 						</div>
