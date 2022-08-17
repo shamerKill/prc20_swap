@@ -1,4 +1,4 @@
-import { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
+import { FC, MouseEventHandler, MutableRefObject, ReactNode } from 'react';
 import classNames from 'classnames';
 import { InEvmBalanceToken } from '$database';
 import { ComponentFunctionalButton } from '../button';
@@ -6,6 +6,7 @@ import { ComponentFunctionalButton } from '../button';
 import './index.scss';
 import { ComponentLayoutLoading } from '$components/layout/loading';
 import { useTranslation } from 'react-i18next';
+import { toolNumberGetDecimalLength } from '$tools';
 
 const ComponentSwapInputBox: FC<{
 	children?: ReactNode | ReactNode[];
@@ -13,24 +14,27 @@ const ComponentSwapInputBox: FC<{
 		labelText?: string;
 		labelToken?: InEvmBalanceToken | null;
 		inputText?: string;
-		inputChange?: ChangeEventHandler<HTMLInputElement>;
+		inputChange?: (value: string) => void;
 		placeholder?: string;
 		selectToken?: () => void;
 		key: string;
+		disabled?: boolean;
+		checkMax?: boolean;
 	}[];
 	hintText?: string;
 	buttonText?: string;
 	buttonOnClick?:  MouseEventHandler<HTMLButtonElement>;
 	loading?: boolean;
+	focusIndex?: MutableRefObject<number | undefined>;
 }> = ({
-	children, inputs, hintText, buttonOnClick, buttonText, loading
+	inputs, hintText, buttonOnClick, buttonText, loading, focusIndex,
 }) => {
 	const {t} = useTranslation();
 	return (
 		<div className={classNames('com-swap-input-box')}>
 			<div className={classNames('com-swap-input-list')}>
 				{
-					inputs?.map((item) => (
+					inputs?.map((item, index) => (
 						<div key={item.key} className={classNames('com-swap-input-inner')}>
 							<p className={classNames('com-swap-label')}>
 								<span>{item.labelText}</span>
@@ -43,7 +47,29 @@ const ComponentSwapInputBox: FC<{
 									className={classNames('com-swap-input')}
 									type="number"
 									value={item.inputText}
-									onChange={item.inputChange}  />
+									disabled={item.disabled??false}
+									onBlur={e => {
+										if (Number.isNaN(parseFloat(e.target.value))) {
+											item.inputChange?.('0');
+										}
+										if (focusIndex) focusIndex.current = undefined;
+									}}
+									onFocus={e => {
+										const value = parseFloat(e.target.value);
+										if (value === 0) item.inputChange?.('');
+										if (focusIndex) focusIndex.current = index;
+									}}
+									onChange={e => {
+										let value: string = e.target.value;
+										if (!item.labelToken) return;
+										if (item.checkMax === true) {
+											if (parseFloat(value??'0') > parseFloat(item.labelToken?.balance??'0')) {
+												value = item.labelToken?.balance || '0';
+											}
+										}
+										if (toolNumberGetDecimalLength(value) > (item.labelToken?.scale??0)) return;
+										item.inputChange?.(value);
+									}}  />
 								<ComponentFunctionalButton
 									className={classNames('com-swap-button', item.labelToken && 'com-swap-button-selected')}
 									onClick={item.selectToken}>

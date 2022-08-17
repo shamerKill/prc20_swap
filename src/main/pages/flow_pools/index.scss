@@ -204,3 +204,24 @@
 		}
 	}
 }
+.modal_choose_outer {
+	width: 20rem;
+	.modal_choose_tip {
+		text-align: center;
+		font-size: 0.9rem;
+		color: var(--color-gray-color);
+		padding: 0.3rem 0;
+		.modal_choose_name {
+			color: var(--color-primary-color);
+			display: inline-block;
+			padding: 0 0.3rem;
+		}
+	}
+	.modal_choose_btn {
+		width: 100%;
+		background-color: var(--color-primary-color);
+		margin-top: 1rem;
+		border-radius: 0.3rem;
+		padding: 0.8rem 0;
+	}
+}

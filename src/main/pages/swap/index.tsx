@@ -1,15 +1,18 @@
-import { Dispatch, FC, MouseEvent, MouseEventHandler, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { ComponentContentBox, ComponentFunctionalButton } from '$components';
+import { toast } from 'react-toastify';
 
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { ComponentSlippage } from '$components/functional/slippage';
-import { InEvmBalanceToken } from '$database';
-import { toolNumberToPercentage } from '$tools';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLocalSlip, dataGetSwapEffect, dataSetApprove, dataSetLocalSlip, dataSetTokenTransfer, InEvmBalanceToken, swapGetAmountsOut } from '$database';
+import { toolNumberAdd, toolNumberDiv, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalHide, layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
+import ComLayoutShadowGlass from '$components/layout/shadow-glass';
+import { useCustomGetAccountAddress } from '$hooks';
 
 const PageSwap: FC = () => {
 	const {t} = useTranslation();
@@ -18,31 +21,56 @@ const PageSwap: FC = () => {
 	// 兑换出来的数量
 	const [toVolume, setToVolume] = useState('0.0');
 	// 兑换率影响
-	const [swapRateParameter, setSwapRateParameter] = useState('0.0');
+	const [swapRateParameter, setSwapRateParameter] = useState('0%');
 	// 最小接受额
 	const [minReceive, setMinReceive] = useState('0.0');
-	// 网络费用
-	const [netWorkFee, setNetWorkFee] = useState('0.0');
 	// from币信息
 	const [fromTokenInfo, setFromTokenInfo] = useState<InEvmBalanceToken|null>(null);
 	// to币信息
 	const [toTokenInfo, setToTokenInfo] = useState<InEvmBalanceToken|null>(null);
 	// 交易池内from币数量
-	const [fromTokenVolume, setFromTokenVolume] = useState<String|null>(null);
+	const [fromTokenVolume, setFromTokenVolume] = useState<string|null>(null);
 	// 交易池内to币数量
-	const [toTokenVolume, setToTokenVolume] = useState<String|null>(null);
+	const [toTokenVolume, setToTokenVolume] = useState<string|null>(null);
 	// 选择的滑点
-	const [ selectSlip, setSelectSlip ] = useState<number>(0);
+	const [ selectSlip, setSelectSlip ] = useState<number>(); // 默认百分之零点五
 	// 截止时间
-	const [ stopTime, setStopTime ] = useState<number>(0);
+	const [ stopTime, setStopTime ] = useState<number>();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
+	// 兑换代币比例展示
+	const [ tokenSwapShow, setTokenSwapShow ] = useState<string>('');
+	// 是否无法兑换 /流动性不足
+	const [canNotSwap, setCanNotSwap] = useState<boolean>(false);
+	// 是否需要授权
+	const [needApprove, setNeedApprove] = useState<boolean>();
+	// 是否在loading
+	const [ loading, setLoading ] = useState(false);
+	// 获取焦点在第几个input
+	const focusIndexRef = useRef<number>();
 
 	// 选择代币
 	const onSelectToken = (type: 'from' | 'to') => {
 		layoutModalShow({
 			children: <ComModalSelectToken onSelect={(data) => {
-				if (type === 'from') setFromTokenInfo(data);
-				else if (type === 'to') setToTokenInfo(data);
-			}}></ComModalSelectToken>,
+				if (type === 'from') {
+					if (toTokenInfo?.contractAddress === data.contractAddress) setToTokenInfo(null);
+					setFromTokenInfo(data);
+				}
+				else if (type === 'to') {
+					if (fromTokenInfo?.contractAddress === data.contractAddress) setFromTokenInfo(null);
+					setToTokenInfo(data);
+				}
+				setToVolume('0');
+				setToTokenVolume('0');
+				setFromVolume('0');
+				setFromTokenVolume('0');
+				setSwapRateParameter('0.0');
+				setMinReceive('0.0');
+			}} filterContractArr={[
+				fromTokenInfo?.contractAddress ?? '',
+				toTokenInfo?.contractAddress ?? '',
+			]}></ComModalSelectToken>,
 			options: {
 				title: t('选择代币'),
 			}
@@ -54,9 +82,9 @@ const PageSwap: FC = () => {
 		layoutModalShow({
 			children: (
 				<HighSettingModal
-					selectSlip={selectSlip}
+					selectSlip={selectSlip||0}
 					setSelectSlip={setSelectSlip}
-					stopTime={stopTime}
+					stopTime={stopTime||0}
 					setStopTime={setStopTime}>
 				</HighSettingModal>
 			),
@@ -65,9 +93,192 @@ const PageSwap: FC = () => {
 			}
 		});
 	};
+	
+	// 兑换方法
+	const onSwapButtonClick = async () => {
+		// 授权方法
+		if (needApprove) return approve();
+		if (!accountAddress) return;
+		if (!(parseFloat(fromVolume) > 0)) return;
+		setLoading(true);
+		try {
+			toast.info(t('将进行代币兑换'));
+			const result = await dataSetTokenTransfer(
+				accountAddress ?? '',
+				toolNumberStrToIntForFloat(fromVolume, fromTokenInfo?.scale??0),
+				toolNumberStrToIntForFloat(toVolume, toTokenInfo?.scale??0),
+				fromTokenInfo?.contractAddress??'',
+				toTokenInfo?.contractAddress??'',
+				(Math.floor(new Date().getTime() / 1000) + ((stopTime||0) * 60)).toString()
+			);
+			if (result.includes('status: true')) {
+				toast.success(t('兑换成功'));
+				await setTokenBalance();
+				setFromVolume('0');
+				setToVolume('0');
+			} else if (/^0x/.test(result)) {
+				toast.info(t('交易已发送') + `\n(hash:${result})`);
+				setFromVolume('0');
+				setToVolume('0');
+				setTimeout(() => setTokenBalance(), 5000);
+			} else {
+				toast.warning(t('发送错误') + ': \n' + result);
+			}
+		} catch (e) {
+			toast.warning(t('发送错误') + ': \n' + e);
+		}
+		setLoading(false);
+	};
+	// 授权方法
+	const approve = async () => {
+		setLoading(true);
+		try {
+			toast.info(t('请进行代币授权'));
+			const result = await dataSetApprove(fromTokenInfo?.contractAddress??'');
+			if (result) {
+				toast(t('授权成功'), { type: 'success' });
+				setNeedApprove(false);
+			} else {
+				toast(t('授权错误'), { type: 'warning' });
+			}
+		} catch (e: any) {
+			if (/password/.test(e.toString())) {
+				toast(t('密码输入错误'), { type: 'warning' });
+			} else {
+				toast(t('授权错误'), { type: 'warning' });
+			}
+		}
+		setLoading(false);
+	};
+	// 获取代币余额
+	const setTokenBalance = async () => {
+		const result = await dataGetAccountTokenBalance(accountAddress??'', [ fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??'' ]);
+		if (result.status === 200 && result.data) {
+			setFromTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[0]??'', fromTokenInfo?.scale??0)} : state );
+			setToTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[1]??'', toTokenInfo?.scale??0)} : state );
+		}
+	};
+
+	// 监听支付输入框
+	useEffect(() => {
+		if (focusIndexRef.current !== 0) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		const value = parseFloat(fromVolume);
+		if (!(value > 0)) {
+			setToVolume('0');
+			return;
+		}
+		// 获取兑换额度
+		(async () => {
+			const result = await swapGetAmountsOut(
+				toolNumberStrToIntForFloat(fromVolume, fromTokenInfo?.scale??0),
+				[
+					fromTokenInfo?.contractAddress??'',
+					toTokenInfo?.contractAddress??'',
+				]
+			);
+			if (result === '0') {
+				setCanNotSwap(true);
+				setToVolume('0');
+			}
+			else setCanNotSwap(false);
+			setToVolume(toolNumberStrToFloatForInt(result, toTokenInfo?.scale??0));
+		})();
+	}, [fromVolume, fromTokenInfo, toTokenInfo]);
+	// 监听兑换输入框
+	useEffect(() => {
+		if (focusIndexRef.current !== 1) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		if (!selectSlip) return;
+		const value = parseFloat(toVolume);
+		if (!(value > 0)) {
+			setFromVolume('0');
+			return;
+		}
+		// 获取支付额度
+		(async () => {
+			const result = await swapGetAmountsOut(
+				toolNumberStrToIntForFloat(toVolume, toTokenInfo?.scale??0),
+				[
+					toTokenInfo?.contractAddress??'',
+					fromTokenInfo?.contractAddress??'',
+				]
+			);
+			if (result === '0') {
+				setCanNotSwap(true);
+				setFromVolume('0');
+			}
+			else setCanNotSwap(false);
+			setFromVolume(toolNumberStrToFloatForInt(result, fromTokenInfo?.scale??0));
+		})();
+	}, [toVolume, fromTokenInfo, toTokenInfo]);
+	// 设置本地滑点/时间
+	useEffect(() => {
+		if (!selectSlip || !stopTime) return;
+		dataSetLocalSlip(selectSlip, stopTime);
+	}, [selectSlip, stopTime]);
+	// 获取高级设置
+	useEffect(() => {
+		(async () => {
+			const slipTimer = await dataGetLocalSlip();
+			setSelectSlip(slipTimer[0]);
+			setStopTime(slipTimer[1]);
+		})();
+	}, []);
+	// 获取授权判断
+	useEffect(() => {
+		if (!(parseFloat(fromVolume) > 0)) return;
+		if (!fromTokenInfo || !accountAddress) return;
+		if (!needApprove) return;
+		(async () => {
+			// 判断授权
+			const result = await dataGetAllowVolume(fromTokenInfo.contractAddress, accountAddress);
+			if (BigInt(result) <= BigInt(toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale))) {
+				setNeedApprove(true);
+			} else {
+				setNeedApprove(false);
+			}
+		})();
+	}, [fromVolume, fromTokenInfo?.contractAddress, accountAddress, needApprove]);
+	// 获取最小接受额
+	useEffect(() => {
+		if (!selectSlip) return;
+		if (!(parseFloat(toVolume) > 0)) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		const intVolume = toolNumberStrToIntForFloat(toVolume, toTokenInfo.scale);
+		const minValue = BigInt(intVolume) * (BigInt(1000) - BigInt(selectSlip * 10)) / BigInt(1000);
+		setMinReceive(toolNumberStrToFloatForInt(minValue.toString(), toTokenInfo.scale));
+	}, [toVolume, selectSlip, fromTokenInfo, toTokenInfo]);
+	// 获取兑换率影响
+	useEffect(() => {
+		if (!(toTokenInfo) || !(fromTokenInfo)) return;
+		(async() => {
+			const result = await dataGetSwapEffect(fromTokenInfo.contractAddress, toTokenInfo.contractAddress);
+			if (!result) return;
+			const [fromPoolVolume, toPoolVolume] = [toolNumberStrToFloatForInt(result[0], fromTokenInfo.scale), toolNumberStrToFloatForInt(result[1], toTokenInfo.scale)];
+			const divScale = toolNumberDiv(toPoolVolume, fromPoolVolume);
+			setTokenSwapShow(`1 ${fromTokenInfo.symbol} ≈ ${divScale} ${toTokenInfo.symbol}`);
+			setFromTokenVolume(fromPoolVolume);
+			setToTokenVolume(toPoolVolume);
+		})();
+	}, [toTokenInfo, fromTokenInfo]);
+	// 计算兑换率影响
+	useEffect(() => {
+		if (!fromTokenVolume || !toTokenVolume || !fromVolume || !toVolume || !toTokenInfo || !fromTokenInfo) return;
+		// 初始值
+		const defaultScale = toolNumberDiv(toTokenVolume, fromTokenVolume, { places: 10 });
+		// 更改值
+		const exchangeScale = toolNumberDiv(
+			toolNumberAdd(toTokenVolume, toVolume),
+			toolNumberAdd(fromTokenVolume, fromVolume),
+			{ places: 10 }
+		);
+		const moveScale = parseFloat(((parseFloat(exchangeScale) - parseFloat(defaultScale)) / parseFloat(defaultScale)).toFixed(4)) / 100;
+		setSwapRateParameter(toolNumberToPercentage(moveScale));
+	}, [fromTokenVolume, toTokenVolume, fromVolume, toVolume]);
 
 	return (
-		<div className={classNames('page_swap')}>
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_swap')}>
 			<ComponentContentBox
 				topChildren={
 					<div className={classNames('swap_head')}>
@@ -81,24 +292,42 @@ const PageSwap: FC = () => {
 				{/* 兑换操作 */}
 				<div className={classNames('inner_functional')}>
 					<ComponentSwapInputBox
-						hintText="1 PLUGCN = 0.004GG"
-						buttonOnClick={() => console.log(213)}
-						buttonText="选择代币"
+						hintText={tokenSwapShow}
+						focusIndex={focusIndexRef}
+						loading={loading}
+						buttonOnClick={(canNotSwap || (parseFloat(fromVolume) > parseFloat(fromTokenInfo?.balance??''))) ? undefined : () => {
+							if (fromTokenInfo === null) return onSelectToken('from');
+							if (toTokenInfo === null) return onSelectToken('to');
+							onSwapButtonClick();
+						}}
+						buttonText={
+							(fromTokenInfo === null || toTokenInfo === null) ? t('选择代币')
+							: (
+								canNotSwap ? t('流动性不足') : (
+									(parseFloat(fromVolume) > parseFloat(fromTokenInfo.balance)) ? t('支付代币余额不足') :
+									(
+										needApprove ? t('授权代币') :
+										t('兑换')
+									)
+								)
+							)
+						}
 						inputs={[
 							{
-								labelText: "支付",
+								labelText: t('支付'),
 								labelToken: fromTokenInfo,
 								inputText: fromVolume,
-								inputChange: (event) => setFromVolume(event.target.value),
+								inputChange: setFromVolume,
 								placeholder: "0.0",
 								selectToken: () => onSelectToken('from'),
 								key: 'pay_from',
+								checkMax: true,
 							},
 							{
-								labelText: "兑换",
+								labelText: t('兑换'),
 								labelToken: toTokenInfo,
 								inputText: toVolume,
-								inputChange: (event) => setToVolume(event.target.value),
+								inputChange: setToVolume,
 								placeholder: "0.0",
 								selectToken: () => onSelectToken('to'),
 								key: 'pay_to',
@@ -118,14 +347,10 @@ const PageSwap: FC = () => {
 							<p className={classNames('inner_info_value')}>{swapRateParameter}</p>
 							<p className={classNames('inner_info_desc')}>{t('兑换率影响')}</p>
 						</div>
-						<div className={classNames('inner_info_item')}>
-							<p className={classNames('inner_info_value')}>{netWorkFee}</p>
-							<p className={classNames('inner_info_desc')}>{t('网络费用')}</p>
-						</div>
 					</div>
 				</div>
 			</ComponentContentBox>
-		</div>
+		</ComLayoutShadowGlass>
 	);
 };
 
@@ -135,9 +360,9 @@ export default PageSwap;
 // 高级设置组件
 const HighSettingModal: FC<{
 	selectSlip: number,
-	setSelectSlip: Dispatch<SetStateAction<number>>,
+	setSelectSlip: Dispatch<SetStateAction<number|undefined>>,
 	stopTime: number,
-	setStopTime: Dispatch<SetStateAction<number>>,
+	setStopTime: Dispatch<SetStateAction<number|undefined>>,
 	children?: ReactNode,
 }> = ({
 	selectSlip, setSelectSlip, stopTime, setStopTime
@@ -189,7 +414,12 @@ const HighSettingModal: FC<{
 						className={classNames('setting_input_input')}
 						type="number"
 						value={selectSlipMem}
-						onChange={e => setSelectSlipMem(parseFloat(e.target.value === '' ? '0' : e.target.value))} />
+						onChange={e => {
+							let value = e.target.value === '' ? '0' : e.target.value;
+							let valueArr = value.split('.');
+							if (valueArr.length >= 2 && valueArr[1].length > 1) return;
+							setSelectSlipMem(parseFloat(value));
+						}} />
 					<span className={classNames('setting_input_unit')}>%</span>
 				</label>
 			</div>
@@ -207,7 +437,12 @@ const HighSettingModal: FC<{
 					className={classNames('setting_input_input')}
 					type="number"
 					value={stopTimeMem.toString()}
-					onChange={e => setStopTimeMem(parseInt(e.target.value === '' ? '0' : e.target.value))} />
+					onChange={e => {
+						let value = e.target.value === '' ? '0' : e.target.value;
+						let valueArr = value.split('.');
+						if (valueArr.length >= 2 && valueArr[1].length > 1) return;
+						setStopTimeMem(parseFloat(value));
+					}} />
 				<span className={classNames('setting_input_unit')}>{t('分钟')}</span>
 			</label>
 			<ComponentFunctionalButton

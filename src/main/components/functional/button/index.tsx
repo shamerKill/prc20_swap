@@ -12,7 +12,10 @@ export const ComponentFunctionalButton: FC<{
 	children, className, loading, onClick
 }) => {
 	return (
-		<button disabled={loading} onClick={onClick} className={classNames(className, 'component-functional-button')}>
+		<button
+			disabled={(onClick === undefined) || loading}
+			onClick={onClick}
+			className={classNames(className, 'component-functional-button', loading&&'component-functional-button-loading')}>
 			{children}
 		</button>
 	);

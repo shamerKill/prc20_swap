@@ -19,6 +19,8 @@ const ComponentLayoutModal: FC = () => {
 	const [ backBtnHandle, setBackBtnHandle ] = useState<(() => void)|undefined>(undefined);
 	// 背景是否关闭
 	const [ bgCanClose, setBgCanClose ] = useState<boolean>(false);
+	// 盒子padding
+	const [ padding, setPadding ] = useState<number>();
 	
 	// 订阅显示状态
 	useEffect(() => {
@@ -49,7 +51,7 @@ const ComponentLayoutModal: FC = () => {
 					setBackBtnHandle(() => options.backBtnHandle);
 				}
 				if (options.title) setTitle(options.title);
-				if (options.bgClose) setBgCanClose(true);
+				if (options.bgClose) setBgCanClose(options.bgClose);
 			}
 		}).unsubscribe;
 	}, []);

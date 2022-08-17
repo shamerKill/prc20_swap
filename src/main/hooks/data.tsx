@@ -1,5 +1,6 @@
-import { dataBaseError } from "$database";
+import { accountStore, dataBaseError } from "$database";
 import { useCallback, useEffect, useState } from "react";
+import { map } from "rxjs";
 
 // fetch data from server
 // func do function
@@ -25,4 +26,16 @@ export const useCustomFetchDataHook = <T extends any, A extends any>(
 	}, [defaultDo, fetchData]);
 
 	return {fetched, data, error, fetchData};
+};
+
+
+// 获取账户地址
+export const useCustomGetAccountAddress = () => {
+	// 账户地址
+	const [ accountAddress, setAccountAddress ] = useState<string>();
+	// 获取账户地址
+	useEffect(() => {
+		return accountStore.pipe(map(item => item.accountAddress)).subscribe(setAccountAddress).unsubscribe;
+	}, []);
+	return {accountAddress, setAccountAddress};
 };

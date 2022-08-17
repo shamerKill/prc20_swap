@@ -43,7 +43,7 @@ const ComFunctionSlider: FC<{
 			left = boxWidth - innerWith / 2;
 		}
 		setLeftScale(() => {
-			const value = parseFloat(toolNumberToPercentage(((left + innerWith / 2) / boxWidth).toFixed(2), false));
+			const value = parseFloat(toolNumberToPercentage((left / (boxWidth - innerWith / 2)).toFixed(2), false));
 			return value;
 		});
 	}

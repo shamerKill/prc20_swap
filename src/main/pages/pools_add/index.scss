@@ -104,13 +104,14 @@
 		flex: 1;
 		overflow: hidden;
 		@include media-phone {
-			padding-left: 0.2rem;
-			padding-right: 0.2rem;
+			padding-left: 0.5rem;
+			padding-right: 0.5rem;
+			overflow: scroll;
 			box-sizing: border-box;
 		}
 	}
 	.inner_info_value {
-		padding-bottoM: 1rem;
+		padding-bottom: 1rem;
 		position: relative;
 	}
 	.inner_info_value::after {
@@ -130,6 +131,7 @@
 		white-space: nowrap;
 		overflow: scroll;
 		width: 100%;
+		text-align: center;
 		@include media-phone {
 			padding-bottom: 0.5rem;
 		}

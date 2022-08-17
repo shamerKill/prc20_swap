@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { ComponentContentBox, ComponentFunctionalButton } from '$components';
 
 import './index.scss';
+import { accountStore } from '$database';
+import { useCustomGetAccountAddress } from '$hooks';
+import ComLayoutShadowGlass from '$components/layout/shadow-glass';
+import { layoutModalShow } from '$database/layout-data';
 
 type TypeFlowPoolItem = {
 	id: string;
@@ -65,6 +69,8 @@ const defaultData: TypeFlowPoolItem[] = [
 
 const PageFlowPools: FC = () => {
 	const { t } = useTranslation();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
 
 	// 总锁仓价值
 	const [ allLockUpValue, setAllLockUpValue ] = useState<string>('0');
@@ -91,7 +97,7 @@ const PageFlowPools: FC = () => {
 
 
 	return (
-		<div className={classNames('page_flow_pools')}>
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_flow_pools')}>
 			<div className={classNames('flow_top')}>
 				<div className={classNames('flow_top_value')}>
 					<div className={classNames('flow_top_value_text')}>{t('总锁仓价值')}</div>
@@ -125,7 +131,7 @@ const PageFlowPools: FC = () => {
 					itemList.map(item => <FlowItem key={item.id} info={item}></FlowItem>)
 				}
 			</div>
-		</div>
+		</ComLayoutShadowGlass>
 	);
 };
 
@@ -136,6 +142,12 @@ const FlowItem: FC<{
 	info: TypeFlowPoolItem
 }> = ({ info }) => {
 	const { t } = useTranslation();
+	// 选择
+	const onBtnChoose = () => {
+		layoutModalShow({
+			children: <ChooseModal lpName={info.name}></ChooseModal>,
+		});
+	};
 	return (
 		<div className={classNames('flow_item_box')}>
 			<ComponentContentBox
@@ -172,7 +184,8 @@ const FlowItem: FC<{
 							<div className={classNames('item_content_label')}>
 								<p className={classNames('item_label_title')}>
 									<span>{t('可收取')}</span>
-									<ComponentFunctionalButton className={classNames('item_label_title_btn')}>
+									<ComponentFunctionalButton
+										className={classNames('item_label_title_btn')}>
 										{t('收获')}
 									</ComponentFunctionalButton>
 								</p>
@@ -185,9 +198,9 @@ const FlowItem: FC<{
 					}
 					<p className={classNames('item_label_title', 'item_label_title_item')}>
 						<span>{t(info.did ? '挖矿收益(未发放)' : '挖矿奖励')}</span>
-						<p className={classNames('item_label_title_value')}>
+						<span className={classNames('item_label_title_value')}>
 							{ info.did ? info.allProfitValue : '' } { info.profitSymbol }
-						</p>
+						</span>
 					</p>
 				</div>
 				<div className={classNames('item_buttons')}>
@@ -195,31 +208,61 @@ const FlowItem: FC<{
 						info.did ? (
 							info.type === 'lockup' ? (
 								<>
-									<ComponentFunctionalButton className={classNames('item_button item_button_double item_button_lock')}>
+									<ComponentFunctionalButton
+										className={classNames('item_button item_button_double item_button_lock')}>
 										{t('锁定')}
 									</ComponentFunctionalButton>
-									<ComponentFunctionalButton className={classNames('item_button item_button_double item_button_unlock')}>
+									<ComponentFunctionalButton
+										className={classNames('item_button item_button_double item_button_unlock')}>
 										{t('收获&解锁')}
 									</ComponentFunctionalButton>
 								</>
 							) : (
 								<>
-									<ComponentFunctionalButton className={classNames('item_button item_button_double item_button_pledge')}>
+									<ComponentFunctionalButton
+										className={classNames('item_button item_button_double item_button_pledge')}>
 										{t('质押')}
 									</ComponentFunctionalButton>
-									<ComponentFunctionalButton className={classNames('item_button item_button_double item_button_withdraw')}>
+									<ComponentFunctionalButton
+										className={classNames('item_button item_button_double item_button_withdraw')}>
 										{t('收获&解押')}
 									</ComponentFunctionalButton>
 								</>
 							)
 						) : (
-							<ComponentFunctionalButton className={classNames('item_button item_button_select')}>
+							<ComponentFunctionalButton
+								className={classNames('item_button item_button_select')}
+								onClick={onBtnChoose}>
 								{t('选择')}
 							</ComponentFunctionalButton>
 						)
 					}
 				</div>
 			</ComponentContentBox>
+		</div>
+	);
+};
+
+// 选择弹窗(授权)
+const ChooseModal: FC<{
+	lpName: string;
+}> = ({lpName}) => {
+	const { t } = useTranslation();
+	// 授权方法
+	const onBtnApprove = () => {
+
+	};
+	return (
+		<div className={classNames('modal_choose_outer')}>
+			<p className={classNames('modal_choose_tip')}>{t('请在钱包中签名')}</p>
+			<p className={classNames('modal_choose_tip')}>
+				{t('授权')}<span className={classNames('modal_choose_name')}>{lpName}</span>{t('矿池')}
+			</p>
+			<ComponentFunctionalButton
+				className={classNames('modal_choose_btn')}
+				onClick={onBtnApprove}>
+				{t('授权')}
+			</ComponentFunctionalButton>
 		</div>
 	);
 };

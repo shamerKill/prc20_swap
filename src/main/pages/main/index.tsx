@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ComponentLayoutBase, ComponentFunctionalButton } from '$components';
 import { assertLogoImg } from '$services';
 import { accountStore } from '$database';
-import { useCustomRouteFormatPath } from '$hooks';
+import { useCustomGetAccountAddress, useCustomRouteFormatPath } from '$hooks';
 import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet } from '$tools';
 
 import './index.scss';
@@ -15,16 +15,17 @@ import './index.scss';
 const PageHome: FC = () => {
 	const { i18n, t } = useTranslation();
 	const [walletLinking, setWalletLinking] = useState(false);
-	const [accountAddress, setAccountAddress] = useState('');
+	// 账户地址
+	const { accountAddress, setAccountAddress } = useCustomGetAccountAddress();
 	const [showLoading, setShowLoading] = useState(false);
 	const navigate = useNavigate();
 	const [, routeGroup] = useCustomRouteFormatPath();
 	const [routeLoading, setRouteLoading] = useState(false);
 
 	// 连接钱包
-	const linkWallet = async () => {
+	const linkWallet = async (init: boolean = false) => {
 		setShowLoading(true);
-		const result = await toolLinkWallet();
+		const result = await toolLinkWallet(init);
 		setShowLoading(false);
 		if (result === null) return;
 		accountStore.next(result);
@@ -49,6 +50,7 @@ const PageHome: FC = () => {
 	}
 
 	useEffect(() => {
+		linkWallet(true);
 		return accountStore.pipe(map(item => item.accountAddress)).subscribe((accountAddress) => {
 			if (accountAddress && accountAddress != '') {
 				setWalletLinking(true);
@@ -71,10 +73,10 @@ const PageHome: FC = () => {
 						walletLinking ?
 						(
 							<div className={classNames('main_base_connect', walletLinking && 'main_base_connected')}>
-								<p className={classNames('main_base_connect_account')}>{toolHideAddressCenter(accountAddress)}</p>
+								<p className={classNames('main_base_connect_account')}>{toolHideAddressCenter(accountAddress??'')}</p>
 							</div>
 						) : (
-							<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_connect', walletLinking && 'main_base_connected')} onClick={linkWallet}>
+							<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_connect', walletLinking && 'main_base_connected')} onClick={() => linkWallet()}>
 								<span className={classNames('main_base_connect_text')}>{t('connect wallet')}</span>
 								<span className={classNames('main_base_connect_icon')}>
 									<i className={classNames('iconfont', 'icon-jiantou_xiangzuo')}></i>

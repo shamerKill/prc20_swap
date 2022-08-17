@@ -32,6 +32,10 @@
 		justify-content: space-between;
 		padding: 0.8rem 1rem;
 		cursor: pointer;
+		border-bottom: 1px solid var(--color-content-hight-color);
+		&.token_select_item_bg {
+			background-color: var(--color-main-background-color);
+		}
 		&:hover {
 			background-color: var(--color-primary-color-opacity2);
 		}
@@ -46,9 +50,17 @@
 		border-radius: 1rem;
 		overflow: hidden;
 	}
-	.token_select_symbol {
-		flex: 1;
+	.token_select_info {
 		padding-left: 1rem;
+		flex: 1;
+	}
+	.token_select_address {
+		font-size: 0.9rem;
+		color: var(--color-gray-color);
+		transform: scale(0.8);
+		transform-origin: left center;
+	}
+	.token_select_symbol {
 		font-weight: 900;
 	}
 	.token_select_balance {
