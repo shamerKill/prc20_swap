@@ -3,6 +3,7 @@ import Web3  from 'web3';
 import { toolApi, toolGet, toolReadUTF, toolWriteUTF } from "$tools";
 import { accountStore, InEvmToken, InSwapPoolInfo } from "./appStore";
 import { dataBaseError, dataBaseResult, TypeDataBase } from "./error";
+import { TypeAppVersion } from '$types';
 export const web3 = new Web3();
 export const swapRouterAddress = 'gx1xulgpeuajthdc52eyqhfpsrf8w3thu97lhguxs';
 export const factoryAddress = 'gx18g7wv6uq6p08mkupr8j2cze8hhhz5twu0ml2cz';
@@ -25,16 +26,17 @@ export const getDemoData = async (): Promise<string[]> => {
 };
 
 // 获取代币列表核心代币
-export const dataGetTokenCoreList = async (): Promise<TypeDataBase<InEvmToken[]>> => {
-	return toolGet(toolApi('/exchange/choice'))
+export const dataGetTokenCoreList = async (version: TypeAppVersion): Promise<TypeDataBase<InEvmToken[]>> => {
+	return toolGet(toolApi('/exchange/choice'), { version })
 		.then((data: any) => {
 			if (data.errno !== 200) throw Error(data.errmsg);
+			if (!data.data) return dataBaseResult([]);
 			const result = data.data.map((item: { [key in 'name'|'logo'|'token'|'decimals']: string|number; }) => ({
 				symbol: item.name,
 				contractAddress: item.token,
 				scale: item.decimals,
 				logo: item.logo,
-				minUnit: item.name,
+				minUnit: item.token,
 			}));
 			return dataBaseResult(result);
 		})
@@ -53,7 +55,7 @@ export const dataSearchToken = async (searchText: string): Promise<TypeDataBase<
 					contractAddress: item.token,
 					scale: item.decimals,
 					logo: item.logo,
-					minUnit: item.name,
+					minUnit: item.token,
 				}));
 			}
 			return dataBaseResult(result);
@@ -66,6 +68,7 @@ export const dataGetAccountTokenBalance = async (accountAddress: string, contrac
 	return toolGet(toolApi('/exchange/coins'), { address: accountAddress, tokens: contractAddressList.join() })
 		.then((data: any) => {
 			if (data.errno !== 200) throw Error(data.errmsg);
+			if (!data.data) return dataBaseResult([]);
 			const result: string[] = data.data.map((item: any) => item.balance);
 			return dataBaseResult(result);
 		})
@@ -73,8 +76,8 @@ export const dataGetAccountTokenBalance = async (accountAddress: string, contrac
 }
 
 // 获取本地代币列表
-export const dataGetTokenLocalList = async (address: string): Promise<InEvmToken[]> => {
-	const localData = window.localStorage.getItem(`cosmo_swap_${address}`);
+export const dataGetTokenLocalList = async (address: string, version: TypeAppVersion): Promise<InEvmToken[]> => {
+	const localData = window.localStorage.getItem(`cosmo_swap_${address}_${version}`);
 	if (localData == null) return [];
 	else {
 		const strData = toolReadUTF(
@@ -85,8 +88,8 @@ export const dataGetTokenLocalList = async (address: string): Promise<InEvmToken
 	}
 };
 // 设置本地代币列表
-export const dataSetTokenLocalList = async (token: InEvmToken[], address: string): Promise<void> => {
-	window.localStorage.setItem(`cosmo_swap_${address}`, toolWriteUTF(JSON.stringify(token)).join('_'));
+export const dataSetTokenLocalList = async (token: InEvmToken[], address: string, version: TypeAppVersion): Promise<void> => {
+	window.localStorage.setItem(`cosmo_swap_${address}_${version}`, toolWriteUTF(JSON.stringify(token)).join('_'));
 };
 
 // swap根据支付数量获取支出数量
@@ -165,6 +168,17 @@ export const dataSetApprove = async (contractAddress: string) => {
 	}
 	return result;
 };
+
+// 获取v1 lp
+export const dataGetSwapLpV10 = async (tokenAddress: string[]): Promise<TypeDataBase<{'lp_id': number, 'token_0': {[key in 'name'|'num']: string}, 'token_1': {[key in 'name'|'num']: string}}>> => {
+	return toolGet(toolApi('/exchange/lptoken'), { token1: tokenAddress[0], token2: tokenAddress[1] })
+		.then((data: any) => {
+			if (data.errno !== 200) throw Error(data.errmsg);
+			return dataBaseResult(data.data);
+		})
+		.catch(e => dataBaseError(e.toString()));
+	
+}
 
 // 获取兑换率影响
 export const dataGetSwapEffect = async (fromContract: string, toContract: string): Promise<string[]|undefined> => {
@@ -322,4 +336,44 @@ export const dataGetAccountLpList = async (account: string): Promise<TypeDataBas
 			return dataBaseResult(result);
 		})
 		.catch(e => dataBaseError(e.toString()));
+};
+
+
+// 判断是v1还是v2
+export const dataGetAppVersion = async (): Promise<TypeAppVersion> => {
+	const localData = window.localStorage.getItem(`cosmo_swap_version`);
+	if (localData == null) return 'v2';
+	else {
+		if (localData === 'v1') return 'v1';
+		else return 'v2';
+	}
+};
+
+export const dataSetAppVersion = async (version: TypeAppVersion) => {
+	window.localStorage.setItem(`cosmo_swap_version`, version);
+}
+
+// v1兑换代币
+export const dataSetSwapV1 = async (data: {
+	poolId: number; fromSymbol: string; fromAmount: string; toSymbol: string; feeAmount: string; orderPrice: number;
+}) => {
+	let result: any;
+	if (await cosmo.isWallet) {
+		result = await cosmo.walletTool.sendLiquidity({
+			poolId: data.poolId,
+			fromSymbol: data.fromSymbol,
+			fromAmount: data.fromAmount,
+			toSymbol: data.toSymbol,
+			feeAmount: data.feeAmount,
+			orderPrice: data.orderPrice,
+			gasAll: '200'
+		});
+	}
+	if (await cosmo.isChrome) {
+		const hash = await cosmo.chromeTool.dexPoolExchange(
+			data.poolId.toString(), data.fromSymbol, parseInt(data.fromAmount), data.toSymbol, data.feeAmount, data.orderPrice
+		);
+		result = hash;
+	}
+	return result;
 };

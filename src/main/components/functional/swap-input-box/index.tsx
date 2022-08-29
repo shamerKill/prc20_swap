@@ -62,6 +62,7 @@ const ComponentSwapInputBox: FC<{
 									onChange={e => {
 										let value: string = e.target.value;
 										if (!item.labelToken) return;
+										if (/-/.test(value)) return;
 										if (item.checkMax === true) {
 											if (parseFloat(value??'0') > parseFloat(item.labelToken?.balance??'0')) {
 												value = item.labelToken?.balance || '0';

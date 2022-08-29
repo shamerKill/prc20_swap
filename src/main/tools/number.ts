@@ -42,7 +42,9 @@ export function toolNumberDiv <T=string|number|BigInt>(
 		return BigInt(result) as unknown as T;
 	}
 }
-// 乘法
+/**
+ * 乘法
+**/
 export const toolNumberMul = (first: string, second: string): string => {
 	// 获取最长的小数点
 	const firstMax = toolNumberGetDecimalLength(first);
@@ -56,6 +58,9 @@ export const toolNumberMul = (first: string, second: string): string => {
 	return result;
 };
 
+/**
+ * 加法
+**/
 export const toolNumberAdd = (first: string, second: string): string => {
 	// 获取最长的小数点
 	const firstMax = toolNumberGetDecimalLength(first);
@@ -65,6 +70,21 @@ export const toolNumberAdd = (first: string, second: string): string => {
 	const firstInt = toolNumberStrToIntForFloat(first, maxPointLen);
 	const secondInt = toolNumberStrToIntForFloat(second, maxPointLen);
 	const resultBig = BigInt(firstInt) + BigInt(secondInt);
+	const result = toolNumberStrToFloatForInt(resultBig.toString(), maxPointLen);
+	return result;
+};
+/**
+ * 减法
+**/
+export const toolNumberCut = (first: string, second: string): string => {
+	// 获取最长的小数点
+	const firstMax = toolNumberGetDecimalLength(first);
+	const secondMax = toolNumberGetDecimalLength(second);
+	let maxPointLen = firstMax;
+	if (firstMax < secondMax) maxPointLen = secondMax;
+	const firstInt = toolNumberStrToIntForFloat(first, maxPointLen);
+	const secondInt = toolNumberStrToIntForFloat(second, maxPointLen);
+	const resultBig = BigInt(firstInt) - BigInt(secondInt);
 	const result = toolNumberStrToFloatForInt(resultBig.toString(), maxPointLen);
 	return result;
 };

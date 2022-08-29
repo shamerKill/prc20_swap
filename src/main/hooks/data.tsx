@@ -1,6 +1,7 @@
-import { accountStore, dataBaseError } from "$database";
-import { useCallback, useEffect, useState } from "react";
-import { map } from "rxjs";
+import { accountStore, dataBaseError, dataGetAppVersion, dataSetAppVersion } from "$database";
+import { TypeAppVersion } from "$types";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { BehaviorSubject, map } from "rxjs";
 
 // fetch data from server
 // func do function
@@ -38,4 +39,25 @@ export const useCustomGetAccountAddress = () => {
 		return accountStore.pipe(map(item => item.accountAddress)).subscribe(setAccountAddress).unsubscribe;
 	}, []);
 	return {accountAddress, setAccountAddress};
+};
+
+const appVersionSub = new BehaviorSubject<TypeAppVersion|undefined>(undefined);
+// 获取应用版本
+export const useCustomGetAppVersion = (): [ TypeAppVersion | undefined, (version: TypeAppVersion) => void ] => {
+	const [ version, setVersion ] = useState<TypeAppVersion>();
+	useEffect(() => {
+		if (!appVersionSub.value) dataGetAppVersion().then(data => {
+			appVersionSub.next(data);
+		});
+		return appVersionSub.subscribe(data => {
+			setVersion(data)
+		}).unsubscribe;
+	}, []);
+	useEffect(() => {
+		if (version) dataSetAppVersion(version);
+	}, [version]);
+	const setVersionCall = (_version: TypeAppVersion) => {
+		appVersionSub.next(_version);
+	};
+	return [ version, setVersionCall ];
 };

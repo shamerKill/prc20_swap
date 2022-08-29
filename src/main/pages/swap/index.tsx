@@ -6,16 +6,374 @@ import { toast } from 'react-toastify';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { ComponentSlippage } from '$components/functional/slippage';
-import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLocalSlip, dataGetSwapEffect, dataSetApprove, dataSetLocalSlip, dataSetTokenTransfer, InEvmBalanceToken, swapGetAmountsOut } from '$database';
-import { toolNumberAdd, toolNumberDiv, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLocalSlip, dataGetSwapEffect, dataGetSwapLpV10, dataSetApprove, dataSetLocalSlip, dataSetSwapV1, dataSetTokenTransfer, InEvmBalanceToken, swapGetAmountsOut } from '$database';
+import { toolNumberAdd, toolNumberCut, toolNumberDiv, toolNumberMul, toolNumberSplit, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalHide, layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
-import { useCustomGetAccountAddress } from '$hooks';
+import { useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 
 const PageSwap: FC = () => {
+	const [ appVersion ] = useCustomGetAppVersion();
+	if (appVersion === 'v2') {
+		return <PageSwapV20 />
+	} else if (appVersion === 'v1') {
+		return <PageSwapV10 />
+	} else {
+		return <></>
+	}
+};
+
+const PageSwapV10: FC = () => {
 	const {t} = useTranslation();
+	const [ appVersion ] = useCustomGetAppVersion();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
+	// 支付数量
+	const [fromVolume, setFromVolume] = useState('0.0');
+	// 兑换出来的数量
+	const [toVolume, setToVolume] = useState('0.0');
+	// 支付手续费数量
+	const [feeVolume, setFeeVolume] = useState('0.0');
+	// 最小接受额
+	const [minReceive, setMinReceive] = useState('0.0');
+	// from币信息
+	const [fromTokenInfo, setFromTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// to币信息
+	const [toTokenInfo, setToTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// 交易池内from币数量
+	const [fromTokenVolume, setFromTokenVolume] = useState<string|null>(null);
+	// 交易池内to币数量
+	const [toTokenVolume, setToTokenVolume] = useState<string|null>(null);
+	// 兑换代币比例展示
+	const [ tokenSwapShow, setTokenSwapShow ] = useState<string>('');
+	// 是否在loading
+	const [ loading, setLoading ] = useState(false);
+	// 是否无法兑换 /流动性不足
+	const [canNotSwap, setCanNotSwap] = useState<boolean>(false);
+	// lp id
+	const [lpId, setLpId] = useState<number>();
+	// 代币价格
+	const [ orderPrice, setOrderPrice ] = useState<string>();
+	// 获取焦点在第几个input
+	const focusIndexRef = useRef<number>();
+
+	// 兑换方法
+	const onSwapButtonClick = async () => {
+		// 授权方法
+		if (!accountAddress) return;
+		if (
+			!(parseFloat(fromVolume) > 0) || !fromTokenInfo || !lpId || !toTokenInfo || !orderPrice
+		) return;
+		if (parseFloat(fromTokenInfo.balance) - parseFloat(fromVolume) < 0) {
+			return toast.warn(t('余额不足'));
+		}
+		setLoading(true);
+		try {
+			const result = await dataSetSwapV1({
+				poolId: lpId,
+				fromSymbol: fromTokenInfo.minUnit,
+				fromAmount: toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale),
+				toSymbol: toTokenInfo.minUnit,
+				orderPrice: parseFloat(orderPrice),
+				feeAmount: toolNumberStrToIntForFloat(feeVolume, fromTokenInfo.scale),
+			});
+			if (typeof result === 'string') {
+				toast.info(t('交易已发送' + ' hash: \n' + result), { delay: 0 });
+			} else if (result?.status === 0 && result?.data?.result?.txs?.[0]?.tx_result?.code === 0) {
+				await setTokenBalance();
+				setFromVolume('0');
+				setToVolume('0');
+				toast.success(t('兑换成功'));
+			} else {
+				toast.warning(t('发送错误') + ': \n' + result);
+			}
+		} catch (e) {
+			toast.warning(t('发送错误') + ': \n' + e);
+		}
+		setLoading(false);
+	};
+	// 获取代币余额
+	const setTokenBalance = async () => {
+		const result = await dataGetAccountTokenBalance(accountAddress??'', [ fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??'' ]);
+		if (result.status === 200 && result.data) {
+			setFromTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[0]??'', fromTokenInfo?.scale??0)} : state );
+			setToTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[1]??'', toTokenInfo?.scale??0)} : state );
+		}
+	};
+
+	// 选择代币
+	const onSelectToken = (type: 'from' | 'to') => {
+		layoutModalShow({
+			children: <ComModalSelectToken onSelect={(data) => {
+				if (type === 'from') {
+					if (toTokenInfo?.contractAddress === data.contractAddress) setToTokenInfo(null);
+					setFromTokenInfo(data);
+				}
+				else if (type === 'to') {
+					if (fromTokenInfo?.contractAddress === data.contractAddress) setFromTokenInfo(null);
+					setToTokenInfo(data);
+				}
+				setToVolume('0');
+				setToTokenVolume('0');
+				setFromVolume('0');
+				setFromTokenVolume('0');
+				setFeeVolume('0.0');
+				setMinReceive('0.0');
+			}} filterContractArr={[
+				fromTokenInfo?.contractAddress ?? '',
+				toTokenInfo?.contractAddress ?? '',
+			]}></ComModalSelectToken>,
+			options: {
+				title: t('选择代币'),
+			}
+		});
+	}
+	// 判断是否有交易池
+	useEffect(() => {
+		if (!toTokenInfo || !fromTokenInfo) return;
+		(async() => {
+			setLoading(true);
+			const result = await dataGetSwapLpV10([fromTokenInfo.minUnit, toTokenInfo.minUnit]);
+			setLoading(false);
+			if (!result) return;
+			if (result.status !== 200 || !result.data) return setCanNotSwap(true);
+			if (result.data.lp_id === 0) {
+				return setCanNotSwap(true);
+			}
+			setLpId(result.data.lp_id);
+			setCanNotSwap(false);
+			const [fromPoolVolume, toPoolVolume] = [toolNumberStrToFloatForInt(result.data.token_0.num, fromTokenInfo.scale), toolNumberStrToFloatForInt(result.data.token_1.num, toTokenInfo.scale)];
+			const divScale = toolNumberDiv(toPoolVolume, fromPoolVolume);
+			setTokenSwapShow(`1 ${fromTokenInfo.symbol} ≈ ${divScale} ${toTokenInfo.symbol}`);
+			setFromTokenVolume(fromPoolVolume);
+			setToTokenVolume(toPoolVolume);
+		})();
+	}, [toTokenInfo, fromTokenInfo]);
+	// 监听支付输入框
+	useEffect(() => {
+		if (focusIndexRef.current !== 0) return;
+		if (!fromTokenInfo || !toTokenInfo || !fromTokenVolume || !toTokenVolume) return;
+		const value = parseFloat(fromVolume);
+		if (!(value > 0)) {
+			setToVolume('0');
+			return;
+		}
+		// 获取手续费
+		const fee = toolNumberSplit(toolNumberMul(toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale), '0.0015'), 0, true);
+		setFeeVolume(toolNumberStrToFloatForInt(fee, fromTokenInfo.scale));
+		const _memTokenList = [fromTokenInfo, toTokenInfo].sort((a, b) => Number((a.minUnit as any) > (b.minUnit as any)) - 1);
+		const _memFromToken = _memTokenList[0];
+		const _memToToken = _memTokenList[1];
+    let _memFromTokenVolumeWithDex = fromTokenVolume;
+    let _memToTokenVolumeWithDex = toTokenVolume;
+    let _memFromValue = fromVolume;
+    let _memToValue = '0';
+    if (_memFromToken.minUnit != fromTokenInfo.minUnit) {
+      _memFromTokenVolumeWithDex = toTokenVolume;
+      _memToTokenVolumeWithDex = fromTokenVolume;
+      _memFromValue = '0';
+      _memToValue = fromVolume;
+    }
+    // 代币价格
+		const tokenOrderPrice = toolNumberDiv(
+			// 需要作为标的物的代币
+			toolNumberAdd(
+				toolNumberStrToIntForFloat(_memFromTokenVolumeWithDex, _memFromToken.scale),
+				toolNumberMul(toolNumberStrToIntForFloat(_memFromValue, _memFromToken.scale), '2')
+			),
+			// 需要求价格的代币
+			toolNumberAdd(
+				toolNumberStrToIntForFloat(_memToTokenVolumeWithDex, _memToToken.scale),
+				toolNumberMul(toolNumberStrToIntForFloat(_memToValue, _memToToken.scale), '2')
+			),
+			{
+				places: 20
+			}
+		);
+		setOrderPrice(tokenOrderPrice);
+		// 可以兑换的数据
+		let canGetVolume: string;
+		if (_memFromToken.minUnit === fromTokenInfo.minUnit) {
+			canGetVolume = toolNumberStrToFloatForInt(
+				toolNumberSplit(
+					toolNumberDiv(
+						toolNumberCut(
+							toolNumberStrToIntForFloat(
+								fromVolume, fromTokenInfo.scale
+							),
+							fee
+						),
+						tokenOrderPrice
+					),
+					0
+				),
+				toTokenInfo.scale
+			);
+		} else {
+			canGetVolume = toolNumberStrToFloatForInt(
+				toolNumberSplit(
+					toolNumberMul(
+						toolNumberCut(
+							toolNumberStrToIntForFloat(
+								fromVolume, fromTokenInfo.scale
+							),
+							fee
+						),
+						tokenOrderPrice
+					),
+					0
+				),
+				toTokenInfo.scale
+			);
+		}
+		setToVolume(canGetVolume);
+	}, [fromVolume, fromTokenInfo, toTokenInfo, fromTokenVolume, toTokenVolume]);
+	// 监听兑换输入框
+	useEffect(() => {
+		if (focusIndexRef.current !== 1) return;
+		if (!fromTokenInfo || !toTokenInfo || !fromTokenVolume || !toTokenVolume) return;
+		const value = parseFloat(toVolume);
+		if (!(value > 0)) {
+			setFromVolume('0');
+			return;
+		}
+		const _memTokenList = [fromTokenInfo, toTokenInfo].sort((a, b) => Number((a.minUnit as any) > (b.minUnit as any)) - 1);
+		const _memFromToken = _memTokenList[0];
+		const _memToToken = _memTokenList[1];
+    let _memFromTokenVolumeWithDex = fromTokenVolume;
+    let _memToTokenVolumeWithDex = toTokenVolume;
+    let _memFromValue = fromVolume;
+    let _memToValue = '0';
+    if (_memFromToken.minUnit != fromTokenInfo.minUnit) {
+      _memFromTokenVolumeWithDex = toTokenVolume;
+      _memToTokenVolumeWithDex = fromTokenVolume;
+      _memFromValue = '0';
+      _memToValue = fromVolume;
+    }
+    // 代币价格
+		const tokenOrderPrice = toolNumberDiv(
+			// 需要作为标的物的代币
+			toolNumberAdd(
+				toolNumberStrToIntForFloat(_memFromTokenVolumeWithDex, _memFromToken.scale),
+				toolNumberMul(toolNumberStrToIntForFloat(_memFromValue, _memFromToken.scale), '2')
+			),
+			// 需要求价格的代币
+			toolNumberAdd(
+				toolNumberStrToIntForFloat(_memToTokenVolumeWithDex, _memToToken.scale),
+				toolNumberMul(toolNumberStrToIntForFloat(_memToValue, _memToToken.scale), '2')
+			),
+			{
+				places: 20
+			}
+		);
+		setOrderPrice(tokenOrderPrice);
+		// 需要支付的数据
+		let needGetVolume: string;
+		if (_memFromToken.minUnit === fromTokenInfo.minUnit) {
+			needGetVolume = toolNumberSplit(
+				toolNumberMul(
+					toolNumberStrToIntForFloat(
+						toVolume, toTokenInfo.scale
+					),
+					tokenOrderPrice
+				),
+				0,
+				true,
+			);
+		} else {
+			needGetVolume = toolNumberSplit(
+				toolNumberDiv(
+					toolNumberStrToIntForFloat(
+						toVolume, toTokenInfo.scale
+					),
+					tokenOrderPrice
+				),
+				0,
+				true,
+			);
+		}
+		needGetVolume = toolNumberDiv(needGetVolume, '0.9985', { places: 0 });
+		// 获取手续费
+		const fee = toolNumberSplit(toolNumberMul(needGetVolume, '0.0015'), 0, true);
+		setFeeVolume(toolNumberStrToFloatForInt(fee, fromTokenInfo.scale));
+		setFromVolume(toolNumberStrToFloatForInt(toolNumberAdd(needGetVolume, fee), fromTokenInfo.scale));
+	}, [toVolume, fromTokenInfo, toTokenInfo, fromTokenVolume, toTokenVolume]);
+
+	return (
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_swap')}>
+			<ComponentContentBox
+				topChildren={
+					<div className={classNames('swap_head')}>
+						<h2 className={classNames('swap_title')}>{t('swap')}</h2>
+					</div>
+				}
+				innerClass={classNames('swap_inner')}>
+				{/* 兑换操作 */}
+				<div className={classNames('inner_functional')}>
+					<ComponentSwapInputBox
+						hintText={tokenSwapShow}
+						focusIndex={focusIndexRef}
+						loading={loading}
+						buttonOnClick={(canNotSwap || (parseFloat(fromVolume) > parseFloat(fromTokenInfo?.balance??''))) ? undefined : () => {
+							if (fromTokenInfo === null) return onSelectToken('from');
+							if (toTokenInfo === null) return onSelectToken('to');
+							onSwapButtonClick();
+						}}
+						buttonText={
+							(fromTokenInfo === null || toTokenInfo === null) ? t('选择代币')
+							: (
+								canNotSwap ? t('流动性不足') : (
+									(parseFloat(fromVolume) > parseFloat(fromTokenInfo.balance)) ? t('支付代币余额不足') : t('兑换')
+								)
+							)
+						}
+						inputs={[
+							{
+								labelText: t('支付'),
+								labelToken: fromTokenInfo,
+								inputText: fromVolume,
+								inputChange: setFromVolume,
+								placeholder: "0.0",
+								selectToken: () => onSelectToken('from'),
+								key: 'pay_from',
+								checkMax: true,
+							},
+							{
+								labelText: t('兑换'),
+								labelToken: toTokenInfo,
+								inputText: toVolume,
+								inputChange: setToVolume,
+								placeholder: "0.0",
+								selectToken: () => onSelectToken('to'),
+								key: 'pay_to',
+							}
+						]} />
+				</div>
+				{/* 展示 */}
+				<div className={classNames('inner_info')}>
+					<ComponentSlippage />
+					<div className={classNames('inner_info_content')}>
+						<div className={classNames('inner_info_line')}></div>
+						<div className={classNames('inner_info_item')}>
+							<p className={classNames('inner_info_value')}>{minReceive}</p>
+							<p className={classNames('inner_info_desc')}>{t('最小接受额')}</p>
+						</div>
+						<div className={classNames('inner_info_item')}>
+							<p className={classNames('inner_info_value')}>{feeVolume} {fromTokenInfo?.symbol}</p>
+							<p className={classNames('inner_info_desc')}>{t('手续费消耗')}</p>
+						</div>
+					</div>
+				</div>
+			</ComponentContentBox>
+		</ComLayoutShadowGlass>
+	);
+};
+
+const PageSwapV20: FC = () => {
+	const {t} = useTranslation();
+	const [ appVersion ] = useCustomGetAppVersion();
 	// 支付数量
 	const [fromVolume, setFromVolume] = useState('0.0');
 	// 兑换出来的数量
@@ -276,6 +634,17 @@ const PageSwap: FC = () => {
 		const moveScale = parseFloat(((parseFloat(exchangeScale) - parseFloat(defaultScale)) / parseFloat(defaultScale)).toFixed(4)) / 100;
 		setSwapRateParameter(toolNumberToPercentage(moveScale));
 	}, [fromTokenVolume, toTokenVolume, fromVolume, toVolume]);
+
+	useEffect(() => {
+		if (appVersion) {
+			setFromTokenInfo(null);
+			setToTokenInfo(null);
+			setFromVolume('0');
+			setToVolume('0');
+			setMinReceive('0.0');
+			setSwapRateParameter('0%');
+		}
+	}, [appVersion]);
 
 	return (
 		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_swap')}>

@@ -1,7 +1,7 @@
 import ComponentLayoutRefresh from "$components/layout/refresh";
 import { dataGetAccountTokenBalance, dataGetTokenCoreList, dataGetTokenLocalList, dataSearchToken, dataSetTokenLocalList, InEvmBalanceToken } from "$database";
 import { layoutModalHide } from "$database/layout-data";
-import { useCustomFetchDataHook, useCustomGetAccountAddress } from "$hooks";
+import { useCustomFetchDataHook, useCustomGetAccountAddress, useCustomGetAppVersion } from "$hooks";
 import { toolHideAddressCenter, toolNumberStrToFloatForInt } from "$tools";
 import classNames from "classnames";
 import { FC, MouseEvent, useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ export const ComModalSelectToken: FC<{
 }> = ({ onSelect, filterContractArr }) => {
 	const {t} = useTranslation();
 	const accountAddressRef = useRef<string>();
+	const [ appVersion ] = useCustomGetAppVersion();
 	const { accountAddress } = useCustomGetAccountAddress();
 	const [ searchText, setSearchText ] = useState<string>('');
 	const [ localTokenList, setLocalTokenList ] = useState<InEvmBalanceToken[]>([]);
@@ -35,7 +36,7 @@ export const ComModalSelectToken: FC<{
 	const doubleTimer = useRef<number>();
 
 	// 获取远程数据
-	const { fetched, data: fetchedData, fetchData: getRemoteList } = useCustomFetchDataHook(dataGetTokenCoreList);
+	const { fetched, data: fetchedData, fetchData: getRemoteList } = useCustomFetchDataHook(dataGetTokenCoreList, false);
 
 	// 选择方法
 	const onItemClick = (data: InEvmBalanceToken) => {
@@ -54,7 +55,7 @@ export const ComModalSelectToken: FC<{
 
 	// 切换管理列表
 	const onSwitchAdmin = () => setAdminPage(state => {
-		if (!state === false) getRemoteList();
+		if (!state === false && appVersion) getRemoteList(appVersion);
 		return !state;
 	});
 
@@ -75,11 +76,14 @@ export const ComModalSelectToken: FC<{
 
 	// 远程数据赋值
 	useEffect(() => {
-		if (fetched && fetchedData?.data !== undefined && accountAddressRef.current) {
+		if (appVersion) getRemoteList(appVersion);
+	}, [appVersion]);
+	useEffect(() => {
+		if (fetched && fetchedData?.data !== undefined && accountAddressRef.current && appVersion) {
 			// 获取账户余额
 			(async () => {
 				setHadBalance(false);
-				const localData = await dataGetTokenLocalList(accountAddressRef.current??'');
+				const localData = await dataGetTokenLocalList(accountAddressRef.current??'', appVersion);
 				const localContract = localData.map(item => item.contractAddress);
 				const remoteList = fetchedData.data?.filter(item => !localContract.includes(item.contractAddress)) ?? [];
 				const balances = (await dataGetAccountTokenBalance(
@@ -92,17 +96,17 @@ export const ComModalSelectToken: FC<{
 				setHadBalance(true);
 			})();
 		}
-	}, [fetchedData, fetched]);
+	}, [fetchedData, fetched, appVersion]);
 	// 设置本地数据
 	useEffect(() => {
-		if (!accountAddressRef.current) return;
-		dataSetTokenLocalList(localTokenList, accountAddressRef.current!);
-	}, [localTokenList]);
+		if (!accountAddressRef.current || !appVersion) return;
+		dataSetTokenLocalList(localTokenList, accountAddressRef.current!, appVersion);
+	}, [localTokenList, appVersion]);
 	// 本地数据
 	useEffect(() => {
-		if (!accountAddress) return;
+		if (!accountAddress || !appVersion) return;
 		(async () => {
-			const localData = await dataGetTokenLocalList(accountAddress);
+			const localData = await dataGetTokenLocalList(accountAddress, appVersion);
 			if (localData.length === 0) return setLocalTokenList([]);
 			const balances = (await dataGetAccountTokenBalance(
 				accountAddressRef.current!,
@@ -110,7 +114,7 @@ export const ComModalSelectToken: FC<{
 			)).data!;
 			setLocalTokenList(localData.map((item, index) => ({...item, balance: toolNumberStrToFloatForInt(balances[index], item.scale)})));
 		})();
-	}, [accountAddress]);
+	}, [accountAddress, appVersion]);
 	// loading
 	useEffect(() => {
 		if (fetched === true && hadBalance === true) setLoading(false);

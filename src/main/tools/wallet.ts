@@ -1,9 +1,8 @@
 import { accountStoreInit } from './../database/appStore';
-import { accountStore } from '$database';
 import cosmo from 'cosmo-wallet-tool';
 // 需要的权限类型
 const needPermission = [
-	'accountAddress', 'accountAddressType', 'contractCall', 'tokenTransferSend', 'contractSend'
+	'accountAddress', 'accountAddressType', 'contractCall', 'tokenTransferSend', 'contractSend', 'liquidity'
 ];
 
 // 判断钱包类型

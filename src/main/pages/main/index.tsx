@@ -7,19 +7,21 @@ import { useTranslation } from 'react-i18next';
 import { ComponentLayoutBase, ComponentFunctionalButton } from '$components';
 import { assertLogoImg } from '$services';
 import { accountStore } from '$database';
-import { useCustomGetAccountAddress, useCustomRouteFormatPath } from '$hooks';
-import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet } from '$tools';
+import { useCustomGetAccountAddress, useCustomGetAppVersion, useCustomRouteFormatPath } from '$hooks';
+import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet, toolTimeSleep } from '$tools';
 
 import './index.scss';
 
 const PageHome: FC = () => {
 	const { i18n, t } = useTranslation();
+	// 版本号
+	const [ appVersion, setAppVersion ] = useCustomGetAppVersion();
 	const [walletLinking, setWalletLinking] = useState(false);
 	// 账户地址
 	const { accountAddress, setAccountAddress } = useCustomGetAccountAddress();
 	const [showLoading, setShowLoading] = useState(false);
 	const navigate = useNavigate();
-	const [, routeGroup] = useCustomRouteFormatPath();
+	const [, routeGroup ] = useCustomRouteFormatPath();
 	const [routeLoading, setRouteLoading] = useState(false);
 
 	// 连接钱包
@@ -29,15 +31,32 @@ const PageHome: FC = () => {
 		setShowLoading(false);
 		if (result === null) return;
 		accountStore.next(result);
-	}
+	};
 
+	// 切换语言
 	const changeLanguage = async () => {
 		if (i18n.language == LANGUAGE_EN) {
 			i18n.changeLanguage(LANGUAGE_ZH);
 		} else if (i18n.language == LANGUAGE_ZH) {
 			i18n.changeLanguage(LANGUAGE_EN);
 		}
-	}
+	};
+
+	// 切换版本
+	const changeVersion = async () => {
+		setShowLoading(true);
+		await toolTimeSleep(1000);
+		if (appVersion === 'v2') {
+			setAppVersion('v1');
+		} else {
+			setAppVersion('v2');
+		}
+		await toolTimeSleep(1000);
+		if (/flowPools/.test(routeGroup)) {
+			navigate('/swap/swap');
+		}
+		setShowLoading(false);
+	};
 
 	const onRouteTab = async (link: string) => {
 		if (routeLoading) return;
@@ -94,6 +113,7 @@ const PageHome: FC = () => {
 						<span className={classNames('main_base_nav_link_text')}>
 							{t('swap')}
 						</span>
+						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
 					<div className={classNames('main_base_nav_link', routeGroup == 'poolsList' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/poolsList')}>
 						<span className={classNames('main_base_nav_link_icon')}>
@@ -102,6 +122,7 @@ const PageHome: FC = () => {
 						<span className={classNames('main_base_nav_link_text')}>
 							{t('pool')}
 						</span>
+						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
 					<div className={classNames('main_base_nav_link', routeGroup == 'browser' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/browser/uplugcn')}>
 						<span className={classNames('main_base_nav_link_icon')}>
@@ -111,14 +132,26 @@ const PageHome: FC = () => {
 							{t('browser')}
 						</span>
 					</div>
-					<div className={classNames('main_base_nav_link', routeGroup == 'flowPools' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/flowPools')}>
+					{
+						appVersion === 'v2' && (
+							<div className={classNames('main_base_nav_link', routeGroup == 'flowPools' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/flowPools')}>
+								<span className={classNames('main_base_nav_link_icon')}>
+									<i className={classNames('iconfont', 'icon-liudongchi')}></i>
+								</span>
+								<span className={classNames('main_base_nav_link_text')}>
+									{t('流动性矿池')}
+								</span>
+							</div>
+						)
+					}
+					<ComponentFunctionalButton className={classNames('main_base_nav_btn')} onClick={changeVersion}>
 						<span className={classNames('main_base_nav_link_icon')}>
-							<i className={classNames('iconfont', 'icon-liudongchi')}></i>
+							<i className={classNames('iconfont', appVersion === 'v1' ? 'icon-canpinhuihuiyuanv1' : 'icon-canpinhuihuiyuanv2')}></i>
 						</span>
 						<span className={classNames('main_base_nav_link_text')}>
-							{t('流动性矿池')}
+							{t('版本切换')}
 						</span>
-					</div>
+					</ComponentFunctionalButton>
 				</div>
 				<hr className={classNames('main_base_line')} />
 					<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_language', walletLinking && 'main_base_language_linked')} onClick={changeLanguage}>
