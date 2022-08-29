@@ -4,5 +4,16 @@
 	"connect wallet": "连接钱包",
 	"swap": "兑换",
 	"pool": "流动池",
-	"browser": "浏览器"
+	"browser": "浏览器",
+	"browser-price": "价格",
+	"totalTrading": "总交易对",
+	"tradNum": "交易数",
+	"newTrading": "新交易对",
+	"liquidity": "资产流动性",
+	"turnover": "成交额",
+	"name": "名称",
+	"totalAmount": "总金额",
+	"totalQuantity": "总数量",
+	"account": "账户",
+	"time": "时间"
 }

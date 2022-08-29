@@ -1,11 +1,11 @@
 import { toolGet } from '$tools';
 import { FC,useEffect,useState } from 'react';
-import ComponentBrowserOverview from './overview';
+import ComponentBrowserCoinOverview from '../coinOverview';
 
-import ComponentBrowserList from './list';
-import ComponentBrowserTabList from './tabList';
+import ComponentBrowserList from '../list';
+import ComponentBrowserTabList from '../tabList';
 import { useParams } from 'react-router-dom';
-const PageInfo: FC = () => {
+const TokenInfo: FC = () => {
 	const [coinPair,setCoinPair] = useState('')
 	const params:any = useParams();
 	useEffect(() => {
@@ -14,12 +14,12 @@ const PageInfo: FC = () => {
 	}, [params]);
 	return (
 		<div>
-			<ComponentBrowserOverview coinPair={coinPair}></ComponentBrowserOverview>
-			<ComponentBrowserList listType={1} coinPair={coinPair}></ComponentBrowserList>
+			<ComponentBrowserCoinOverview coinPair={coinPair}></ComponentBrowserCoinOverview>
 			<ComponentBrowserList listType={2} coinPair={coinPair}></ComponentBrowserList>
+			<ComponentBrowserTabList listType={'all'} token={coinPair}></ComponentBrowserTabList>
 		</div>
 	);
 };
 
-export default PageInfo;
+export default TokenInfo;
 

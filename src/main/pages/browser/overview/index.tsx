@@ -1,19 +1,32 @@
-import { FC } from 'react';
+import { FC, useEffect,useState } from 'react';
 import ComponentOverviewCharts from './charts';
+import classNames from 'classnames';
 import * as echarts from 'echarts';
+import { toolGet } from '$tools';
 
 import './index.scss';
-
+type dataType = {
+  new_trading_pair: number,
+  price: string,
+  trading: number,
+  trading_pair: number
+}
 const ComponentBrowserOverview: FC<{
 	coinPair?: string;
 }> = ({
 	coinPair
 }) => {
+	const [dataInfo,setDataInfo] = useState<dataType>(Object);
+	const [chartType,setChartType] = useState<'day'|'week'>('day');
+	const [optionValue,setOptionValue] = useState<Array<string>>([]);
+	const [optionDate,setOptionDate] = useState<Array<string>>([]);
+	const [optionValue1,setOptionValue1] = useState<Array<string>>([]);
+	const [optionDate1,setOptionDate1] = useState<Array<string>>([]);
   let option = {
-    data: ['1', '2', '3', '4', '5', '6', '7'],
+    data: optionDate,
     series: [
       {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
+        data: optionValue,
         type: 'line',
         areaStyle: {
           color: new echarts.graphic.LinearGradient(
@@ -34,11 +47,11 @@ const ComponentBrowserOverview: FC<{
       }
     ],
   };
-  const option1 = {
-    data: ['1', '2', '3', '4', '5', '6', '7'],
+  let option1 = {
+    data: optionDate1,
     series: [
       {
-        data: [120, 200, 150, 80, 70, 110, 130],
+        data: optionValue1,
         type: 'bar',
         itemStyle: {
           color:'#31D87F',  
@@ -49,24 +62,78 @@ const ComponentBrowserOverview: FC<{
       }
     ],
   };
+	useEffect(() => {
+    if (coinPair == 'plugcn') {
+      getTopInfo();
+      getChart();
+    }
+	}, [coinPair]);
+  const getTopInfo = () => {
+    toolGet(':8552/browser/home/info').then((res:any) => {
+      if (res.errno==200) {
+        setDataInfo(res.data)
+      }
+    })
+  }
+  const getChart = () => {
+    toolGet(':8552/browser/home/fluidity',{date:chartType}).then((res:any) => {
+      if (res.errno==200) {
+        let timeArr = []
+        let dataArr = [];
+        if (res.data!=null) {
+          let beforeArr:any = res.data.reverse();
+          for (let index = 0; index < beforeArr.length; index++) {
+            timeArr.push(beforeArr[index].day)
+            dataArr.push(beforeArr[index].num)
+          }
+        }
+        setOptionDate(timeArr);
+        setOptionValue(dataArr);
+      }
+    })
+    toolGet(':8552/browser/home/turnover',{date:chartType}).then((res:any) => {
+      if (res.errno==200) {
+        let timeArr = []
+        let dataArr = [];
+        if (res.data!=null) {
+          let beforeArr:any = res.data.reverse();
+          for (let index = 0; index < beforeArr.length; index++) {
+            timeArr.push(beforeArr[index].day)
+            dataArr.push(beforeArr[index].num)
+          }
+        }
+        setOptionDate1(timeArr);
+        setOptionValue1(dataArr);
+      }
+    })
+  }
+  const doCheck = (type:'day'|'week') => {
+    if (type == chartType) return
+    setChartType(type);
+  }
+	useEffect(() => {
+    if (chartType) {
+      getChart();
+    }
+	}, [chartType]);
 	return (
     <div className="overview-info">
       <div className="browser-overview">
         <div className="info-item">
           <div className="info-title"><div className="coin-name">{coinPair?.toLocaleUpperCase()}</div> 价格:</div>
-          <div className="info-value"> $ 0.0841</div>
+          <div className="info-value"> $ {dataInfo.price}</div>
         </div>
         <div className="info-item">
           <div className="info-title">总交易对:</div>
-          <div className="info-value"> 1,004</div>
+          <div className="info-value"> {dataInfo.trading_pair}</div>
         </div>
         <div className="info-item">
           <div className="info-title">交易数(24H) :</div>
-          <div className="info-value"> 751,898</div>
+          <div className="info-value"> {dataInfo.trading}</div>
         </div>
         <div className="info-item">
           <div className="info-title">新交易对(24H) :</div>
-          <div className="info-value"> 3</div>
+          <div className="info-value"> {dataInfo.new_trading_pair}</div>
         </div>
       </div>
       <div className="overview-info-detail">
@@ -76,23 +143,31 @@ const ComponentBrowserOverview: FC<{
               资产流动性
             </div>
             <div className="overview-info-title-item-value">
-              $156,989,766 <span className="rate">+0.08%</span>
+              ${Number(optionValue[optionValue.length-1])} <span className="rate">{(Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2])}%</span>
             </div>
           </div>
-          <div className="overview-info-title-item">
-            <div className="overview-info-title-item-title">
-              24H 成交额
+          <div className="overview-info-title-item other">
+            <div className="flex-item">
+              <div className="overview-info-title-item-title">
+                24H 成交额
+              </div>
+              <div className="overview-info-title-item-value">
+                ${Number(optionValue1[optionValue1.length-1])} <span className="rate">{(Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2])}%</span>
+              </div>
             </div>
-            <div className="overview-info-title-item-value">
-              $156,989,766 <span className="rate">+0.08%</span>
+            <div className="flex-item">
+              <div className="overview-info-title-btns">
+                <div className={classNames('overview-info-title-btns-item', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>每天</div>
+                <div className={classNames('overview-info-title-btns-item', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>每周</div>
+              </div>
             </div>
           </div>
         </div>
         <div className="overview-charts-list">
-          <div className="overview-charts-list-item">
+          <div className="overview-charts-list-item1">
             <ComponentOverviewCharts option={option} domId={'chartDom1'}></ComponentOverviewCharts>
           </div>
-          <div className="overview-charts-list-item">
+          <div className="overview-charts-list-item1">
             <ComponentOverviewCharts option={option1} domId={'chartDom2'}></ComponentOverviewCharts>
           </div>
         </div>

@@ -1,0 +1,10 @@
+@import '../../../../styles/base.var.scss';
+.chartDom{
+  width: 100%;
+  height: 100%;
+  background: var(--color-content-background-color);
+  border-radius: 2.5rem;
+	@include media-phone {
+    border-radius: 1rem;
+  }
+}

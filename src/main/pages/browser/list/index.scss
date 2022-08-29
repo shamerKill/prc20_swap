@@ -40,6 +40,20 @@
         }
       }
       &-item{
+        display: flex;
+        align-items: center;
+        img{
+          width: 1.6rem;
+          height: 1.6rem;
+          background-color: var(--color-main-background-color);
+          border-radius: 1rem;
+          overflow: hidden;
+          &:nth-child(1){
+            margin-right: -0.5rem;
+            position: relative;
+            z-index: 1;
+          }
+        }
         @include media-phone {
           flex: none;
           height: 100%;

@@ -1,9 +1,10 @@
+const baseUrl = 'http://192.168.3.5';
 export const toolAjax = async <T>(url: string, option?: {
 	method: 'GET' | 'POST';
 	body?: any;
 	type?: 'json'|'text';
 }): Promise<T> => {
-	return fetch(url, {
+	return fetch(baseUrl+url, {
 		method: option?.method, body: option?.body,
 	}).then(data => {
 		if (option?.type === 'json') return data.json();
@@ -16,7 +17,7 @@ export const toolGet = async <T>(
 ): Promise<T> => {
 	let fetchUrl = url;
 	if (search) fetchUrl += '?' + Object.keys(search).map(key => `${key}=${search[key]}`).join('&');
-	return toolAjax(fetchUrl, { method: 'GET' });
+	return toolAjax(fetchUrl, { method: 'GET',type: 'json' });
 };
 
 export const toolPost = async <T>(url: string, body: any): Promise<T> => {

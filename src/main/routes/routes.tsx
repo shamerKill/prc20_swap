@@ -1,4 +1,6 @@
 import PageInfo from '$pages/browser';
+import TokenInfo from '$pages/browser/token';
+import DetailInfo from '$pages/browser/detail';
 import PageFlowPools from '$pages/flow_pools';
 import PageHome from '$pages/main';
 import PagePoolsAdd from '$pages/pools_add';
@@ -35,6 +37,14 @@ export const routesList: (PathRouteProps & {
 			{
 				path: 'browser/:id',
 				element: <PageInfo />,
+			},
+			{
+				path: 'token/:id',
+				element: <TokenInfo />,
+			},
+			{
+				path: 'detail/:id',
+				element: <DetailInfo />,
 			},
 			{
 				path: 'flowPools',
