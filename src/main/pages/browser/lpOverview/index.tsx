@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import ComponentOverviewCharts from './charts';
 import ComponentOverviewKline from './kline';
 
-import { toolGet } from '$tools';
+import { toolApi,toolGet } from '$tools';
 import * as echarts from 'echarts';
 
 import './index.scss';
@@ -99,14 +99,14 @@ const ComponentBrowserCoinOverview: FC<{
 	}, [lineIndex]);
   
   const getTopInfo = () => {
-    toolGet(':8552/browser/trading/info', {token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/trading/info'), {token:coinPair}).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }
     })
   }
   const getVolumeData = () => {
-    toolGet(':8552/browser/token/volume',{token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/volume'),{token:coinPair}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -122,7 +122,7 @@ const ComponentBrowserCoinOverview: FC<{
     })
   }
   const getTvlData = () => {
-    toolGet(':8552/browser/token/tvl',{token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/tvl'),{token:coinPair}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -171,7 +171,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(':8554/kline',{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApi('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;

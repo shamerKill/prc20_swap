@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import classNames from 'classnames';
-import { toolGet } from '$tools';
+import { toolGet,toolApi } from '$tools';
 
 import './index.scss';
 type dataType = {
@@ -41,7 +41,7 @@ const ComponentBrowserLpOverview: FC<{
 	}, [coinPair]);
   
   const getTopInfo = () => {
-    toolGet(':8552/browser/token/info', {token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/info'), {token:coinPair}).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }

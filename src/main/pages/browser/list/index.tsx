@@ -1,7 +1,7 @@
 import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { toolGet } from '$tools';
+import { toolApi,toolGet } from '$tools';
 import './index.scss';
 
 type tokenItem = {
@@ -58,7 +58,7 @@ const ComponentBrowserList: FC<{
 	};
   const getList = () => {
     if (listType == 1) {
-      toolGet(':8552/browser/home/hotToken', {from: currentPage,amount: pageSize}).then((res:any) => {
+      toolGet(toolApi('/browser/home/hotToken'), {from: currentPage,amount: pageSize}).then((res:any) => {
         if (res.errno == 200) {
           setTotal(res.data.total);
           if (res.data.list != null) {
@@ -67,7 +67,7 @@ const ComponentBrowserList: FC<{
         }
       })
     } else {
-      toolGet(':8552/browser/home/trading_pair', {from: currentPage,amount: pageSize}).then((res:any) => {
+      toolGet(toolApi('/browser/home/trading_pair'), {from: currentPage,amount: pageSize}).then((res:any) => {
         if (res.errno == 200) {
           setTotal(res.data.total);
           if (res.data.list != null) {
@@ -78,7 +78,7 @@ const ComponentBrowserList: FC<{
     }
   }
   const getTokenList = () => {
-    toolGet(':8552/browser/token/trading_pair', {token: coinPair,from: currentPage,amount: pageSize}).then((res:any) => {
+    (toolApi('/browser/token/trading_pair'), {token: coinPair,from: currentPage,amount: pageSize}).then((res:any) => {
       if (res.errno == 200) {
         setTotal(res.data.total);
         if (res.data.list != null) {

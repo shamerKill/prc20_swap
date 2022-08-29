@@ -2,7 +2,7 @@ import { FC, useEffect,useState } from 'react';
 import ComponentOverviewCharts from './charts';
 import classNames from 'classnames';
 import * as echarts from 'echarts';
-import { toolGet } from '$tools';
+import { toolApi,toolGet } from '$tools';
 
 import './index.scss';
 type dataType = {
@@ -69,14 +69,14 @@ const ComponentBrowserOverview: FC<{
     }
 	}, [coinPair]);
   const getTopInfo = () => {
-    toolGet(':8552/browser/home/info').then((res:any) => {
+    toolGet(toolApi('/browser/home/info')).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }
     })
   }
   const getChart = () => {
-    toolGet(':8552/browser/home/fluidity',{date:chartType}).then((res:any) => {
+    toolGet(toolApi('/browser/home/fluidity'),{date:chartType}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -91,7 +91,7 @@ const ComponentBrowserOverview: FC<{
         setOptionValue(dataArr);
       }
     })
-    toolGet(':8552/browser/home/turnover',{date:chartType}).then((res:any) => {
+    toolGet(toolApi('/browser/home/turnover'),{date:chartType}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];

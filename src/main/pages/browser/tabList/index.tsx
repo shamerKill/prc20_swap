@@ -1,6 +1,6 @@
 import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
-import { toolGet } from '$tools';
+import { toolApi,toolGet } from '$tools';
 import './index.scss';
 type tradeItem = {
   address: string,
@@ -38,7 +38,7 @@ const ComponentBrowserTabList: FC<{
 		setCurrentPage(1)
 	};
   const getList = () => {
-    toolGet(':8552/browser/token/operation', {from: currentPage,amount: pageSize, token: token,types:listType}).then((res:any) => {
+    toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType}).then((res:any) => {
       if (res.errno == 200) {
         setTotal(res.data.total);
         if (res.data.list != null) {
