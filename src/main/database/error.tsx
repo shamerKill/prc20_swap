@@ -1,7 +1,19 @@
-export const dataBaseError = (data: any) => {
+export type TypeDataBase<T=any> = {
+	status: number;
+	data?: T;
+	msg?: string;
+};
+
+export const dataBaseError = (msg: string = 'data error'): TypeDataBase => {
 	return {
 		status: -1,
-		error: data,
-		msg: 'data error',
+		msg,
 	};
 };
+
+export const dataBaseResult = <T=any>(data: T): TypeDataBase => {
+	return {
+		status: 200,
+		data,
+	};
+}

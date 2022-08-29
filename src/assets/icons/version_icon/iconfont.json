@@ -1,0 +1,37 @@
+{
+  "id": "3608838",
+  "name": "version",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1013219",
+      "name": "会员V1",
+      "font_class": "canpinhuihuiyuanv1",
+      "unicode": "e6d0",
+      "unicode_decimal": 59088
+    },
+    {
+      "icon_id": "1013220",
+      "name": "会员V2",
+      "font_class": "canpinhuihuiyuanv2",
+      "unicode": "e6d1",
+      "unicode_decimal": 59089
+    },
+    {
+      "icon_id": "250822",
+      "name": "V1",
+      "font_class": "v1",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "250823",
+      "name": "V2",
+      "font_class": "v2",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    }
+  ]
+}

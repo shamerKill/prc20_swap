@@ -25,16 +25,15 @@ export function toolNumberDiv <T=string|number|BigInt>(
 		dividendStr = (dividend as unknown as BigInt).toString();
 	}
 	// 获取最长的小数点
-	let maxPointLen = 0;
-	if (divisorStr.split('.')?.[1].length > maxPointLen) {
-		maxPointLen = divisorStr.split('.')?.[1].length;
-	} else if (dividendStr.split('.')?.[1].length > maxPointLen) {
-		maxPointLen = dividendStr.split('.')?.[1].length;
-	}
+	const divisorStrMax = toolNumberGetDecimalLength(divisorStr);
+	const dividendStrMax = toolNumberGetDecimalLength(dividendStr);
+	let maxPointLen = divisorStrMax;
+	if (divisorStrMax < dividendStrMax) maxPointLen = dividendStrMax;
 	// 转换成无小数点的字符串
 	const divisorStrInt = toolNumberStrToIntForFloat(divisorStr, maxPointLen);
 	const dividendStrInt = toolNumberStrToIntForFloat(dividendStr, maxPointLen);
-	const result = toolNumberStrToFloatForInt((BigInt(divisorStrInt) / BigInt(dividendStrInt)).toString(), options?.places??0);
+	let result = (parseInt(divisorStrInt) / parseInt(dividendStrInt)).toFixed(options?.places ??maxPointLen);
+	if (parseFloat(divisorStr) === 0) result = '0';
 	if (typeof divisor === 'string') {
 		return result as unknown as T;
 	} else if (typeof divisor === 'number') {
@@ -43,6 +42,66 @@ export function toolNumberDiv <T=string|number|BigInt>(
 		return BigInt(result) as unknown as T;
 	}
 }
+/**
+ * 乘法
+**/
+export const toolNumberMul = (first: string, second: string): string => {
+	// 获取最长的小数点
+	const firstMax = toolNumberGetDecimalLength(first);
+	const secondMax = toolNumberGetDecimalLength(second);
+	let maxPointLen = firstMax;
+	if (firstMax < secondMax) maxPointLen = secondMax;
+	const firstInt = toolNumberStrToIntForFloat(first, maxPointLen);
+	const secondInt = toolNumberStrToIntForFloat(second, maxPointLen);
+	const resultBig = BigInt(firstInt) * BigInt(secondInt);
+	const result = toolNumberStrToFloatForInt(resultBig.toString(), maxPointLen * 2);
+	return result;
+};
+
+/**
+ * 加法
+**/
+export const toolNumberAdd = (first: string, second: string): string => {
+	// 获取最长的小数点
+	const firstMax = toolNumberGetDecimalLength(first);
+	const secondMax = toolNumberGetDecimalLength(second);
+	let maxPointLen = firstMax;
+	if (firstMax < secondMax) maxPointLen = secondMax;
+	const firstInt = toolNumberStrToIntForFloat(first, maxPointLen);
+	const secondInt = toolNumberStrToIntForFloat(second, maxPointLen);
+	const resultBig = BigInt(firstInt) + BigInt(secondInt);
+	const result = toolNumberStrToFloatForInt(resultBig.toString(), maxPointLen);
+	return result;
+};
+/**
+ * 减法
+**/
+export const toolNumberCut = (first: string, second: string): string => {
+	// 获取最长的小数点
+	const firstMax = toolNumberGetDecimalLength(first);
+	const secondMax = toolNumberGetDecimalLength(second);
+	let maxPointLen = firstMax;
+	if (firstMax < secondMax) maxPointLen = secondMax;
+	const firstInt = toolNumberStrToIntForFloat(first, maxPointLen);
+	const secondInt = toolNumberStrToIntForFloat(second, maxPointLen);
+	const resultBig = BigInt(firstInt) - BigInt(secondInt);
+	const result = toolNumberStrToFloatForInt(resultBig.toString(), maxPointLen);
+	return result;
+};
+
+// 小数点截取
+export const toolNumberSplit = (input: string, places: number, ceil: boolean =  false): string => {
+	const strArr = input.split('.');
+	if (strArr.length === 1) return input;
+	else {
+		if (places === 0) {
+			if (!ceil) return strArr[0];
+			else return (BigInt(strArr[0]) + BigInt(1)).toString();
+		}
+		strArr[1] = strArr[1].slice(0, places);
+		return strArr.join('.');
+	}
+};
 
 // 将小数字符串转为无小数整数 
 export const toolNumberStrToIntForFloat = (input: string, places: number): string => {
@@ -51,7 +110,20 @@ export const toolNumberStrToIntForFloat = (input: string, places: number): strin
 	for (let i = 0; i < places; i++) {
 		if (strArr[1].length < places) strArr[1] += '0';
 	}
-	return strArr.join('');
+	if (strArr[1].length > places) strArr[1] = strArr[1].slice(0, places);
+	let result = '';
+	strArr.join('').split('').forEach(item => {
+		if (result === '' && item === '0') return;
+		result += item;
+	});
+	return result;
+};
+
+// 获取字符串小数位
+export const toolNumberGetDecimalLength = (input: string): number => {
+	const strArr = input.split('.');
+	if (strArr.length === 1) return 0;
+	else return strArr[1].length;
 };
 
 // 将整数字符串转换为带小数字符串
@@ -71,6 +143,8 @@ export const toolNumberStrToFloatForInt = (input: string, places: number): strin
 			if (resultStr === '') resultStr += '0';
 			point = true;
 			resultStr += replaceStr[i];
+		} else if (resultStr !== '') {
+			resultStr += replaceStr[i];
 		}
 	}
 	for (let i = resultStr.length - 1; i >= 0; i--) {
@@ -85,7 +159,7 @@ export const toolNumberStrToFloatForInt = (input: string, places: number): strin
 export const toolNumberToPercentage = (input: number|string, addSign: boolean = true): string => {
 	const inputStr = typeof input === 'number' ? input : parseFloat(input);
 	if (Number.isNaN(inputStr)) return input.toString();
-	return (inputStr * 1000 / 10).toString() + (addSign ? '%' : '');
+	return parseFloat((inputStr * 1000 / 10).toFixed(2)).toString() + (addSign ? '%' : '');
 }
 
 // 百分比转数字

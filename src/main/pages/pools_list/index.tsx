@@ -1,11 +1,12 @@
-import { map } from 'rxjs';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FC, useEffect, useState } from 'react';
-import { toolNumberToPercentage } from '$tools';
-import { accountStore, InSwapPoolInfo } from '$database';
+import { toolNumberStrToFloatForInt, toolNumberToPercentage } from '$tools';
+import { dataGetAccountLpList, InSwapPoolInfo } from '$database';
 import { ComponentContentBox, ComponentFunctionalButton, ComponentLayoutLoading } from '$components';
+import ComLayoutShadowGlass from '$components/layout/shadow-glass';
+import { useCustomGetAccountAddress } from '$hooks';
 
 import './index.scss';
 
@@ -15,51 +16,34 @@ const PagePoolsList: FC = () => {
 	// 流动池列表
 	const [ poolsList, setPoolsList ] = useState<InSwapPoolInfo[]>([]);
 	const [ fetchLoading, setFetchLoading ] = useState<boolean>(false);
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
 
 	// 前往添加流动池
 	const goToAddPool = (item?: InSwapPoolInfo) => {
 		if (!item) return navigate('./add');
-		return navigate(`./add?id=${item.id}`);
+		return navigate(`./add?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}`);
 	}
 	// 删除流动池
 	const goToDeletePool = (item: InSwapPoolInfo) => {
-		return navigate(`./delete?id=${item.id}`);
+		return navigate(`./delete?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}`);
 	}
 
 	// 获取数据
 	useEffect(() => {
-		return accountStore.pipe(map(item => item.accountAddress)).subscribe((address) => {
-			setFetchLoading(true);
-			setTimeout(() => {
-				setFetchLoading(false);
-				setPoolsList([
-					{
-						id: '1',
-						poolScale: '0.12',
-						tokenOne: {
-							symbol: 'plugcn',
-							contractAddress: 'gx1ay6eqcf0crujlkkvvzkrzd8e8fayh85yl6qgcl',
-							scale: 1,
-							logo: 'http://zh.plugchain.info/assets/logo/chain-logo-light.png',
-							minUnit: '',
-							balance: '100.4',
-						},
-						tokenTwo: {
-							symbol: 'ETH',
-							contractAddress: 'gx1ay6eqcf0crujlkkvvzkrzd8e8fayh85yl6qgcl',
-							scale: 1,
-							logo: 'http://zh.plugchain.info/assets/logo/chain-logo-light.png',
-							minUnit: '',
-							balance: '100.4',
-						},
-					},
-				]);
-			}, 3000);
-		}).unsubscribe;
-	}, []);
+		if (!accountAddress) return;
+		setFetchLoading(true);
+		dataGetAccountLpList(accountAddress).then(data => {
+			if (data.status === 200 && data.data) {
+				setPoolsList(data.data);
+			}
+		}).finally(() => {
+			setFetchLoading(false);
+		});
+	}, [accountAddress]);
 
 	return (
-		<div className={classNames('page_pools_list')}>
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_list')}>
 			{
 				<ComponentLayoutLoading showLoading={fetchLoading}></ComponentLayoutLoading>
 			}
@@ -104,8 +88,8 @@ const PagePoolsList: FC = () => {
 										<p className={classNames('pools_item_info_title')}>{t('资金池比例')}</p>
 									</div>
 									<div className={classNames('pools_item_info_info')}>
-										<p className={classNames('pools_item_info_text')}>{item.tokenOne.balance??'-'}</p>
-										<p className={classNames('pools_item_info_text')}>{item.tokenTwo.balance??'-'}</p>
+										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenOne.balance, item.tokenOne.scale)}</p>
+										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenTwo.balance, item.tokenTwo.scale)}</p>
 										<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
 									</div>
 								</div>
@@ -114,7 +98,7 @@ const PagePoolsList: FC = () => {
 					}
 				</div>
 			</ComponentContentBox>
-		</div>
+		</ComLayoutShadowGlass>
 	);
 };
 

@@ -1,0 +1,17 @@
+.com-shadow-glass-default {
+	filter: blur(0px);
+	transition: filter 1s;
+	position: relative;
+	&.com-shadow-glass {
+		filter: blur(10px);
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 5;
+		}
+	}
+}

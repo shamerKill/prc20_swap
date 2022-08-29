@@ -4,3 +4,4 @@ export * from './string';
 export * from './number';
 export * from './ajax';
 export * from './wallet';
+export * from './time';

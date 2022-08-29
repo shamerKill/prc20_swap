@@ -1,8 +1,10 @@
 import ComponentLayoutRefresh from "$components/layout/refresh";
-import { InEvmBalanceToken } from "$database";
+import { dataGetAccountTokenBalance, dataGetTokenCoreList, dataGetTokenLocalList, dataSearchToken, dataSetTokenLocalList, InEvmBalanceToken } from "$database";
 import { layoutModalHide } from "$database/layout-data";
+import { useCustomFetchDataHook, useCustomGetAccountAddress, useCustomGetAppVersion } from "$hooks";
+import { toolHideAddressCenter, toolNumberStrToFloatForInt } from "$tools";
 import classNames from "classnames";
-import { FC, MouseEvent, useEffect, useState } from "react";
+import { FC, MouseEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ComponentFunctionalButton } from "../button";
 
@@ -11,11 +13,16 @@ import './index.scss';
 // 选择代币
 export const ComModalSelectToken: FC<{
 	onSelect: (data: InEvmBalanceToken) => void;
-}> = ({ onSelect }) => {
+	filterContractArr: string[];
+}> = ({ onSelect, filterContractArr }) => {
 	const {t} = useTranslation();
+	const accountAddressRef = useRef<string>();
+	const [ appVersion ] = useCustomGetAppVersion();
+	const { accountAddress } = useCustomGetAccountAddress();
 	const [ searchText, setSearchText ] = useState<string>('');
 	const [ localTokenList, setLocalTokenList ] = useState<InEvmBalanceToken[]>([]);
 	const [ remoteTokenList, setRemoteTokenList ] = useState<InEvmBalanceToken[]>([]);
+	const [ searchTokenList, setSearchTokenList ] = useState<InEvmBalanceToken[]>();
 	const [ loading, setLoading ] = useState<boolean>(false);
 	// 是不是管理列表
 	const [ adminPage, setAdminPage ] = useState<boolean>(false);
@@ -23,23 +30,13 @@ export const ComModalSelectToken: FC<{
 	const [ deleteTipShow, setDeleteTipShow ] = useState<boolean>(false);
 	// 删除代币暂存
 	const [ willDeleteToken, setWillDeleteToken ] = useState<InEvmBalanceToken>();
+	// 是否获取过余额
+	const [ hadBalance, setHadBalance ] = useState(false);
+	// 防抖
+	const doubleTimer = useRef<number>();
 
-	// 加载更多方法
-	const fetchMore = () => {
-		const data: InEvmBalanceToken[] = [];
-		for (let i = 0; i < 20; i++) {
-			data.push({
-				symbol: 'plug ' + Math.random().toFixed(5),
-				contractAddress: '',
-				scale: 1,
-				logo: 'http://zh.plugchain.info/assets/logo/chain-logo-light.png',
-				minUnit: '',
-				balance: '100.4',
-			});
-		}
-		setLocalTokenList(data);
-		setRemoteTokenList(state => state.concat(data));
-	};
+	// 获取远程数据
+	const { fetched, data: fetchedData, fetchData: getRemoteList } = useCustomFetchDataHook(dataGetTokenCoreList, false);
 
 	// 选择方法
 	const onItemClick = (data: InEvmBalanceToken) => {
@@ -47,14 +44,20 @@ export const ComModalSelectToken: FC<{
 		layoutModalHide();
 	};
 	// 添加本地
-	const onItemAdd = (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, item: InEvmBalanceToken) => {
+	const onItemAdd = (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, token: InEvmBalanceToken) => {
 		event.preventDefault();
 		event.stopPropagation();
-		console.log(item);
+		const saveList = localTokenList.filter(item => token.contractAddress !== item.contractAddress);
+		saveList.unshift(token);
+		setRemoteTokenList(state => state.filter(item => item.contractAddress !== token.contractAddress));
+		setLocalTokenList(saveList);
 	}
 
 	// 切换管理列表
-	const onSwitchAdmin = () => setAdminPage(state => !state);
+	const onSwitchAdmin = () => setAdminPage(state => {
+		if (!state === false && appVersion) getRemoteList(appVersion);
+		return !state;
+	});
 
 	// 移除代币提示
 	const onDeleteTokenTip = (item?: InEvmBalanceToken) => {
@@ -71,21 +74,99 @@ export const ComModalSelectToken: FC<{
 		}
 	}
 
-	// 获取数据
+	// 远程数据赋值
 	useEffect(() => {
-		fetchMore();
-	}, []);
+		if (appVersion) getRemoteList(appVersion);
+	}, [appVersion]);
+	useEffect(() => {
+		if (fetched && fetchedData?.data !== undefined && accountAddressRef.current && appVersion) {
+			// 获取账户余额
+			(async () => {
+				setHadBalance(false);
+				const localData = await dataGetTokenLocalList(accountAddressRef.current??'', appVersion);
+				const localContract = localData.map(item => item.contractAddress);
+				const remoteList = fetchedData.data?.filter(item => !localContract.includes(item.contractAddress)) ?? [];
+				const balances = (await dataGetAccountTokenBalance(
+					accountAddressRef.current!,
+					remoteList.map(item => item.contractAddress)||[]
+				)).data!;
+				setRemoteTokenList(
+					remoteList.map((item, index) => ({...item, balance: toolNumberStrToFloatForInt(balances[index], item.scale)}))||[]
+				);
+				setHadBalance(true);
+			})();
+		}
+	}, [fetchedData, fetched, appVersion]);
+	// 设置本地数据
+	useEffect(() => {
+		if (!accountAddressRef.current || !appVersion) return;
+		dataSetTokenLocalList(localTokenList, accountAddressRef.current!, appVersion);
+	}, [localTokenList, appVersion]);
+	// 本地数据
+	useEffect(() => {
+		if (!accountAddress || !appVersion) return;
+		(async () => {
+			const localData = await dataGetTokenLocalList(accountAddress, appVersion);
+			if (localData.length === 0) return setLocalTokenList([]);
+			const balances = (await dataGetAccountTokenBalance(
+				accountAddressRef.current!,
+				localData.map(item => item.contractAddress)||[]
+			)).data!;
+			setLocalTokenList(localData.map((item, index) => ({...item, balance: toolNumberStrToFloatForInt(balances[index], item.scale)})));
+		})();
+	}, [accountAddress, appVersion]);
+	// loading
+	useEffect(() => {
+		if (fetched === true && hadBalance === true) setLoading(false);
+		else setLoading(true);
+	}, [fetched, hadBalance]);
+	// 删除
+	useEffect(() => {
+		if (deleteTipShow === false) setWillDeleteToken(undefined);
+	}, [deleteTipShow]);
+	useEffect(() => {
+		accountAddressRef.current = accountAddress;
+	}, [accountAddress]);
+	useEffect(() => {
+		setSearchText('');
+	}, [adminPage]);
 
 	// 监听搜索
 	useEffect(() => {
-		console.log(searchText);
-	}, [searchText]);
-	
-	useEffect(() => {
-		if (deleteTipShow === false) {
-			setWillDeleteToken(undefined);
+		if (searchText === '') {
+			setSearchTokenList(undefined);
+			return;
 		}
-	}, [deleteTipShow]);
+		if (doubleTimer.current !== undefined) clearTimeout(doubleTimer.current);
+		doubleTimer.current = setTimeout(async () => {
+			// 判断是否在本地列表中
+			const localList = localTokenList.filter(item => (
+				item.contractAddress === searchText || item.symbol === searchText
+			));
+			if (localList.length !== 0) return setSearchTokenList(localList);
+			// 判断是否在远程列表中
+			const remoteList = remoteTokenList.filter(item => (
+				item.contractAddress === searchText || item.symbol === searchText
+			));
+			if (remoteList.length !== 0) return setSearchTokenList(remoteList);
+			setLoading(true);
+			const result = await dataSearchToken(searchText);
+			setLoading(false);
+			if (result.status === 200 && result.data) {
+				if (result.data?.length === 0) {
+					setSearchTokenList([]);
+				} else {
+					setLoading(true);
+					const balances = (await dataGetAccountTokenBalance(
+						accountAddressRef.current!,
+						result.data.map(item => item.contractAddress)||[]
+					)).data!;
+					setLoading(false);
+					setSearchTokenList(result.data.map((item, index) => ({...item, balance: toolNumberStrToFloatForInt(balances[index], item.scale)})));
+				}
+			}
+		}, 1 * 1000) as unknown as number;
+	}, [searchText]);
 
 	return (
 		<div className={classNames('com-swap-token-select')}>
@@ -101,32 +182,69 @@ export const ComModalSelectToken: FC<{
 					<>
 						<ComponentLayoutRefresh
 							className={classNames('token_select_list')}
-							loadingHandler={fetchMore}
 							loading={loading}>
 							{
-								localTokenList.map(item => (
-									<div onClick={() => onItemClick(item)} className={classNames('token_select_item')} key={item.symbol + item.minUnit}>
+								!searchTokenList && localTokenList.map(item => (
+									<div
+										onClick={() => onItemClick(item)}
+										className={classNames('token_select_item', filterContractArr.includes(item.contractAddress)&&'token_select_item_bg')}
+										key={item.symbol + item.minUnit + item.contractAddress}>
 										<img className={classNames('token_select_logo')}
 											src={item.logo}
 											alt={item.symbol} />
-										<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+										<div className={classNames('token_select_info')}>
+											<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+											<p className={classNames('token_select_address')}>{toolHideAddressCenter(item.contractAddress)}</p>
+										</div>
 										<p className={classNames('token_select_balance')}>{item.balance}</p>
 									</div>
 								))
 							}
 							{
-								remoteTokenList.map(item => (
-									<div onClick={() => onItemClick(item)} className={classNames('token_select_item')} key={item.symbol + item.minUnit}>
+								!searchTokenList && remoteTokenList.map(item => (
+									<div
+										onClick={() => onItemClick(item)}
+										className={classNames('token_select_item', filterContractArr.includes(item.contractAddress)&&'token_select_item_bg')}
+										key={item.symbol + item.minUnit + item.contractAddress}>
 										<img className={classNames('token_select_logo')}
 											src={item.logo}
 											alt={item.symbol} />
-										<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+										<div className={classNames('token_select_info')}>
+											<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+											<p className={classNames('token_select_address')}>{toolHideAddressCenter(item.contractAddress)}</p>
+										</div>
 										<p className={classNames('token_select_balance')}>{item.balance}</p>
 										<ComponentFunctionalButton
 											onClick={e => onItemAdd(e, item)}
 											className={classNames('token_select_add')}>
 											{t('添加')}
 										</ComponentFunctionalButton>
+									</div>
+								))
+							}
+							{
+								searchTokenList && searchTokenList.map(item => (
+									<div
+										onClick={() => onItemClick(item)}
+										className={classNames('token_select_item', filterContractArr.includes(item.contractAddress)&&'token_select_item_bg')}
+										key={item.symbol + item.minUnit + item.contractAddress}>
+										<img className={classNames('token_select_logo')}
+											src={item.logo}
+											alt={item.symbol} />
+										<div className={classNames('token_select_info')}>
+											<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+											<p className={classNames('token_select_address')}>{toolHideAddressCenter(item.contractAddress)}</p>
+										</div>
+										<p className={classNames('token_select_balance')}>{item.balance}</p>
+										{
+											(localTokenList.filter(local => local.contractAddress === item.contractAddress).length === 0) && (
+												<ComponentFunctionalButton
+													onClick={e => onItemAdd(e, item)}
+													className={classNames('token_select_add')}>
+													{t('添加')}
+												</ComponentFunctionalButton>
+											)
+										}
 									</div>
 								))
 							}
@@ -160,7 +278,10 @@ export const ComModalSelectToken: FC<{
 										<img className={classNames('token_select_logo')}
 											src={item.logo}
 											alt={item.symbol} />
-										<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+										<div className={classNames('token_select_info')}>
+											<p className={classNames('token_select_symbol')}>{item.symbol}</p>
+											<p className={classNames('token_select_address')}>{toolHideAddressCenter(item.contractAddress)}</p>
+										</div>
 										<ComponentFunctionalButton onClick={() => onDeleteTokenTip(item)} className={classNames('token_local_delete')}>
 											<i className={classNames('iconfont', 'icon-shanchu')}></i>
 										</ComponentFunctionalButton>

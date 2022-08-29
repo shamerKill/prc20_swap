@@ -1,13 +1,16 @@
 .component-functional-button {
 	cursor: pointer;
+	position: relative;
 	&:active {
 		transform: translateY(1px)  translateX(1px);
 	}
-	&[disabled] {
+	.component-functional-button-loading {
 		position: relative;
 		overflow: hidden;
 		cursor: default;
 		filter: blur(2px);
+	}
+	&[disabled] {
 		&::after {
 			content: '';
 			width: 100%;
@@ -17,6 +20,9 @@
 			left: 0;
 			background-color: var(--color-background-color);
 			opacity: 0.5;
+		}
+		&:active {
+			transform: none;
 		}
 	}
 }
