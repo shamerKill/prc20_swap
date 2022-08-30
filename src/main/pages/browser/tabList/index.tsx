@@ -2,6 +2,7 @@ import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
 import { toolApi,toolGet } from '$tools';
 import './index.scss';
+import { useTranslation } from 'react-i18next';
 type tradeItem = {
   address: string,
   date: number,
@@ -18,6 +19,7 @@ const ComponentBrowserTabList: FC<{
   listType,
   token
 }) => {
+	const { t } = useTranslation();
 	useEffect(() => {
     if (token) {
       getList();
@@ -37,6 +39,11 @@ const ComponentBrowserTabList: FC<{
 		setPageSize(val)
 		setCurrentPage(1)
 	};
+	useEffect(() => {
+    if (currentPage) {
+      getList();
+    }
+	}, [currentPage]);
   const getList = () => {
     toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType}).then((res:any) => {
       if (res.errno == 200) {
@@ -54,11 +61,11 @@ const ComponentBrowserTabList: FC<{
         <div className="table-area">
           <div className="list-content-title">
             <div className="list-content-title-item">#</div>
-            <div className="list-content-title-item">总金额</div>
-            <div className="list-content-title-item">总数量</div>
-            <div className="list-content-title-item">总数量</div>
-            <div className="list-content-title-item">账户</div>
-            <div className="list-content-title-item">时间</div>
+            <div className="list-content-title-item">{t('totalAmount')}</div>
+            <div className="list-content-title-item">{t('totalQuantity')}</div>
+            <div className="list-content-title-item">{t('totalQuantity')}</div>
+            <div className="list-content-title-item">{t('account')}</div>
+            <div className="list-content-title-item">{t('time')}</div>
           </div>
           {
             list.map((item, index) => 
@@ -74,10 +81,10 @@ const ComponentBrowserTabList: FC<{
           }
         </div>
         {
-          total > 0 && <ComponentFunctionalPagenation className='overview' currentPage={currentPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions} total={total} totalText={`共${total}条`} handleChangePage={handleChangePage} handleChangePageSize={handleChangePageSize}></ComponentFunctionalPagenation>
+          total > 0 && <ComponentFunctionalPagenation className='overview' currentPage={currentPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions} total={total} totalText={`${t('共')}${total}${t('条')}`} handleChangePage={handleChangePage} handleChangePageSize={handleChangePageSize}></ComponentFunctionalPagenation>
         }
         {
-          total == 0 && <div className='noDatas'>暂无数据</div>
+          total == 0 && <div className='noDatas'>{t('暂无数据')}</div>
         }
       </div>
 		</div>

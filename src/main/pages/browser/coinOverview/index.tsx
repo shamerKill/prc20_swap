@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { toolGet,toolApi } from '$tools';
+import { useTranslation } from 'react-i18next';
 
 import './index.scss';
 type dataType = {
@@ -33,6 +34,7 @@ const ComponentBrowserLpOverview: FC<{
 }> = ({
 	coinPair
 }) => {
+	const { t } = useTranslation();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	useEffect(() => {
     if (coinPair) {
@@ -55,27 +57,27 @@ const ComponentBrowserLpOverview: FC<{
         {dataInfo.name} ${dataInfo.price?.num}  <span className="rate">({dataInfo.price?.change}%)</span>
         </div>
         <div className="overview-info-title-btns">
-          <div className="overview-info-title-btns-item active">增加流动性</div>
-          <div className="overview-info-title-btns-item">交易</div>
+          <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
+          <div className="overview-info-title-btns-item">{t('交易')}</div>
         </div>
       </div>
       <div className="overview-info">
         <div className="overview-info-item1">
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">
-              总流动性
+            {t('pool')}
             </div>
             ${dataInfo.fluidity?.num} <span className="rate">({dataInfo.fluidity?.change}%)</span>
           </div>
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">
-              交易数
+            {t('tradNum')}
             </div>
             ${dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
           </div>
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">
-              成交额
+            {t('turnover')}
             </div>
             ${dataInfo.turnover?.num} <span className="rate">({dataInfo.turnover?.change}%)</span>
           </div>

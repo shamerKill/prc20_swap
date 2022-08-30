@@ -2,6 +2,7 @@ import { FC, useState,useRef, useEffect } from 'react';
 import classNames from 'classnames';
 import ComponentOverviewCharts from './charts';
 import ComponentOverviewKline from './kline';
+import { useTranslation } from 'react-i18next';
 
 import { toolApi,toolGet } from '$tools';
 import * as echarts from 'echarts';
@@ -49,6 +50,7 @@ const ComponentBrowserCoinOverview: FC<{
 }> = ({
 	coinPair
 }) => {
+	const { t } = useTranslation();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [optionValue,setOptionValue] = useState<klineItem[]>([]);
   let optionValues:klineItem[] = [];
@@ -218,28 +220,28 @@ const ComponentBrowserCoinOverview: FC<{
         ${dataInfo.price?.num}  <span className="rate">({dataInfo.price?.change}%)</span>
       </div>
       <div className="overview-info-title-btns">
-        <div className="overview-info-title-btns-item active">增加流动性</div>
-        <div className="overview-info-title-btns-item">交易</div>
+        <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
+        <div className="overview-info-title-btns-item">{t('交易')}</div>
       </div>
     </div>
       <div className="overview-info">
         <div className="overview-info-item other">
           <div className="overview-info-item-value">
             <div className="overview-info-item-tips">
-              总流动性
+            {t('liquidity')}
             </div>
             ${dataInfo.fluidity?.num} <span className="rate">({dataInfo.fluidity?.change}%)</span>
           </div>
           <div className="overview-info-item-item">
             <div className="overview-info-item-value">
               <div className="overview-info-item-tips">
-                交易数
+              {t('tradNum')}
               </div>
               ${dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
             </div>
             <div className="overview-info-item-value">
               <div className="overview-info-item-tips">
-                成交额
+              {t('turnover')}
               </div>
               ${dataInfo.turnover?.num} <span className="rate">({dataInfo.turnover?.change}%)</span>
             </div>

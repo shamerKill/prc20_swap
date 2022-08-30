@@ -3,6 +3,7 @@ import ComponentFunctionalPagenation from '$components/functional/pagination';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { toolApi,toolGet } from '$tools';
 import './index.scss';
+import { useTranslation } from 'react-i18next';
 
 type tokenItem = {
 	change: string; // 价格变化
@@ -33,6 +34,7 @@ const ComponentBrowserList: FC<{
   listType,
   coinPair
 }) => {
+	const { t } = useTranslation();
 	useEffect(() => {
     if (coinPair == 'plugcn') {
       getList();
@@ -44,7 +46,7 @@ const ComponentBrowserList: FC<{
 	const [list, setList] = useState<tokenItem[]>([]);
 	const [list1, setList1] = useState<tridePair[]>([]);
 	const [pageSize, setPageSize] = useState(10);
-	const [total, setTotal] = useState(123);
+	const [total, setTotal] = useState(0);
 	const [pageSizeOptions, setPageSizeOptions] = useState([5, 10, 20, 30]);
   const navigate = useNavigate();
 
@@ -56,6 +58,11 @@ const ComponentBrowserList: FC<{
 		setPageSize(val)
 		setCurrentPage(1)
 	};
+	useEffect(() => {
+    if (currentPage) {
+      getList();
+    }
+	}, [currentPage]);
   const getList = () => {
     if (listType == 1) {
       toolGet(toolApi('/browser/home/hotToken'), {from: currentPage,amount: pageSize}).then((res:any) => {
@@ -78,7 +85,7 @@ const ComponentBrowserList: FC<{
     }
   }
   const getTokenList = () => {
-    (toolApi('/browser/token/trading_pair'), {token: coinPair,from: currentPage,amount: pageSize}).then((res:any) => {
+    toolGet(toolApi('/browser/token/trading_pair'), {token: coinPair,from: currentPage,amount: pageSize}).then((res:any) => {
       if (res.errno == 200) {
         setTotal(res.data.total);
         if (res.data.list != null) {
@@ -96,17 +103,17 @@ const ComponentBrowserList: FC<{
 	return (
 		<div className='browser-list'>
       <div className="list-title">
-        {listType==1?'热门代币':'交易对'}
+        {listType==1?t('热门代币'):t('交易对')}
       </div>
       <div className="list-content">
         <div className="table-area">
           <div className="list-content-title">
             <div className="list-content-title-item"></div>
-            <div className="list-content-title-item">名称</div>
-            <div className="list-content-title-item">资产流动性</div>
-            <div className="list-content-title-item">成交额 24H</div>
-            <div className="list-content-title-item">{listType == 1 ? '价格' : '成交额 7D'}</div>
-            <div className="list-content-title-item">价格变化</div>
+            <div className="list-content-title-item">{t('name')}</div>
+            <div className="list-content-title-item">{t('liquidity')}</div>
+            <div className="list-content-title-item">{t('turnover')} 24H</div>
+            <div className="list-content-title-item">{listType == 1 ? t('browser-price') : t('turnover')+' 7D'}</div>
+            {/* <div className="list-content-title-item">价格变化</div> */}
           </div>
           {
             listType == 1 && list.map((item, index) => 
@@ -116,9 +123,9 @@ const ComponentBrowserList: FC<{
                 </div>
                 <div className="list-content-detail-item">{item.name}</div>
                 <div className="list-content-detail-item">$ {item.fluidity}</div>
-                <div className="list-content-detail-item">$ {item.turnover}</div>
+                <div className="list-content-detail-item">$ {Number(item.turnover)}</div>
                 <div className="list-content-detail-item">$ {item.price}</div>
-                <div className="list-content-detail-item">{item.change}%</div>
+                {/* <div className="list-content-detail-item">{item.change}%</div> */}
               </div>
             )}
 
@@ -133,16 +140,16 @@ const ComponentBrowserList: FC<{
               <div className="list-content-detail-item">$ {item.fluidity}</div>
               <div className="list-content-detail-item">$ {item.turnover}</div>
               <div className="list-content-detail-item">$ {item.turnover_week}</div>
-              <div className="list-content-detail-item">{item.turnover}</div>
+              {/* <div className="list-content-detail-item">{item.turnover}</div> */}
             </div>
            )}
           
         </div>
         {
-          total > 0 && <ComponentFunctionalPagenation className='overview' currentPage={currentPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions} total={total} totalText={`共${total}条`} handleChangePage={handleChangePage} handleChangePageSize={handleChangePageSize}></ComponentFunctionalPagenation>
+          total > 0 && <ComponentFunctionalPagenation className='overview' currentPage={currentPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions} total={total} totalText={`${t('共')}${total}${t('条')}`} handleChangePage={handleChangePage} handleChangePageSize={handleChangePageSize}></ComponentFunctionalPagenation>
         }
         {
-          total == 0 && <div className='noDatas'>暂无数据</div>
+          total == 0 && <div className='noDatas'>{t('暂无数据')}</div>
         }
 			  
       </div>

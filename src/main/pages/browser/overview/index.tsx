@@ -1,6 +1,7 @@
 import { FC, useEffect,useState } from 'react';
 import ComponentOverviewCharts from './charts';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import * as echarts from 'echarts';
 import { toolApi,toolGet } from '$tools';
 
@@ -16,6 +17,7 @@ const ComponentBrowserOverview: FC<{
 }> = ({
 	coinPair
 }) => {
+	const { t } = useTranslation();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [chartType,setChartType] = useState<'day'|'week'>('day');
 	const [optionValue,setOptionValue] = useState<Array<string>>([]);
@@ -120,19 +122,19 @@ const ComponentBrowserOverview: FC<{
     <div className="overview-info">
       <div className="browser-overview">
         <div className="info-item">
-          <div className="info-title"><div className="coin-name">{coinPair?.toLocaleUpperCase()}</div> 价格:</div>
+          <div className="info-title"><div className="coin-name">{coinPair?.toLocaleUpperCase()}</div> {t('browser-price')}:</div>
           <div className="info-value"> $ {dataInfo.price}</div>
         </div>
         <div className="info-item">
-          <div className="info-title">总交易对:</div>
+          <div className="info-title">{t('totalTrading')}:</div>
           <div className="info-value"> {dataInfo.trading_pair}</div>
         </div>
         <div className="info-item">
-          <div className="info-title">交易数(24H) :</div>
+          <div className="info-title">{t('tradNum')}(24H) :</div>
           <div className="info-value"> {dataInfo.trading}</div>
         </div>
         <div className="info-item">
-          <div className="info-title">新交易对(24H) :</div>
+          <div className="info-title">{t('newTrading')}(24H) :</div>
           <div className="info-value"> {dataInfo.new_trading_pair}</div>
         </div>
       </div>
@@ -140,7 +142,7 @@ const ComponentBrowserOverview: FC<{
         <div className="overview-info-title">
           <div className="overview-info-title-item">
             <div className="overview-info-title-item-title">
-              资产流动性
+            {t('liquidity')}
             </div>
             <div className="overview-info-title-item-value">
               ${Number(optionValue[optionValue.length-1])} <span className="rate">{(Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2])}%</span>
@@ -149,7 +151,7 @@ const ComponentBrowserOverview: FC<{
           <div className="overview-info-title-item other">
             <div className="flex-item">
               <div className="overview-info-title-item-title">
-                24H 成交额
+                24H {t('turnover')}
               </div>
               <div className="overview-info-title-item-value">
                 ${Number(optionValue1[optionValue1.length-1])} <span className="rate">{(Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2])}%</span>
@@ -157,8 +159,8 @@ const ComponentBrowserOverview: FC<{
             </div>
             <div className="flex-item">
               <div className="overview-info-title-btns">
-                <div className={classNames('overview-info-title-btns-item', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>每天</div>
-                <div className={classNames('overview-info-title-btns-item', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>每周</div>
+                <div className={classNames('overview-info-title-btns-item', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>{t('每天')}</div>
+                <div className={classNames('overview-info-title-btns-item', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>{t('每周')}</div>
               </div>
             </div>
           </div>

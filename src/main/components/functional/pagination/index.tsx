@@ -1,5 +1,6 @@
 import { FC,ReactNode, useEffect, useState } from "react";
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 import './index.scss';
 
@@ -22,6 +23,7 @@ const ComponentFunctionalPagenation: FC<{
   handleChangePage,
   handleChangePageSize
 }) => {
+	const { t } = useTranslation();
   const count = Math.ceil(total / pageSize);
   const [pageArr, setPageArr] = useState<(number | string)[]>([]);
   useEffect(() => {
@@ -57,7 +59,7 @@ const ComponentFunctionalPagenation: FC<{
     if (pageSizeOptions) {
       return (
         <select name="pageSize" className="page-size" id="react-hook-pagenation-page-size" value={pageSize} onChange={e => handleChangePageSize(Number(e.target.value))}>
-          {pageSizeOptions.map((item, index) => (<option key={index} value={item}>{item}条/页</option>))}
+          {pageSizeOptions.map((item, index) => (<option key={index} value={item}>{item}{t('条')}/{t('页')}</option>))}
         </select>
       )
     }
@@ -66,14 +68,14 @@ const ComponentFunctionalPagenation: FC<{
 
   return (
     <div className={classNames(className, 'react-hook-pagenation')}>
-      <button disabled={currentPage === 1} className="prev-page" onClick={() => handleChangePage(currentPage === 1 ? 1 : currentPage - 1)}>上一页</button>
+      <button disabled={currentPage === 1} className="prev-page" onClick={() => handleChangePage(currentPage === 1 ? 1 : currentPage - 1)}>{t('上一页')}</button>
       {pageArr.map((item, index) => {
         if (item === '···') {
           return <div className="page-item-omit" key={`${item}-${index}`}>{item}</div>
         }
         return <div className={`page-item ${item === currentPage ? 'current-page' : ''}`} key={`${item}-${index}`} onClick={() => handleChangePage(+item)}>{item}</div>
       })}
-      <button disabled={currentPage === count} className="next-page" onClick={() => handleChangePage(currentPage === count ? count : currentPage + 1)}>下一页</button>
+      <button disabled={currentPage === count} className="next-page" onClick={() => handleChangePage(currentPage === count ? count : currentPage + 1)}>{t('下一页')}</button>
       {makePageSizeOptions()}
       {totalText && <div className="total">{totalText}</div>}
     </div>
