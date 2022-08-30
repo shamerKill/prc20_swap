@@ -1,6 +1,5 @@
 import { FC,useEffect,useState } from 'react';
-// import ComponentBrowserOverview from './overview';
-import ComponentBrowserCoinOverview from './coinOverview';
+import ComponentBrowserOverview from './overview';
 
 import ComponentBrowserList from './list';
 import ComponentBrowserTabList from './tabList';
@@ -9,15 +8,14 @@ const PageInfo: FC = () => {
 	const [coinPair,setCoinPair] = useState('')
 	const params:any = useParams();
 	useEffect(() => {
+		console.log(params.id)
 		setCoinPair(params.id)
 	}, [params]);
 	return (
 		<div>
-			<ComponentBrowserCoinOverview coinPair={coinPair}></ComponentBrowserCoinOverview>
-			{/* <ComponentBrowserOverview coinPair={coinPair}></ComponentBrowserOverview> */}
-			<ComponentBrowserList listType={1}></ComponentBrowserList>
-			<ComponentBrowserList listType={2}></ComponentBrowserList>
-			<ComponentBrowserTabList listType={2}></ComponentBrowserTabList>
+			<ComponentBrowserOverview coinPair={coinPair}></ComponentBrowserOverview>
+			<ComponentBrowserList listType={1} coinPair={coinPair}></ComponentBrowserList>
+			<ComponentBrowserList listType={2} coinPair={coinPair}></ComponentBrowserList>
 		</div>
 	);
 };

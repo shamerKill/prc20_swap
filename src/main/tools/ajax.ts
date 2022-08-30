@@ -1,3 +1,4 @@
+
 export const toolApi = (path: string): string => {
 	const testSite = '192.168.3.5:8552';
 	return `${window.location.protocol}//${testSite}/${path}`.replace(/([^:])\/+/g, '$1/');

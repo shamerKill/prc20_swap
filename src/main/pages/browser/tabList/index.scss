@@ -47,10 +47,10 @@
           align-items: center;
         }
         &:nth-child(1){
-          width: 14rem;
+          width: 8rem;
         }
         &:nth-child(2){
-          width: 11rem;
+          width: 13rem;
         }
         &:nth-child(3){
           width: 11rem;
@@ -60,6 +60,9 @@
         }
         &:nth-child(5){
           width: 14rem;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
         &:nth-child(6){
           width: 8rem;

@@ -57,6 +57,11 @@
       @include media-phone {
         width: 100%;
       }
+      &.other{
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
       &-title{
         color: var(--color-browser-tips-color);
         font-size: 1rem;
@@ -73,6 +78,36 @@
         }
       }
     }
+    .overview-info-title-btns{
+      display: flex;
+      padding-right: 1.3rem;
+      &-item{
+        width: 8.3rem;
+        height: 3rem;
+        background: var(--color-background-color);
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-browser-title-color);
+        font-size: 1rem;
+        cursor: pointer;
+        user-select: none;
+        &.active{
+          background: var(--color-browser-title-color);
+          color: var(--color-primary-color);
+          position: relative;
+          z-index: 1;
+        }
+        &.active1{
+          background: var(--color-browser-title-color);
+          color: var(--color-primary-color);
+          position: relative;
+          z-index: 1;
+          margin-left: -2rem;
+        }
+      }
+    }
   }
   
 }
@@ -84,7 +119,7 @@
 	@include media-phone {
 		flex-direction: column;
 	}
-  &-item{
+  &-item1{
     padding: 0.65rem;
     width: 50%;
     height: 100%;
