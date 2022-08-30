@@ -27,7 +27,6 @@ const PageSwap: FC = () => {
 
 const PageSwapV10: FC = () => {
 	const {t} = useTranslation();
-	const [ appVersion ] = useCustomGetAppVersion();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
 	// 支付数量
@@ -614,6 +613,7 @@ const PageSwapV20: FC = () => {
 			const result = await dataGetSwapEffect(fromTokenInfo.contractAddress, toTokenInfo.contractAddress);
 			if (!result) return;
 			const [fromPoolVolume, toPoolVolume] = [toolNumberStrToFloatForInt(result[0], fromTokenInfo.scale), toolNumberStrToFloatForInt(result[1], toTokenInfo.scale)];
+			console.log(toPoolVolume, fromPoolVolume);
 			const divScale = toolNumberDiv(toPoolVolume, fromPoolVolume);
 			setTokenSwapShow(`1 ${fromTokenInfo.symbol} ≈ ${divScale} ${toTokenInfo.symbol}`);
 			setFromTokenVolume(fromPoolVolume);

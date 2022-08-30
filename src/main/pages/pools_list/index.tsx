@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FC, useEffect, useState } from 'react';
 import { toolNumberStrToFloatForInt, toolNumberToPercentage } from '$tools';
-import { dataGetAccountLpList, InSwapPoolInfo } from '$database';
+import { dataGetAccountLpList, dataGetAccountLpListV10, InSwapPoolInfo } from '$database';
 import { ComponentContentBox, ComponentFunctionalButton, ComponentLayoutLoading } from '$components';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
-import { useCustomGetAccountAddress } from '$hooks';
+import { useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 
 import './index.scss';
 
@@ -18,6 +18,8 @@ const PagePoolsList: FC = () => {
 	const [ fetchLoading, setFetchLoading ] = useState<boolean>(false);
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
+	// 版本号
+	const [ appVersion ] = useCustomGetAppVersion();
 
 	// 前往添加流动池
 	const goToAddPool = (item?: InSwapPoolInfo) => {
@@ -31,16 +33,23 @@ const PagePoolsList: FC = () => {
 
 	// 获取数据
 	useEffect(() => {
-		if (!accountAddress) return;
+		if (!accountAddress || !appVersion) return;
 		setFetchLoading(true);
-		dataGetAccountLpList(accountAddress).then(data => {
-			if (data.status === 200 && data.data) {
-				setPoolsList(data.data);
+		(async () => {
+			if (appVersion === 'v2') {
+				const data = await dataGetAccountLpList(accountAddress);
+				if (data.status === 200 && data.data) {
+					setPoolsList(data.data);
+				}
+			} else if (appVersion === 'v1') {
+				const data = await dataGetAccountLpListV10(accountAddress);
+				if (data.status === 200 && data.data) {
+					setPoolsList(data.data);
+				}
 			}
-		}).finally(() => {
 			setFetchLoading(false);
-		});
-	}, [accountAddress]);
+		})();
+	}, [accountAddress, appVersion]);
 
 	return (
 		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_list')}>

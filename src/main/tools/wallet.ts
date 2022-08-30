@@ -25,12 +25,13 @@ export const toolLinkWallet = async (init: boolean = false): Promise<typeof acco
 		if (permissionResult === null) return null;
 	}
 	const accountType = await cosmo.getAccountType();
-	if (accountType === 'PRC10') return null;
 	const accountAddress = await cosmo.getAccount();
 	if (!accountAddress) return null;
+	if (!accountType) return null;
 	return {
 		isWallet: deviceType === 'wallet',
 		isWeb: deviceType === 'web',
 		accountAddress: accountAddress,
+		accountType: accountType === 'PRC20' ? 'PRC20' : 'PRC10'
 	};
 };

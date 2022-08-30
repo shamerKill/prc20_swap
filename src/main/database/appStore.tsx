@@ -27,6 +27,8 @@ export const accountStoreInit: {
 	isWeb: boolean;
 	// 账户地址
 	accountAddress?: string;
+	// 账户类型
+	accountType?: 'PRC10'|'PRC20'
 } = {
 	isWallet: false,
 	isWeb: false,

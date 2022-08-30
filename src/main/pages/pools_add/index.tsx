@@ -4,17 +4,220 @@ import { ComponentContentBox, ComponentLayoutLoading } from '$components';
 import { useTranslation } from 'react-i18next';
 
 import './index.scss';
-import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataSearchToken, dataSetApprove, dataSetLpPoolAddVolume, InEvmBalanceToken } from '$database';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataGetSwapLpV10, dataSearchToken, dataSetApprove, dataSetLpPoolAddVolume, InEvmBalanceToken } from '$database';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
 import { ComponentSlippage } from '$components/functional/slippage';
 import { toolNumberAdd, toolNumberDiv, toolNumberMul, toolNumberSplit, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
-import { useCustomFormatSearch, useCustomGetAccountAddress } from '$hooks';
+import { useCustomFormatSearch, useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 import { toast } from 'react-toastify';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
 
 const PagePoolsAdd: FC = () => {
+	const [ appVersion ] = useCustomGetAppVersion();
+	if (appVersion === 'v2') return <PagePoolsAddV20></PagePoolsAddV20>
+	else return <PagePoolsAddV10></PagePoolsAddV10>
+};
+
+const PagePoolsAddV10: FC = () => {
+	const { t } = useTranslation();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
+	const search = useCustomFormatSearch<{one?: string, two?: string}>();
+	// from支付数量
+	const [fromVolume, setFromVolume] = useState('0.0');
+	// to支付数量
+	const [toVolume, setToVolume] = useState('0.0');
+	// from币信息
+	const [fromTokenInfo, setFromTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// to币信息
+	const [toTokenInfo, setToTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// 已有from币池子数量
+	const [ fromPoolTokenVolume, setFromPoolTokenVolume ] = useState<string|null>(null);
+	// 已有to币池子数量
+	const [ toPoolTokenVolume, setToPoolTokenVolume ] = useState<string|null>(null);
+	// 1from兑换to比例
+	const [ oneFromTransTo, setOneFromTransTo ] = useState<string>('-');
+	// 1to兑换from比例
+	const [ oneToTransFrom, setOneToTransFrom ] = useState<string>('-');
+	// 新增后资金池比例
+	const [ addedScale, setAddedScale ] = useState<string>('-');
+	// 已有仓位数据
+	const [ holderData, setHolderData ] = useState<null|{ from: string, to: string, scale: string }>(null);
+	// 显示loading
+	const [ loading, setLoading ] = useState(false);
+	// lp地址
+	const [ lpContractAddress, setLpContractAddress ] = useState<string>();
+	// lp 总量
+	const [ lpTotalVolume, setLpTotalVolume ] = useState<string>();
+	// 用户持有lp数量
+	const [ lpUserVolume, setLpUserVolume ] = useState<string>();
+	// 是否符合添加
+	const [ canAdd, setCanAdd ]  = useState<boolean>(false);
+	// 是否需要授权
+	const [needApproveFrom, setNeedApproveFrom] = useState<boolean>();
+	const [needApproveTo, setNeedApproveTo] = useState<boolean>();
+	// 获取焦点在第几个input
+	const focusIndexRef = useRef<number>();
+
+	// 添加流动池
+	const addPools = async () => {
+		if (!accountAddress) return;
+		if (!(parseFloat(fromVolume) > 0)) return;
+		setLoading(true);
+		try {
+			toast.info(t('将进行代币兑换'));
+			const result = await dataSetLpPoolAddVolume(
+				[fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??''],
+				[toolNumberStrToIntForFloat(fromVolume, fromTokenInfo?.scale??0), toolNumberStrToIntForFloat(toVolume, toTokenInfo?.scale??0)],
+				accountAddress ?? '',
+			);
+			if (result.includes('status: true')) {
+				toast.success(t('兑换成功'));
+				await setTokenBalance();
+				setFromVolume('0');
+				setToVolume('0');
+			} else if (/^0x/.test(result)) {
+				toast.info(t('交易已发送') + `\n(hash:${result})`);
+				setFromVolume('0');
+				setToVolume('0');
+				setTimeout(() => setTokenBalance(), 5000);
+			} else {
+				toast.warning(t('发送错误') + ': \n' + result);
+			}
+		} catch (e) {
+			toast.warning(t('发送错误') + ': \n' + e);
+		}
+		setLoading(false);
+	};
+	// 获取代币余额
+	const setTokenBalance = async () => {
+		const result = await dataGetAccountTokenBalance(accountAddress??'', [ fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??'' ]);
+		if (result.status === 200 && result.data) {
+			setFromTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[0]??'', fromTokenInfo?.scale??0)} : state );
+			setToTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[1]??'', toTokenInfo?.scale??0)} : state );
+		}
+		const res = await dataGetLpPoolDidVolume(lpContractAddress??'', accountAddress??'');
+		if (res) setLpUserVolume(res);
+		else setLpUserVolume('0');
+	};
+
+	// 选择代币
+	const onSelectToken = (type: 'from' | 'to') => {
+		layoutModalShow({
+			children: <ComModalSelectToken onSelect={(data) => {
+				if (type === 'from') {
+					if (toTokenInfo?.contractAddress === data.contractAddress) setToTokenInfo(null);
+					setFromTokenInfo(data);
+				}
+				else if (type === 'to') {
+					if (fromTokenInfo?.contractAddress === data.contractAddress) setFromTokenInfo(null);
+					setToTokenInfo(data);
+				}
+				setFromVolume('0');
+				setToVolume('0');
+			}} filterContractArr={[
+				fromTokenInfo?.contractAddress??'',
+				toTokenInfo?.contractAddress??'',
+			]}></ComModalSelectToken>,
+			options: {
+				title: t('选择代币'),
+			}
+		});
+	};
+
+	// 获取lp地址
+	useEffect(() => {
+		if (!fromTokenInfo || !toTokenInfo) {
+			setLpContractAddress(undefined);
+			return;
+		}
+		(async () => {
+			const result = await dataGetSwapLpV10([fromTokenInfo.contractAddress, toTokenInfo.contractAddress]);
+			console.log(result);
+		})();
+	}, [fromTokenInfo, toTokenInfo]);
+	return (
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_add')}>
+			<ComponentLayoutLoading showLoading={loading}></ComponentLayoutLoading>
+			<ComponentContentBox
+				outerClass={classNames('pools_box_outer')}
+				innerClass={classNames('pools_box_inner')}
+				topChildren={
+					<div className={classNames('pools_head')}>
+						<h2 className={classNames('pools_title')}>{t('增加流动池')}</h2>
+					</div>
+				}>
+				{/*  */}
+				<div className={classNames('pools_add_inner')}>
+					<div
+						className={classNames('pools_add_box')}>
+						<ComponentSwapInputBox
+							buttonOnClick={canAdd ? addPools : undefined}
+							buttonText={
+								(fromTokenInfo && toTokenInfo) ?
+								(
+									needApproveFrom ? (t('授权代币') + ' ' + fromTokenInfo.symbol) : (
+										needApproveTo ? (t('授权代币') + ' ' + toTokenInfo.symbol) : t('添加')
+									)
+								) :
+								t('选择代币')}
+							focusIndex={focusIndexRef}
+							inputs={[
+								{
+									labelText: "输入",
+									labelToken: fromTokenInfo,
+									inputText: fromVolume,
+									inputChange: setFromVolume,
+									placeholder: "0.0",
+									selectToken: () => onSelectToken('from'),
+									key: 'pay_from',
+									checkMax: true,
+								},
+								{
+									labelText: "输入",
+									labelToken: toTokenInfo,
+									inputText: toVolume,
+									inputChange: setToVolume,
+									placeholder: "0.0",
+									selectToken: () => onSelectToken('to'),
+									key: 'pay_to',
+									checkMax: true,
+								}
+							]} />
+					</div>
+					{/* 展示 */}
+					{
+						fromTokenInfo && toTokenInfo && (
+							<div className={classNames('inner_info')}>
+								<ComponentSlippage />
+								<div className={classNames('inner_info_content')}>
+									<div className={classNames('inner_info_line')}></div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{oneFromTransTo}</p>
+										<p className={classNames('inner_info_desc')}>{toTokenInfo?.symbol} / {fromTokenInfo?.symbol}</p>
+									</div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{oneToTransFrom}</p>
+										<p className={classNames('inner_info_desc')}>{fromTokenInfo?.symbol} / {toTokenInfo?.symbol}</p>
+									</div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{addedScale}</p>
+										<p className={classNames('inner_info_desc')}>{t('资金池比例')}</p>
+									</div>
+								</div>
+							</div>
+						)
+					}
+				</div>
+			</ComponentContentBox>
+		</ComLayoutShadowGlass>
+	);
+};
+
+
+const PagePoolsAddV20: FC = () => {
 	const { t } = useTranslation();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();

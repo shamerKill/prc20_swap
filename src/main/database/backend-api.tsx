@@ -313,6 +313,7 @@ export const dataGetAccountLpList = async (account: string): Promise<TypeDataBas
 	return toolGet(toolApi('/lpAmount/own'), { address: account })
 		.then((data: any) => {
 			if (data.errno !== 200) throw Error(data.errmsg);
+			if (!data.data) return dataBaseResult([]);
 			const result: InSwapPoolInfo[] = data.data.map((item: any) => ({
 				id: item['contract_lp']['address'],
 				tokenOne: {
@@ -337,6 +338,37 @@ export const dataGetAccountLpList = async (account: string): Promise<TypeDataBas
 		})
 		.catch(e => dataBaseError(e.toString()));
 };
+
+// 获取用户lp列表 prc10
+export const dataGetAccountLpListV10 = async (account: string) => {
+	return toolGet(toolApi('/lpAmount/ownV1'), { address: account })
+	.then((data: any) => {
+		if (data.errno !== 200) throw Error(data.errmsg);
+		if (!data.data) return dataBaseResult([]);
+		const result: InSwapPoolInfo[] = data.data.map((item: any) => ({
+			id: item['contract_lp']['address'],
+			tokenOne: {
+				symbol: item['contract0']['name'],
+				contractAddress: item['contract0']['address'],
+				scale: item['contract0']['decimals'],
+				logo: item['contract0']['logo'],
+				balance: item['contract0']['balance'],
+				minUnit: item['contract0']['name'],
+			},
+			tokenTwo: {
+				symbol: item['contract1']['name'],
+				contractAddress: item['contract1']['address'],
+				scale: item['contract1']['decimals'],
+				logo: item['contract1']['logo'],
+				balance: item['contract1']['balance'],
+				minUnit: item['contract0']['name'],
+			},
+			poolScale: item['proportion'].toString(),
+		} as InSwapPoolInfo));
+		return dataBaseResult(result);
+	})
+	.catch(e => dataBaseError(e.toString()));
+}
 
 
 // 判断是v1还是v2
