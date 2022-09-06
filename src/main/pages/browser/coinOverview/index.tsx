@@ -2,6 +2,7 @@ import { FC, useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { toolGet,toolApi } from '$tools';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import './index.scss';
 type dataType = {
@@ -35,6 +36,7 @@ const ComponentBrowserLpOverview: FC<{
 	coinPair
 }) => {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	useEffect(() => {
     if (coinPair) {
@@ -49,7 +51,12 @@ const ComponentBrowserLpOverview: FC<{
       }
     })
   }
-  
+  const goLp = () => {
+    navigate('/swap/poolsList');
+  }
+  const goSwap = () => {
+    navigate('/swap/swap');
+  }
   return (
     <div className="overview-info-detail">
       <div className="overview-info-title">
@@ -58,8 +65,8 @@ const ComponentBrowserLpOverview: FC<{
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
         </div>
         <div className="overview-info-title-btns">
-          <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
-          <div className="overview-info-title-btns-item">{t('交易')}</div>
+          <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
+          <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
         </div>
       </div>
       <div className="overview-info">

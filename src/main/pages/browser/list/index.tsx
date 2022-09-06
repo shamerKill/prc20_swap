@@ -38,7 +38,6 @@ const ComponentBrowserList: FC<{
 	const { t } = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
 	useEffect(() => {
-    console.log(appVersion)
     if (appVersion != undefined) {
       if (coinPair == 'pc') {
         getList();

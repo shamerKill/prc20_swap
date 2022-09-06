@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import ComponentOverviewCharts from './charts';
 import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { toolApi,toolGet } from '$tools';
 import * as echarts from 'echarts';
@@ -61,6 +62,7 @@ const ComponentBrowserCoinOverview: FC<{
 	coinPair
 }) => {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [optionValue,setOptionValue] = useState<klineItem[]>([]);
   let optionValues:klineItem[] = [];
@@ -154,7 +156,6 @@ const ComponentBrowserCoinOverview: FC<{
     return new Date(timeStr).toLocaleString().replace(/:\d{1,2}$/, '')
   }
   const connectWs = () => {
-    console.log(optionValue)
     optionValues = optionValue
     ws.current = new WebSocket('ws://192.168.3.5:8554/marquee');
     ws.current.onopen = _e => {
@@ -222,7 +223,12 @@ const ComponentBrowserCoinOverview: FC<{
   const doChange = (i:number) => {
     setLineIndex(i);
   }
-
+  const goLp = () => {
+    navigate('/swap/poolsList');
+  }
+  const goSwap = () => {
+    navigate('/swap/swap');
+  }
 	return (
     <div className="overview-info-detail">
     <div className="overview-info-title">
@@ -231,8 +237,8 @@ const ComponentBrowserCoinOverview: FC<{
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
       <div className="overview-info-title-btns">
-        <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
-        <div className="overview-info-title-btns-item">{t('交易')}</div>
+        <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
+        <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
       </div>
     </div>
       <div className="overview-info">
