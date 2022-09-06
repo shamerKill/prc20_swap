@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import * as echarts from 'echarts';
 import { toolApi,toolGet } from '$tools';
+import { useCustomGetAppVersion } from '$hooks';
 
 import './index.scss';
 type dataType = {
@@ -18,6 +19,7 @@ const ComponentBrowserOverview: FC<{
 	coinPair
 }) => {
 	const { t } = useTranslation();
+	const [ appVersion ] = useCustomGetAppVersion();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [chartType,setChartType] = useState<'day'|'week'>('day');
 	const [optionValue,setOptionValue] = useState<Array<string>>([]);
@@ -65,20 +67,20 @@ const ComponentBrowserOverview: FC<{
     ],
   };
 	useEffect(() => {
-    if (coinPair == 'plugcn') {
+    if (coinPair == 'pc'&&appVersion) {
       getTopInfo();
       getChart();
     }
-	}, [coinPair]);
+	}, [coinPair,appVersion]);
   const getTopInfo = () => {
-    toolGet(toolApi('/browser/home/info')).then((res:any) => {
+    toolGet(toolApi('/browser/home/info'),{version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }
     })
   }
   const getChart = () => {
-    toolGet(toolApi('/browser/home/fluidity'),{date:chartType}).then((res:any) => {
+    toolGet(toolApi('/browser/home/fluidity'),{date:chartType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -93,7 +95,7 @@ const ComponentBrowserOverview: FC<{
         setOptionValue(dataArr);
       }
     })
-    toolGet(toolApi('/browser/home/turnover'),{date:chartType}).then((res:any) => {
+    toolGet(toolApi('/browser/home/turnover'),{date:chartType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -145,7 +147,7 @@ const ComponentBrowserOverview: FC<{
             {t('liquidity')}
             </div>
             <div className="overview-info-title-item-value">
-              ${Number(optionValue[optionValue.length-1])} <span className="rate">{(Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2])}%</span>
+              ${optionValue[optionValue.length-1] ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{optionValue[optionValue.length-1] ? (Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]) : '0'}%</span>
             </div>
           </div>
           <div className="overview-info-title-item other">
@@ -154,7 +156,7 @@ const ComponentBrowserOverview: FC<{
                 24H {t('turnover')}
               </div>
               <div className="overview-info-title-item-value">
-                ${Number(optionValue1[optionValue1.length-1])} <span className="rate">{(Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2])}%</span>
+                ${optionValue1[optionValue1.length-1] ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{optionValue1[optionValue1.length-1] ? (Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]) : '0'}%</span>
               </div>
             </div>
             <div className="flex-item">

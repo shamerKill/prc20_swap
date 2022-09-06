@@ -54,7 +54,8 @@ const ComponentBrowserLpOverview: FC<{
     <div className="overview-info-detail">
       <div className="overview-info-title">
         <div className="overview-info-title-price">
-        {dataInfo.name} ${dataInfo.price?.num}  <span className="rate">({dataInfo.price?.change}%)</span>
+        {dataInfo.name} ${dataInfo.price?.num}  
+        {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
         </div>
         <div className="overview-info-title-btns">
           <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
@@ -67,19 +68,21 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('pool')}
             </div>
-            ${dataInfo.fluidity?.num} <span className="rate">({dataInfo.fluidity?.change}%)</span>
+            ${dataInfo.fluidity?.num} 
+            {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">
             {t('tradNum')}
             </div>
-            ${dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
+            {dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
           </div>
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">
             {t('turnover')}
             </div>
-            ${dataInfo.turnover?.num} <span className="rate">({dataInfo.turnover?.change}%)</span>
+            ${Number(dataInfo.turnover?.num)}
+             {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
           </div>
         </div>
       </div>

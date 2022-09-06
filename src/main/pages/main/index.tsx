@@ -124,7 +124,7 @@ const PageHome: FC = () => {
 						</span>
 						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
-					<div className={classNames('main_base_nav_link', routeGroup == 'browser' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/browser/plugcn')}>
+					<div className={classNames('main_base_nav_link', routeGroup == 'browser' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/browser/pc')}>
 						<span className={classNames('main_base_nav_link_icon')}>
 							<i className={classNames('iconfont', 'icon-liulanqi')}></i>
 						</span>

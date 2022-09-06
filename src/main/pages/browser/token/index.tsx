@@ -1,14 +1,25 @@
-import { FC,useEffect,useState } from 'react';
+import { FC,useEffect,useState,useRef } from 'react';
 import ComponentBrowserCoinOverview from '../coinOverview';
 
 import ComponentBrowserList from '../list';
 import ComponentBrowserTabList from '../tabList';
-import { useParams } from 'react-router-dom';
+import { useParams,useNavigate } from 'react-router-dom';
+import { useCustomGetAppVersion } from '$hooks';
+import { TypeAppVersion } from '$types';
 const TokenInfo: FC = () => {
 	const [coinPair,setCoinPair] = useState('')
 	const params:any = useParams();
+	const [ appVersion ] = useCustomGetAppVersion();
+	const navigate = useNavigate();
+	let versoins = useRef<TypeAppVersion>();
 	useEffect(() => {
-		console.log(params.id)
+		if (appVersion && versoins.current && appVersion !== versoins.current) {
+			navigate('/swap/browser/pc');
+		} else {
+			versoins.current = appVersion;
+		}
+	}, [appVersion]);
+	useEffect(() => {
 		setCoinPair(params.id)
 	}, [params]);
 	return (

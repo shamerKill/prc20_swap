@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { toolApi,toolGet } from '$tools';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
+import { useCustomGetAppVersion } from '$hooks';
 
 type tokenItem = {
 	change: string; // 价格变化
@@ -35,13 +36,17 @@ const ComponentBrowserList: FC<{
   coinPair
 }) => {
 	const { t } = useTranslation();
+	const [ appVersion ] = useCustomGetAppVersion();
 	useEffect(() => {
-    if (coinPair == 'plugcn') {
-      getList();
-    } else if (coinPair.length == 41) {
-      getTokenList();
+    console.log(appVersion)
+    if (appVersion != undefined) {
+      if (coinPair == 'pc') {
+        getList();
+      } else if (coinPair.length == 41) {
+        getTokenList();
+      }
     }
-	}, [coinPair]);
+	}, [coinPair,appVersion]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tokenItem[]>([]);
 	const [list1, setList1] = useState<tridePair[]>([]);
@@ -65,7 +70,7 @@ const ComponentBrowserList: FC<{
 	}, [currentPage]);
   const getList = () => {
     if (listType == 1) {
-      toolGet(toolApi('/browser/home/hotToken'), {from: currentPage,amount: pageSize}).then((res:any) => {
+      toolGet(toolApi('/browser/home/hotToken'), {from: currentPage,amount: pageSize,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
         if (res.errno == 200) {
           setTotal(res.data.total);
           if (res.data.list != null) {
@@ -74,22 +79,26 @@ const ComponentBrowserList: FC<{
         }
       })
     } else {
-      toolGet(toolApi('/browser/home/trading_pair'), {from: currentPage,amount: pageSize}).then((res:any) => {
+      toolGet(toolApi('/browser/home/trading_pair'), {from: currentPage,amount: pageSize,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
         if (res.errno == 200) {
           setTotal(res.data.total);
           if (res.data.list != null) {
             setList1(res.data.list);
+          } else {
+            setList1([]);
           }
         }
       })
     }
   }
   const getTokenList = () => {
-    toolGet(toolApi('/browser/token/trading_pair'), {token: coinPair,from: currentPage,amount: pageSize}).then((res:any) => {
+    toolGet(toolApi('/browser/token/trading_pair'), {token: coinPair,from: currentPage,amount: pageSize,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno == 200) {
         setTotal(res.data.total);
         if (res.data.list != null) {
           setList1(res.data.list);
+        } else {
+          setList1([]);
         }
       }
     })
