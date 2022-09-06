@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import ComponentOverviewCharts from './charts';
 import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { toolApi,toolGet } from '$tools';
 import * as echarts from 'echarts';
@@ -19,7 +20,17 @@ type dataType = {
     change: string,
     num: string
   },
-  token: string,
+  token: [
+    {
+      logo: string,
+      name: string,
+      token: string,
+    },{
+      logo: string,
+      name: string,
+      token: string,
+    }
+  ],
   trading: {
     change: string,
     num: string
@@ -51,6 +62,7 @@ const ComponentBrowserCoinOverview: FC<{
 	coinPair
 }) => {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [optionValue,setOptionValue] = useState<klineItem[]>([]);
   let optionValues:klineItem[] = [];
@@ -118,8 +130,8 @@ const ComponentBrowserCoinOverview: FC<{
             dataArr.push(res.data[index].num)
           }
         }
-        setOptionDate1(timeArr);
-        setOptionValue1(dataArr);
+        setOptionDate1(timeArr.reverse());
+        setOptionValue1(dataArr.reverse());
       }
     })
   }
@@ -134,8 +146,8 @@ const ComponentBrowserCoinOverview: FC<{
             dataArr.push(res.data[index].num)
           }
         }
-        setOptionDate1(timeArr);
-        setOptionValue1(dataArr);
+        setOptionDate1(timeArr.reverse());
+        setOptionValue1(dataArr.reverse());
       }
     })
   }
@@ -144,7 +156,6 @@ const ComponentBrowserCoinOverview: FC<{
     return new Date(timeStr).toLocaleString().replace(/:\d{1,2}$/, '')
   }
   const connectWs = () => {
-    console.log(optionValue)
     optionValues = optionValue
     ws.current = new WebSocket('ws://192.168.3.5:8554/marquee');
     ws.current.onopen = _e => {
@@ -212,16 +223,22 @@ const ComponentBrowserCoinOverview: FC<{
   const doChange = (i:number) => {
     setLineIndex(i);
   }
-
+  const goLp = () => {
+    navigate('/swap/poolsList');
+  }
+  const goSwap = () => {
+    navigate('/swap/swap');
+  }
 	return (
     <div className="overview-info-detail">
     <div className="overview-info-title">
       <div className="overview-info-title-price">
-        ${dataInfo.price?.num}  <span className="rate">({dataInfo.price?.change}%)</span>
+      {dataInfo.token[0].name} / {dataInfo.token[1].name}  (${dataInfo.price?.num})  
+        {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
       <div className="overview-info-title-btns">
-        <div className="overview-info-title-btns-item active">{t('增加流动性')}</div>
-        <div className="overview-info-title-btns-item">{t('交易')}</div>
+        <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
+        <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
       </div>
     </div>
       <div className="overview-info">
@@ -230,29 +247,39 @@ const ComponentBrowserCoinOverview: FC<{
             <div className="overview-info-item-tips">
             {t('liquidity')}
             </div>
-            ${dataInfo.fluidity?.num} <span className="rate">({dataInfo.fluidity?.change}%)</span>
+            ${dataInfo.fluidity?.num} 
+            {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item-item">
             <div className="overview-info-item-value">
               <div className="overview-info-item-tips">
               {t('tradNum')}
               </div>
-              ${dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
+              {dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
             </div>
             <div className="overview-info-item-value">
               <div className="overview-info-item-tips">
               {t('turnover')}
               </div>
-              ${dataInfo.turnover?.num} <span className="rate">({dataInfo.turnover?.change}%)</span>
+              ${dataInfo.turnover?.num} 
+              {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
             </div>
 
           </div>
         </div>
         <div className="overview-info-item other">
           <div className="overview-info-item-title">
-            <div className="overview-info-item-value">
-              $156,989,766 <span className="rate">(2021.09.08)</span>
+
+            {
+              tabIndex!=0&&<div className="overview-info-item-value">
+              ${option1.series[0].data[option1.series[0].data.length-1] ? Number(option1.series[0].data[option1.series[0].data.length-1]):'0'} <span className="rate">({option1.data[option1.data.length-1]})</span>
             </div>
+            }
+            {
+              tabIndex==0&&<div className="overview-info-item-value">
+              ${optionValue[optionValue.length-1].close} <span className="rate">({optionValue[optionValue.length-1].createTime})</span>
+            </div>
+            }
             <div className="overview-info-item-tab">
               {tabList.map((item, index) => {
                   return <div key={index} className={classNames('overview-info-item-tab-item', tabIndex == index ? 'item-active':'')} onClick={() => doCheck(index)}>{item.tabName}</div>

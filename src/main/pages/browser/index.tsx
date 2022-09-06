@@ -8,7 +8,6 @@ const PageInfo: FC = () => {
 	const [coinPair,setCoinPair] = useState('')
 	const params:any = useParams();
 	useEffect(() => {
-		console.log(params.id)
 		setCoinPair(params.id)
 	}, [params]);
 	return (
