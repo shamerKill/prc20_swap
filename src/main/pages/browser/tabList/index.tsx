@@ -1,6 +1,6 @@
 import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
-import { toolApi,toolGet } from '$tools';
+import { toolApi,toolGet,toolHideAddressCenter,timestampToTime } from '$tools';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 type tradeItem = {
@@ -74,8 +74,8 @@ const ComponentBrowserTabList: FC<{
                 <div className="list-content-detail-item">$ {item.now_balance}</div>
                 <div className="list-content-detail-item">{item.num_0}</div>
                 <div className="list-content-detail-item">{item.num_1}</div>
-                <div className="list-content-detail-item">{item.hash}</div>
-                <div className="list-content-detail-item">{item.date}</div>
+                <div className="list-content-detail-item">{toolHideAddressCenter(item.address??'')}</div>
+                <div className="list-content-detail-item">{timestampToTime(item.date??0)}</div>
               </div>
             )
           }
