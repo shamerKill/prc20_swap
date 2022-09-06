@@ -44,8 +44,8 @@ export const dataGetTokenCoreList = async (version: TypeAppVersion): Promise<Typ
 };
 
 // 查询代币
-export const dataSearchToken = async (searchText: string): Promise<TypeDataBase<InEvmToken[]>> => {
-	return toolGet(toolApi('/exchange/query'), { name: searchText })
+export const dataSearchToken = async (searchText: string, version?: TypeAppVersion): Promise<TypeDataBase<InEvmToken[]>> => {
+	return toolGet(toolApi('/exchange/query'), { name: searchText, version: version??'v2' })
 		.then((data: any) => {
 			if (data.errno !== 200) throw Error(data.errmsg);
 			let result: InEvmToken[] = [];
@@ -170,7 +170,7 @@ export const dataSetApprove = async (contractAddress: string) => {
 };
 
 // 获取v1 lp
-export const dataGetSwapLpV10 = async (tokenAddress: string[]): Promise<TypeDataBase<{'lp_id': number, 'token_0': {[key in 'name'|'num']: string}, 'token_1': {[key in 'name'|'num']: string}}>> => {
+export const dataGetSwapLpV10 = async (tokenAddress: string[]): Promise<TypeDataBase<{'lp_id': number, 'lp_symbol': string, 'token_0': {[key in 'name'|'num']: string}, 'token_1': {[key in 'name'|'num']: string}}>> => {
 	return toolGet(toolApi('/exchange/lptoken'), { token1: tokenAddress[0], token2: tokenAddress[1] })
 		.then((data: any) => {
 			if (data.errno !== 200) throw Error(data.errmsg);
@@ -352,7 +352,7 @@ export const dataGetAccountLpListV10 = async (account: string) => {
 				contractAddress: item['contract0']['address'],
 				scale: item['contract0']['decimals'],
 				logo: item['contract0']['logo'],
-				balance: item['contract0']['balance'],
+				balance: item['contract_lp']['balance'],
 				minUnit: item['contract0']['name'],
 			},
 			tokenTwo: {
@@ -360,7 +360,7 @@ export const dataGetAccountLpListV10 = async (account: string) => {
 				contractAddress: item['contract1']['address'],
 				scale: item['contract1']['decimals'],
 				logo: item['contract1']['logo'],
-				balance: item['contract1']['balance'],
+				balance: item['contract_lp']['balance'],
 				minUnit: item['contract0']['name'],
 			},
 			poolScale: item['proportion'].toString(),
@@ -387,7 +387,7 @@ export const dataSetAppVersion = async (version: TypeAppVersion) => {
 
 // v1兑换代币
 export const dataSetSwapV1 = async (data: {
-	poolId: number; fromSymbol: string; fromAmount: string; toSymbol: string; feeAmount: string; orderPrice: number;
+	poolId: number; fromSymbol: string; showFromAmount: string, fromAmount: string; toSymbol: string; feeAmount: string; orderPrice: number;
 }) => {
 	let result: any;
 	if (await cosmo.isWallet) {
@@ -403,7 +403,7 @@ export const dataSetSwapV1 = async (data: {
 	}
 	if (await cosmo.isChrome) {
 		const hash = await cosmo.chromeTool.dexPoolExchange(
-			data.poolId.toString(), data.fromSymbol, parseInt(data.fromAmount), data.toSymbol, data.feeAmount, data.orderPrice
+			data.poolId.toString(), data.fromSymbol, parseInt(data.showFromAmount), data.toSymbol, data.feeAmount, data.orderPrice
 		);
 		result = hash;
 	}

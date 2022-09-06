@@ -57,6 +57,45 @@ export const dataSetLpPoolAddVolume = async (
 	}
 	return typeof result === 'object' ? JSON.stringify(result) : result.toString();
 };
+// 执行v1流动池添加方法
+export const dataSetLpPoolAddVolumeV1 = async (input: {
+	poolId: number;
+	fromSymbol: string;
+	fromAmount: string;
+	showFromAmount: string;
+	toSymbol: string;
+	showToAmount: string;
+	toAmount: string;
+	gasAll: string;
+}) => {
+	let result: any;
+	if (await cosmo.isChrome) {
+		result = await cosmo.chromeTool.dexMsgDepositWithinBatch(input.poolId as any, input.fromSymbol, input.showFromAmount as any, input.toSymbol, input.showToAmount as any);
+	}
+	if (await cosmo.isWallet) {
+		result = await cosmo.walletTool.addLiquidity(input);
+	}
+	return result;
+}
+// 执行v1流动池创建方法
+export const dataSetLpPoolCreateVolumeV1 = async (input: {
+	fromSymbol: string;
+	fromAmount: string;
+	showFromAmount: string;
+	toSymbol: string;
+	showToAmount: string;
+	toAmount: string;
+	gasAll: string;
+}) => {
+	let result: any;
+	if (await cosmo.isChrome) {
+		result = await cosmo.chromeTool.dexMsgCreatePool(input.fromSymbol, input.showFromAmount as any, input.toSymbol, input.showToAmount as any);
+	}
+	if (await cosmo.isWallet) {
+		result = await cosmo.walletTool.createLiquidity(input);
+	}
+	return result;
+}
 
 // 获取lp持有量
 export const dataGetLpPoolDidVolume = async (contract: string, userAccount: string): Promise<string|undefined> => {
@@ -88,7 +127,7 @@ export const dataGetLpPoolTotalVolume = async (contract: string): Promise<string
 }
 
 // 移除lp代币
-export const dataSetRemoveLpVolume =async (contracts: string[], lpVolume: string, volumes: string[], userAccount: string) => {
+export const dataSetRemoveLpVolume = async (contracts: string[], lpVolume: string, volumes: string[], userAccount: string) => {
 	let result: string = '';
 	let raw = '';
 	let volumePlug: string|undefined = undefined;
@@ -137,3 +176,15 @@ export const dataSetRemoveLpVolume =async (contracts: string[], lpVolume: string
 	}
 	return typeof result === 'object' ? JSON.stringify(result) : result.toString();
 }
+
+// 移除lp代币
+export const dataSetRemoveLpVolumeV1 = async (poolId: number, lpSymbol: string, lpAmount: string) => {
+	let result: any;
+	if (accountStore.value.isWeb) {
+		result = await cosmo.chromeTool.dexMsgWithdrawWithinBatch(poolId as any, lpSymbol, lpAmount as any);
+	}
+	if (accountStore.value.isWallet) {
+		result = await cosmo.walletTool.removeLiquidity({ poolId, fromSymbol: lpSymbol, fromAmount: lpAmount, gasAll: '200' });
+	}
+	return result;
+};

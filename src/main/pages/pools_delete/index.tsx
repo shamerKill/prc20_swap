@@ -2,18 +2,193 @@ import { ComponentContentBox, ComponentFunctionalButton, ComponentLayoutLoading 
 import ComFunctionSlider from '$components/functional/slider';
 import { ComponentSlippage } from '$components/functional/slippage';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
-import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataSearchToken, dataSetApprove, dataSetRemoveLpVolume, InEvmBalanceToken } from '$database';
-import { useCustomFormatSearch, useCustomGetAccountAddress } from '$hooks';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataGetSwapLpV10, dataSearchToken, dataSetApprove, dataSetRemoveLpVolume, dataSetRemoveLpVolumeV1, InEvmBalanceToken } from '$database';
+import { useCustomFormatSearch, useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 import { toolNumberAdd, toolNumberDiv, toolNumberMul, toolNumberSplit, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage, toolPercentageToNumber } from '$tools';
 import classNames from 'classnames';
 import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import './index.scss';
 
 
 const PagePoolsDelete: FC = () => {
+	const [ appVersion ] = useCustomGetAppVersion();
+	if (appVersion === 'v2') return <PagePoolsDeleteV20></PagePoolsDeleteV20>
+	else return <PagePoolsDeleteV10></PagePoolsDeleteV10>
+
+};
+
+const PagePoolsDeleteV10: FC = () => {
+	const { t } = useTranslation();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
+	const navigate = useNavigate();
+	const scaleItemList = ['0.25', '0.5', '0.75', '1'];
+	const search = useCustomFormatSearch<{[key in 'one'|'two'|'balance']?: string}>();
+	// from币信息
+	const [fromTokenInfo, setFromTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// to币信息
+	const [toTokenInfo, setToTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// 显示loading
+	const [ loading, setLoading ] = useState(false);
+	// lp地址
+	const [ lpContractAddress, setLpContractAddress ] = useState<number>();
+	const [ lpSymbol, setLpSymbol ] = useState<string>();
+	// 删除的比例
+	const [ deleteScale, setDeleteScale ] = useState<string>('0');
+	// 用户持有lp数量
+	const [ lpUserVolume, setLpUserVolume ] = useState<string>();
+	// 刷新流动池数据
+	const [ refresh, setRefresh ] = useState(0);
+	// 移除的lp数量
+	const [ deleteLpVolume, setDeleteLpVolume ] = useState<string>('0');
+
+
+	// 修改数量
+	const onEditValue = (input: string) => {
+		if (input === '') input = '0';
+		const value = parseFloat(input);
+		if (value <= 100 && value >= 0) setDeleteScale(toolPercentageToNumber(value.toFixed(1)));
+		else if (value > 100) setDeleteScale('1');
+		else if (value < 0) setDeleteScale('0');
+		else setDeleteScale('0');
+	};
+	// 移除方法
+	const onRemoveBtn = async () => {
+		if (!accountAddress) return;
+		if (!(parseFloat(deleteScale) > 0)) return toast.warn(t('请选择数量'));
+		if (!lpContractAddress) return;
+		if (!lpSymbol) return;
+		if (!lpUserVolume) return;
+		setLoading(true);
+		try {
+			toast.info(t('将进行流动池移除'));
+			const result = await dataSetRemoveLpVolumeV1(
+				lpContractAddress,
+				lpSymbol,
+				deleteLpVolume
+			);
+			if (result.includes('status: true')) {
+				toast.success(t('移除成功'));
+				navigate(-1);
+				setDeleteScale('0');
+			} else if (typeof result === 'string') {
+				toast.info(t('交易已发送') + `\n(hash:${result})`);
+				setDeleteScale('0');
+				navigate(-1);
+			} else {
+				toast.warning(t('发送错误') + ': \n' + result);
+			}
+		} catch (e) {
+			toast.warning(t('发送错误') + ': \n' + e);
+		}
+		setLoading(false);
+	};
+	// 获取头部信息
+	useEffect(() => {
+		if (search?.one && search?.two && accountAddress && search?.balance) {
+			// 搜索代币信息
+			setLoading(true);
+			setLpUserVolume(search.balance);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataSearchToken(search.two, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??'', search.two??''])
+			]).then(([one, two, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+				if (two.status === 200 && two.data && two.data.length) {
+					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
+				}
+				// 获取账户余额
+			}).finally(() => {
+				setLoading(false);
+			});
+		}
+	}, [search, accountAddress]);
+	// 获取lp地址
+	useEffect(() => {
+		if (!fromTokenInfo || !toTokenInfo) {
+			setLpContractAddress(undefined);
+			return;
+		}
+		(async () => {
+			const result = await dataGetSwapLpV10([fromTokenInfo.contractAddress, toTokenInfo.contractAddress]);
+			if (result.status === 200 && result.data) {
+				setLpContractAddress(result.data.lp_id);
+				setLpSymbol(result.data.lp_symbol);
+			}
+		})();
+	}, [fromTokenInfo, toTokenInfo, refresh]);
+	useEffect(() => {
+		if (!lpUserVolume) return setDeleteLpVolume('0');
+		setDeleteLpVolume(toolNumberSplit(toolNumberMul(lpUserVolume, deleteScale), 0));
+	}, [lpUserVolume, deleteScale]);
+
+	return (
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_delete')}>
+			<ComponentLayoutLoading showLoading={loading}></ComponentLayoutLoading>
+			<ComponentContentBox
+				outerClass={classNames('pools_box_outer')}
+				innerClass={classNames('pools_box_inner')}
+				topChildren={
+					<div className={classNames('pools_head')}>
+						<h2 className={classNames('pools_title')}>{t('移除流动池')}</h2>
+					</div>
+				}>
+				{/* 删除 */}
+				<div className={classNames('pools_delete_inner')}>
+					<div className={classNames('pools_delete_box')}>
+						<div className={classNames('pool_delete_top')}>
+							<div className={classNames('pool_delete_num')}>
+								<p className={classNames('pool_delete_num_text')}>{t('数量')} ({lpUserVolume})</p>
+								<label className={classNames('pool_delete_num_label')} htmlFor="poolDeleteInput">
+									<input
+										id="poolDeleteInput"
+										type="number"
+										value={toolNumberToPercentage(deleteScale, false)}
+										onChange={e => onEditValue(e.target.value)}
+										className={classNames('pool_delete_num_input')} />
+									<span className={classNames('pool_delete_num_unit')}>%</span>
+								</label>
+							</div>
+							<div className={classNames('pool_delete_scale')}>
+								<div className={classNames('delete_scale_list')}>
+									{
+										scaleItemList.map(item => (
+											<ComponentFunctionalButton
+												key={item}
+												onClick={() => onEditValue(toolNumberToPercentage(item, false))}
+												className={classNames('delete_scale_item', item === deleteScale && 'delete_scale_item_select')}>
+												{item === '1' ? 'MAX' : toolNumberToPercentage(item)}
+											</ComponentFunctionalButton>
+										))
+									}
+								</div>
+								<ComFunctionSlider
+									value={parseFloat(toolNumberToPercentage(deleteScale, false))}
+									onChange={value => setDeleteScale(toolPercentageToNumber(value.toString()))}></ComFunctionSlider>
+							</div>
+						</div>
+						<ComponentFunctionalButton
+							className={classNames('pool_delete_btn')}
+							onClick={loading ? undefined : onRemoveBtn}>
+								{t('移除')} <small>({deleteLpVolume})</small>
+						</ComponentFunctionalButton>
+					</div>
+				</div>
+			</ComponentContentBox>
+		</ComLayoutShadowGlass>
+	);
+};
+
+
+const PagePoolsDeleteV20: FC = () => {
 	const { t } = useTranslation();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
@@ -265,7 +440,7 @@ const PagePoolsDelete: FC = () => {
 				innerClass={classNames('pools_box_inner')}
 				topChildren={
 					<div className={classNames('pools_head')}>
-						<h2 className={classNames('pools_title')}>{t('增加流动池')}</h2>
+						<h2 className={classNames('pools_title')}>{t('移除流动池')}</h2>
 					</div>
 				}>
 				{/* 删除 */}

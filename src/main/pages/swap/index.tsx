@@ -73,6 +73,7 @@ const PageSwapV10: FC = () => {
 			const result = await dataSetSwapV1({
 				poolId: lpId,
 				fromSymbol: fromTokenInfo.minUnit,
+				showFromAmount: fromVolume,
 				fromAmount: toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale),
 				toSymbol: toTokenInfo.minUnit,
 				orderPrice: parseFloat(orderPrice),
@@ -80,6 +81,9 @@ const PageSwapV10: FC = () => {
 			});
 			if (typeof result === 'string') {
 				toast.info(t('交易已发送' + ' hash: \n' + result), { delay: 0 });
+				setFromVolume('0');
+				setToVolume('0');
+				setTimeout(() => setTokenBalance(), 5000);
 			} else if (result?.status === 0 && result?.data?.result?.txs?.[0]?.tx_result?.code === 0) {
 				await setTokenBalance();
 				setFromVolume('0');
@@ -613,7 +617,6 @@ const PageSwapV20: FC = () => {
 			const result = await dataGetSwapEffect(fromTokenInfo.contractAddress, toTokenInfo.contractAddress);
 			if (!result) return;
 			const [fromPoolVolume, toPoolVolume] = [toolNumberStrToFloatForInt(result[0], fromTokenInfo.scale), toolNumberStrToFloatForInt(result[1], toTokenInfo.scale)];
-			console.log(toPoolVolume, fromPoolVolume);
 			const divScale = toolNumberDiv(toPoolVolume, fromPoolVolume);
 			setTokenSwapShow(`1 ${fromTokenInfo.symbol} ≈ ${divScale} ${toTokenInfo.symbol}`);
 			setFromTokenVolume(fromPoolVolume);

@@ -45,7 +45,7 @@
   "dependencies": {
     "@types/echarts": "^4.9.16",
     "classnames": "^2.3.1",
-    "cosmo-wallet-tool": "0.0.38",
+    "cosmo-wallet-tool": "0.0.42",
     "dayjs": "^1.11.4",
     "echarts": "^5.3.3",
     "i18next": "^21.8.13",

@@ -28,7 +28,7 @@ const PagePoolsList: FC = () => {
 	}
 	// 删除流动池
 	const goToDeletePool = (item: InSwapPoolInfo) => {
-		return navigate(`./delete?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}`);
+		return navigate(`./delete?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}&balance=${item.tokenOne.balance}`);
 	}
 
 	// 获取数据
@@ -43,6 +43,7 @@ const PagePoolsList: FC = () => {
 				}
 			} else if (appVersion === 'v1') {
 				const data = await dataGetAccountLpListV10(accountAddress);
+				console.log(data);
 				if (data.status === 200 && data.data) {
 					setPoolsList(data.data);
 				}
@@ -83,6 +84,11 @@ const PagePoolsList: FC = () => {
 										</div>
 										<p className={classNames('pools_item_symbols')}>
 											{item.tokenOne.symbol} / {item.tokenTwo.symbol}
+											{
+												appVersion === 'v1' && (
+													<small>({item.tokenOne.balance})</small>
+												)
+											}
 										</p>
 									</div>
 									<div className={classNames('pools_item_buttons')}>
@@ -90,18 +96,24 @@ const PagePoolsList: FC = () => {
 										<ComponentFunctionalButton className={classNames('pools_item_btn pools_item_remove')} onClick={() => goToDeletePool(item)}>{t('移除')}</ComponentFunctionalButton>
 									</div>
 								</div>
-								<div className={classNames('pools_item_info')}>
-									<div className={classNames('pools_item_info_head')}>
-										<p className={classNames('pools_item_info_title')}>{item.tokenOne.symbol}</p>
-										<p className={classNames('pools_item_info_title')}>{item.tokenTwo.symbol}</p>
-										<p className={classNames('pools_item_info_title')}>{t('资金池比例')}</p>
-									</div>
-									<div className={classNames('pools_item_info_info')}>
-										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenOne.balance, item.tokenOne.scale)}</p>
-										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenTwo.balance, item.tokenTwo.scale)}</p>
-										<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
-									</div>
-								</div>
+								{
+									appVersion === 'v2' && (
+										<>
+											<div className={classNames('pools_item_info')}>
+												<div className={classNames('pools_item_info_head')}>
+													<p className={classNames('pools_item_info_title')}>{item.tokenOne.symbol}</p>
+													<p className={classNames('pools_item_info_title')}>{item.tokenTwo.symbol}</p>
+													<p className={classNames('pools_item_info_title')}>{t('资金池比例')}</p>
+												</div>
+												<div className={classNames('pools_item_info_info')}>
+													<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenOne.balance, item.tokenOne.scale)}</p>
+													<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenTwo.balance, item.tokenTwo.scale)}</p>
+													<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
+												</div>
+											</div>
+										</>
+									)
+								}
 							</div>
 						))
 					}
