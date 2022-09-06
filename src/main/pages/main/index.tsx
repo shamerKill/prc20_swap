@@ -131,6 +131,7 @@ const PageHome: FC = () => {
 						<span className={classNames('main_base_nav_link_text')}>
 							{t('browser')}
 						</span>
+						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
 					{
 						appVersion === 'v2' && (

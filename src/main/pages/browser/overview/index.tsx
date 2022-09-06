@@ -147,7 +147,7 @@ const ComponentBrowserOverview: FC<{
             {t('liquidity')}
             </div>
             <div className="overview-info-title-item-value">
-              ${optionValue[optionValue.length-1] ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{optionValue[optionValue.length-1] ? (Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]) : '0'}%</span>
+              ${optionValue[optionValue.length-1] ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{optionValue[optionValue.length-1] ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : '0'}%</span>
             </div>
           </div>
           <div className="overview-info-title-item other">
@@ -156,7 +156,7 @@ const ComponentBrowserOverview: FC<{
                 24H {t('turnover')}
               </div>
               <div className="overview-info-title-item-value">
-                ${optionValue1[optionValue1.length-1] ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{optionValue1[optionValue1.length-1] ? (Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]) : '0'}%</span>
+                ${optionValue1[optionValue1.length-1] ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{optionValue1[optionValue1.length-1] ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : '0'}%</span>
               </div>
             </div>
             <div className="flex-item">
