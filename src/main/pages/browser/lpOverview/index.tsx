@@ -233,7 +233,7 @@ const ComponentBrowserCoinOverview: FC<{
     <div className="overview-info-detail">
     <div className="overview-info-title">
       <div className="overview-info-title-price">
-      {dataInfo.token[0].name} / {dataInfo.token[1].name}  (${dataInfo.price?.num})  
+      {dataInfo.token[0]?.name} / {dataInfo.token[1]?.name}  (${dataInfo.price?.num})  
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
       <div className="overview-info-title-btns">
