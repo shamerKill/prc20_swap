@@ -146,7 +146,7 @@ const PageHome: FC = () => {
 						</span>
 						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
-					{
+					{/* {
 						appVersion === 'v2' && (
 							<div className={classNames('main_base_nav_link', routeGroup == 'flowPools' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/flowPools')}>
 								<span className={classNames('main_base_nav_link_icon')}>
@@ -157,7 +157,7 @@ const PageHome: FC = () => {
 								</span>
 							</div>
 						)
-					}
+					} */}
 					{
 						showVersionBtn && (
 							<ComponentFunctionalButton className={classNames('main_base_nav_btn')} onClick={() => changeVersion()}>

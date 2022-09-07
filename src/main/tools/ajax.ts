@@ -5,6 +5,12 @@ export const toolApi = (path: string): string => {
 	return `${window.location.protocol}//${testSite}/${path}`.replace(/([^:])\/+/g, '$1/');
 };
 
+export const toolApiKline = (path: string): string => {
+	const testSite = '192.168.3.5:8554';
+	// const testSite = '47.242.59.18:8651';
+	return `${window.location.protocol}//${testSite}/${path}`.replace(/([^:])\/+/g, '$1/');
+};
+
 export const toolAjax = async <T>(url: string, option: {
 	method: 'GET' | 'POST';
 	body?: any;

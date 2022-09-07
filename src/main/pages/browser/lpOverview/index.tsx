@@ -5,7 +5,7 @@ import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { toolApi,toolGet } from '$tools';
+import { toolApi,toolApiKline,toolGet } from '$tools';
 import * as echarts from 'echarts';
 
 import './index.scss';
@@ -184,7 +184,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(toolApi('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;
@@ -233,7 +233,7 @@ const ComponentBrowserCoinOverview: FC<{
     <div className="overview-info-detail">
     <div className="overview-info-title">
       <div className="overview-info-title-price">
-      {dataInfo.token[0]?.name} / {dataInfo.token[1]?.name}  (${dataInfo.price?.num})  
+      {dataInfo.token?.[0]?.name} / {dataInfo.token?.[1]?.name}  (${dataInfo.price?.num})  
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
       <div className="overview-info-title-btns">
@@ -277,7 +277,7 @@ const ComponentBrowserCoinOverview: FC<{
             }
             {
               tabIndex==0&&<div className="overview-info-item-value">
-              ${optionValue[optionValue.length-1].close} <span className="rate">({optionValue[optionValue.length-1].createTime})</span>
+              ${optionValue?.[optionValue.length-1]?.close} <span className="rate">({optionValue[optionValue.length-1]?.createTime})</span>
             </div>
             }
             <div className="overview-info-item-tab">

@@ -142,7 +142,8 @@ const PagePoolsAddV10: FC = () => {
 
 	// 获取头部信息
 	useEffect(() => {
-		if (search?.one && search?.two && accountAddress) {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
 			// 搜索代币信息
 			setLoading(true);
 			Promise.all([
@@ -157,7 +158,20 @@ const PagePoolsAddV10: FC = () => {
 				if (two.status === 200 && two.data && two.data.length) {
 					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
 				}
-				// 获取账户余额
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
 			}).finally(() => {
 				setLoading(false);
 			});
@@ -435,7 +449,8 @@ const PagePoolsAddV20: FC = () => {
 
 	// 获取头部信息
 	useEffect(() => {
-		if (search?.one && search?.two && accountAddress) {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
 			// 搜索代币信息
 			setLoading(true);
 			Promise.all([
@@ -451,6 +466,20 @@ const PagePoolsAddV20: FC = () => {
 					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
 				}
 				// 获取账户余额
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
 			}).finally(() => {
 				setLoading(false);
 			});
