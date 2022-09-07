@@ -5,7 +5,7 @@ import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { toolApi,toolGet } from '$tools';
+import { toolApi,toolApiKline,toolGet } from '$tools';
 import * as echarts from 'echarts';
 
 import './index.scss';
@@ -184,7 +184,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(toolApi('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;

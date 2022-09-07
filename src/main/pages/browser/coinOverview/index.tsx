@@ -55,7 +55,7 @@ const ComponentBrowserLpOverview: FC<{
     navigate('/swap/poolsList');
   }
   const goSwap = () => {
-    navigate('/swap/swap');
+    navigate(`/swap/swap?one=${dataInfo.token}`);
   }
   return (
     <div className="overview-info-detail">

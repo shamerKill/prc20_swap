@@ -11,6 +11,7 @@ import { useCustomGetAccountAddress, useCustomGetAppVersion, useCustomRouteForma
 import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet, toolTimeSleep } from '$tools';
 
 import './index.scss';
+import { TypeAppVersion } from '$types';
 
 const PageHome: FC = () => {
 	const { i18n, t } = useTranslation();
@@ -23,6 +24,8 @@ const PageHome: FC = () => {
 	const navigate = useNavigate();
 	const [, routeGroup ] = useCustomRouteFormatPath();
 	const [routeLoading, setRouteLoading] = useState(false);
+	// 是否显示版本切换
+	const [ showVersionBtn, setShowVersionBtn ] = useState(true);
 
 	// 连接钱包
 	const linkWallet = async (init: boolean = false) => {
@@ -30,6 +33,12 @@ const PageHome: FC = () => {
 		const result = await toolLinkWallet(init);
 		setShowLoading(false);
 		if (result === null) return;
+		if (result.accountType === 'PRC10') {
+			changeVersion('v1');
+			setShowVersionBtn(false);
+		} else {
+			setShowVersionBtn(true);
+		}
 		accountStore.next(result);
 	};
 
@@ -43,13 +52,17 @@ const PageHome: FC = () => {
 	};
 
 	// 切换版本
-	const changeVersion = async () => {
+	const changeVersion = async (type?: TypeAppVersion) => {
 		setShowLoading(true);
 		await toolTimeSleep(1000);
-		if (appVersion === 'v2') {
-			setAppVersion('v1');
+		if (type) {
+			setAppVersion(type);
 		} else {
-			setAppVersion('v2');
+			if (appVersion === 'v2') {
+				setAppVersion('v1');
+			} else {
+				setAppVersion('v2');
+			}
 		}
 		await toolTimeSleep(1000);
 		if (/flowPools/.test(routeGroup)) {
@@ -133,7 +146,7 @@ const PageHome: FC = () => {
 						</span>
 						<i className={classNames('iconfont', 'icon_version', appVersion === 'v1' ? 'icon-v1' : 'icon-v2')}></i>
 					</div>
-					{
+					{/* {
 						appVersion === 'v2' && (
 							<div className={classNames('main_base_nav_link', routeGroup == 'flowPools' && 'main_base_nav_active')} onClick={() => onRouteTab('/swap/flowPools')}>
 								<span className={classNames('main_base_nav_link_icon')}>
@@ -144,15 +157,19 @@ const PageHome: FC = () => {
 								</span>
 							</div>
 						)
+					} */}
+					{
+						showVersionBtn && (
+							<ComponentFunctionalButton className={classNames('main_base_nav_btn')} onClick={() => changeVersion()}>
+								<span className={classNames('main_base_nav_link_icon')}>
+									<i className={classNames('iconfont', appVersion === 'v1' ? 'icon-canpinhuihuiyuanv1' : 'icon-canpinhuihuiyuanv2')}></i>
+								</span>
+								<span className={classNames('main_base_nav_link_text')}>
+									{t('版本切换')}
+								</span>
+							</ComponentFunctionalButton>
+						)
 					}
-					<ComponentFunctionalButton className={classNames('main_base_nav_btn')} onClick={changeVersion}>
-						<span className={classNames('main_base_nav_link_icon')}>
-							<i className={classNames('iconfont', appVersion === 'v1' ? 'icon-canpinhuihuiyuanv1' : 'icon-canpinhuihuiyuanv2')}></i>
-						</span>
-						<span className={classNames('main_base_nav_link_text')}>
-							{t('版本切换')}
-						</span>
-					</ComponentFunctionalButton>
 				</div>
 				<hr className={classNames('main_base_line')} />
 					<ComponentFunctionalButton loading={showLoading} className={classNames('main_base_language', walletLinking && 'main_base_language_linked')} onClick={changeLanguage}>

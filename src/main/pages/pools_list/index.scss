@@ -56,7 +56,6 @@
 	.pools_list_box {
 		flex: 1;
 		position: relative;
-		overflow-y: scroll;
 		background-color: var(--color-content-background-color);
 		display: flex;
 		flex-direction: column;
@@ -83,7 +82,6 @@
 		border-radius: 1rem;
 		margin: 1rem 0;
 		position: relative;
-		overflow: hidden;
 		z-index: 1;
 		padding: 1rem;
 		&::before {
@@ -95,6 +93,7 @@
 			height: 100%;
 			z-index: -1;
 			background-color: var(--color-content-hight-color);
+			border-radius: 1rem;
 		}
 		.pools_item_top {
 			display: flex;
@@ -125,6 +124,11 @@
 			padding-left: 1rem;
 			font-weight: bold;
 			font-size: 1.1rem;
+			small {
+				color: var(--color-gray-color);
+				font-size: 0.8em;
+				padding-left: 0.5em;
+			}
 		}
 		.pools_item_buttons {
 			display: flex;

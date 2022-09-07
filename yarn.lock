@@ -1594,10 +1594,10 @@ cosmiconfig@^7.0.1:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-cosmo-wallet-tool@0.0.38:
-  version "0.0.38"
-  resolved "https://registry.yarnpkg.com/cosmo-wallet-tool/-/cosmo-wallet-tool-0.0.38.tgz#82a49434793357a2f9f42725ccac117fcaa55408"
-  integrity sha512-ohEAF1MxPwwr1enbK+zh8+NVWsshZthVtYAjBukgAm6OA2MghmN94D+U0R0QxJ22T7JAhZFWVR9ulfEW3dwV6Q==
+cosmo-wallet-tool@0.0.42:
+  version "0.0.42"
+  resolved "https://registry.yarnpkg.com/cosmo-wallet-tool/-/cosmo-wallet-tool-0.0.42.tgz#5e97e5e61add5a282bc0c190b8513ce471c6689a"
+  integrity sha512-OgrsJldyklBgpOZPEo8Uau30lLlZaZJftpJSn+6bX1Sv4u6ovXXaCLijAU1fmX2p1YQsnJ5kuMwxSul5/o2EWQ==
   dependencies:
     bech32 "^2.0.0"
     web3-utils "^1.7.1"

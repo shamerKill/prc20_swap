@@ -4,17 +4,320 @@ import { ComponentContentBox, ComponentLayoutLoading } from '$components';
 import { useTranslation } from 'react-i18next';
 
 import './index.scss';
-import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataSearchToken, dataSetApprove, dataSetLpPoolAddVolume, InEvmBalanceToken } from '$database';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLpContractAddress, dataGetLpPoolDidVolume, dataGetLpPoolTotalVolume, dataGetLpPoolVolume, dataGetSwapLpV10, dataSearchToken, dataSetApprove, dataSetLpPoolAddVolume, dataSetLpPoolAddVolumeV1, dataSetLpPoolCreateVolumeV1, InEvmBalanceToken } from '$database';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
 import { ComponentSlippage } from '$components/functional/slippage';
 import { toolNumberAdd, toolNumberDiv, toolNumberMul, toolNumberSplit, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
-import { useCustomFormatSearch, useCustomGetAccountAddress } from '$hooks';
+import { useCustomFormatSearch, useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 import { toast } from 'react-toastify';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
 
 const PagePoolsAdd: FC = () => {
+	const [ appVersion ] = useCustomGetAppVersion();
+	if (appVersion === 'v2') return <PagePoolsAddV20></PagePoolsAddV20>
+	else return <PagePoolsAddV10></PagePoolsAddV10>
+};
+
+const PagePoolsAddV10: FC = () => {
+	const { t } = useTranslation();
+	// 账户地址
+	const { accountAddress } = useCustomGetAccountAddress();
+	const search = useCustomFormatSearch<{one?: string, two?: string}>();
+	// from支付数量
+	const [fromVolume, setFromVolume] = useState('0.0');
+	// to支付数量
+	const [toVolume, setToVolume] = useState('0.0');
+	// from币信息
+	const [fromTokenInfo, setFromTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// to币信息
+	const [toTokenInfo, setToTokenInfo] = useState<InEvmBalanceToken|null>(null);
+	// 已有from币池子数量
+	const [ fromPoolTokenVolume, setFromPoolTokenVolume ] = useState<string|null>(null);
+	// 已有to币池子数量
+	const [ toPoolTokenVolume, setToPoolTokenVolume ] = useState<string|null>(null);
+	// 1from兑换to比例
+	const [ oneFromTransTo, setOneFromTransTo ] = useState<string>('-');
+	// 1to兑换from比例
+	const [ oneToTransFrom, setOneToTransFrom ] = useState<string>('-');
+	// 新增后资金池比例
+	const [ addedScale, setAddedScale ] = useState<string>('-');
+	// 显示loading
+	const [ loading, setLoading ] = useState(false);
+	// lp地址id
+	const [ lpContractAddress, setLpContractAddress ] = useState<number>();
+	// 是否符合添加
+	const [ canAdd, setCanAdd ]  = useState<boolean>(false);
+	// 添加还是创建
+	const [ poolType, setPoolType ] = useState<'create'|'add'>('add');
+	// 获取焦点在第几个input
+	const focusIndexRef = useRef<number>();
+	// 刷新流动池数据
+	const [ refresh, setRefresh ] = useState(0);
+
+	// 添加流动池
+	const addPools = async () => {
+		if (!accountAddress) return;
+		if (!(parseFloat(fromVolume) > 0)) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		try {
+			const toastId = toast.info(t('将进行流动池增加'));
+			let result: any;
+			if (!lpContractAddress) {
+				result = await dataSetLpPoolCreateVolumeV1({
+					fromSymbol: fromTokenInfo?.minUnit,
+					showFromAmount: fromVolume,
+					fromAmount: toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale),
+					toSymbol: toTokenInfo.minUnit,
+					showToAmount: toVolume,
+					toAmount: toolNumberStrToIntForFloat(toVolume, toTokenInfo.scale),
+					gasAll: '200',
+				});
+			} else {
+				result = await dataSetLpPoolAddVolumeV1({
+					poolId: lpContractAddress,
+					fromSymbol: fromTokenInfo?.minUnit,
+					showFromAmount: fromVolume,
+					fromAmount: toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale),
+					toSymbol: toTokenInfo.minUnit,
+					showToAmount: toVolume,
+					toAmount: toolNumberStrToIntForFloat(toVolume, toTokenInfo.scale),
+					gasAll: '200',
+				});
+			}
+			toast.dismiss(toastId);
+			if (typeof result === 'string') {
+				toast.info(t('交易已发送' + ' hash: \n' + result), { delay: 0 });
+				setFromVolume('0');
+				setToVolume('0');
+				setTimeout(() => setTokenBalance(), 5000);
+			} else if (result?.status === 0 && result?.data?.result?.txs?.[0]?.tx_result?.code === 0) {
+				await setTokenBalance();
+				setFromVolume('0');
+				setToVolume('0');
+				toast.success(t('流动池增加成功'));
+			} else {
+				toast.warning(t('发送错误') + ': \n' + result);
+			}
+		} catch (e) {
+			toast.warning(t('发送错误') + ': \n' + e);
+		}
+		setLoading(false);
+	};
+	// 获取代币余额
+	const setTokenBalance = async () => {
+		const result = await dataGetAccountTokenBalance(accountAddress??'', [ fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??'' ]);
+		if (result.status === 200 && result.data) {
+			setFromTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[0]??'', fromTokenInfo?.scale??0)} : state );
+			setToTokenInfo(state => state ? {...state, balance: toolNumberStrToFloatForInt(result?.data?.[1]??'', toTokenInfo?.scale??0)} : state );
+		}
+		setRefresh(state => state + 1);
+	};
+
+	// 选择代币
+	const onSelectToken = (type: 'from' | 'to') => {
+		layoutModalShow({
+			children: <ComModalSelectToken onSelect={(data) => {
+				if (type === 'from') {
+					if (toTokenInfo?.contractAddress === data.contractAddress) setToTokenInfo(null);
+					setFromTokenInfo(data);
+				}
+				else if (type === 'to') {
+					if (fromTokenInfo?.contractAddress === data.contractAddress) setFromTokenInfo(null);
+					setToTokenInfo(data);
+				}
+				setFromVolume('0');
+				setToVolume('0');
+			}} filterContractArr={[
+				fromTokenInfo?.contractAddress??'',
+				toTokenInfo?.contractAddress??'',
+			]}></ComModalSelectToken>,
+			options: {
+				title: t('选择代币'),
+			}
+		});
+	};
+
+
+	// 获取头部信息
+	useEffect(() => {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataSearchToken(search.two, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??'', search.two??''])
+			]).then(([one, two, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+				if (two.status === 200 && two.data && two.data.length) {
+					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		}
+	}, [search, accountAddress]);
+	// 获取lp地址
+	useEffect(() => {
+		if (!fromTokenInfo || !toTokenInfo) {
+			setLpContractAddress(undefined);
+			return;
+		}
+		(async () => {
+			const result = await dataGetSwapLpV10([fromTokenInfo.contractAddress, toTokenInfo.contractAddress]);
+			if (result.status === 200 && result.data) {
+				if (result.data.lp_id === 0) setPoolType('create');
+				else setPoolType('add');
+				setLpContractAddress(result.data.lp_id);
+				setFromPoolTokenVolume(toolNumberStrToFloatForInt(result.data.token_0.num, fromTokenInfo.scale));
+				setToPoolTokenVolume(toolNumberStrToFloatForInt(result.data.token_1.num, toTokenInfo.scale));
+			}
+		})();
+	}, [fromTokenInfo, toTokenInfo, refresh]);
+	// 设置比例
+	useEffect(() => {
+		if (fromPoolTokenVolume === null || toPoolTokenVolume === null) return;
+		setOneFromTransTo(toolNumberDiv(toPoolTokenVolume, fromPoolTokenVolume));
+		setOneToTransFrom(toolNumberDiv(fromPoolTokenVolume, toPoolTokenVolume));
+	}, [fromPoolTokenVolume, toPoolTokenVolume]);
+	// 监听输入框
+	useEffect(() => {
+		if (focusIndexRef.current !== 0) return;
+		if (!oneFromTransTo) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		if (poolType === 'create') return;
+		const value = parseFloat(fromVolume);
+		if (!(value > 0)) {
+			setToVolume('0');
+			return;
+		}
+		setToVolume(toolNumberSplit(toolNumberMul(fromVolume, oneFromTransTo), toTokenInfo.scale));
+	}, [fromVolume, fromTokenInfo, toTokenInfo, oneFromTransTo, poolType]);
+	// 监听输出框
+	useEffect(() => {
+		if (focusIndexRef.current !== 1) return;
+		if (!oneToTransFrom) return;
+		if (!fromTokenInfo || !toTokenInfo) return;
+		if (poolType === 'create') return;
+		const value = parseFloat(toVolume);
+		if (!(value > 0)) {
+			setFromVolume('0');
+			return;
+		}
+		setFromVolume(toolNumberSplit(toolNumberMul(toVolume, oneToTransFrom), fromTokenInfo.scale));
+	}, [toVolume, fromTokenInfo, toTokenInfo, oneToTransFrom, poolType]);
+	// 计算资金池比例
+	useEffect(() => {
+		if (fromPoolTokenVolume === null) return;
+		setAddedScale(
+			toolNumberToPercentage(toolNumberDiv(fromVolume, toolNumberAdd(fromPoolTokenVolume, fromVolume), { places: 6 }))
+		);
+	}, [fromVolume, fromPoolTokenVolume]);
+	// 判断是否可以添加
+	useEffect(() => {
+		if (!fromTokenInfo || !toTokenInfo || !fromVolume || !toVolume || parseFloat(fromVolume) === 0 || parseFloat(toVolume) === 0) return setCanAdd(false);
+		if (parseFloat(fromTokenInfo?.balance) < parseFloat(fromVolume)) return setCanAdd(false);
+		if (parseFloat(toTokenInfo?.balance) < parseFloat(toVolume)) return setCanAdd(false);
+		setCanAdd(true);
+	}, [
+		fromVolume, fromTokenInfo, toVolume, toTokenInfo,
+	]);
+	return (
+		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_add')}>
+			<ComponentLayoutLoading showLoading={loading}></ComponentLayoutLoading>
+			<ComponentContentBox
+				outerClass={classNames('pools_box_outer')}
+				innerClass={classNames('pools_box_inner')}
+				topChildren={
+					<div className={classNames('pools_head')}>
+						<h2 className={classNames('pools_title')}>{t('增加流动池')}</h2>
+					</div>
+				}>
+				{/*  */}
+				<div className={classNames('pools_add_inner')}>
+					<div
+						className={classNames('pools_add_box')}>
+						<ComponentSwapInputBox
+							buttonOnClick={canAdd ? addPools : undefined}
+							buttonText={
+								(fromTokenInfo && toTokenInfo) ?
+								( poolType === 'create' ? t('创建流动池') : t('添加') ) :
+								t('选择代币')}
+							focusIndex={focusIndexRef}
+							inputs={[
+								{
+									labelText: "输入",
+									labelToken: fromTokenInfo,
+									inputText: fromVolume,
+									inputChange: setFromVolume,
+									placeholder: "0.0",
+									selectToken: () => onSelectToken('from'),
+									key: 'pay_from',
+									checkMax: true,
+								},
+								{
+									labelText: "输入",
+									labelToken: toTokenInfo,
+									inputText: toVolume,
+									inputChange: setToVolume,
+									placeholder: "0.0",
+									selectToken: () => onSelectToken('to'),
+									key: 'pay_to',
+									checkMax: true,
+								}
+							]} />
+					</div>
+					{/* 展示 */}
+					{
+						fromTokenInfo && toTokenInfo && (
+							<div className={classNames('inner_info')}>
+								<ComponentSlippage />
+								<div className={classNames('inner_info_content')}>
+									<div className={classNames('inner_info_line')}></div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{oneFromTransTo}</p>
+										<p className={classNames('inner_info_desc')}>{toTokenInfo?.symbol} / {fromTokenInfo?.symbol}</p>
+									</div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{oneToTransFrom}</p>
+										<p className={classNames('inner_info_desc')}>{fromTokenInfo?.symbol} / {toTokenInfo?.symbol}</p>
+									</div>
+									<div className={classNames('inner_info_item')}>
+										<p className={classNames('inner_info_value')}>{addedScale}</p>
+										<p className={classNames('inner_info_desc')}>{t('资金池比例')}</p>
+									</div>
+								</div>
+							</div>
+						)
+					}
+				</div>
+			</ComponentContentBox>
+		</ComLayoutShadowGlass>
+	);
+};
+
+
+const PagePoolsAddV20: FC = () => {
 	const { t } = useTranslation();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
@@ -86,14 +389,14 @@ const PagePoolsAdd: FC = () => {
 		if (!(parseFloat(fromVolume) > 0)) return;
 		setLoading(true);
 		try {
-			toast.info(t('将进行代币兑换'));
+			toast.info(t('将进行流动池增加'));
 			const result = await dataSetLpPoolAddVolume(
 				[fromTokenInfo?.contractAddress??'', toTokenInfo?.contractAddress??''],
 				[toolNumberStrToIntForFloat(fromVolume, fromTokenInfo?.scale??0), toolNumberStrToIntForFloat(toVolume, toTokenInfo?.scale??0)],
 				accountAddress ?? '',
 			);
 			if (result.includes('status: true')) {
-				toast.success(t('兑换成功'));
+				toast.success(t('流动池增加成功'));
 				await setTokenBalance();
 				setFromVolume('0');
 				setToVolume('0');
@@ -146,7 +449,8 @@ const PagePoolsAdd: FC = () => {
 
 	// 获取头部信息
 	useEffect(() => {
-		if (search?.one && search?.two && accountAddress) {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
 			// 搜索代币信息
 			setLoading(true);
 			Promise.all([
@@ -162,6 +466,20 @@ const PagePoolsAdd: FC = () => {
 					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
 				}
 				// 获取账户余额
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
 			}).finally(() => {
 				setLoading(false);
 			});

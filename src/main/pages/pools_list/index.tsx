@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FC, useEffect, useState } from 'react';
 import { toolNumberStrToFloatForInt, toolNumberToPercentage } from '$tools';
-import { dataGetAccountLpList, InSwapPoolInfo } from '$database';
+import { dataGetAccountLpList, dataGetAccountLpListV10, InSwapPoolInfo } from '$database';
 import { ComponentContentBox, ComponentFunctionalButton, ComponentLayoutLoading } from '$components';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
-import { useCustomGetAccountAddress } from '$hooks';
+import { useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 
 import './index.scss';
 
@@ -18,6 +18,8 @@ const PagePoolsList: FC = () => {
 	const [ fetchLoading, setFetchLoading ] = useState<boolean>(false);
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
+	// 版本号
+	const [ appVersion ] = useCustomGetAppVersion();
 
 	// 前往添加流动池
 	const goToAddPool = (item?: InSwapPoolInfo) => {
@@ -26,21 +28,29 @@ const PagePoolsList: FC = () => {
 	}
 	// 删除流动池
 	const goToDeletePool = (item: InSwapPoolInfo) => {
-		return navigate(`./delete?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}`);
+		return navigate(`./delete?one=${item.tokenOne.contractAddress}&two=${item.tokenTwo.contractAddress}&balance=${item.tokenOne.balance}`);
 	}
 
 	// 获取数据
 	useEffect(() => {
-		if (!accountAddress) return;
+		if (!accountAddress || !appVersion) return;
 		setFetchLoading(true);
-		dataGetAccountLpList(accountAddress).then(data => {
-			if (data.status === 200 && data.data) {
-				setPoolsList(data.data);
+		(async () => {
+			if (appVersion === 'v2') {
+				const data = await dataGetAccountLpList(accountAddress);
+				if (data.status === 200 && data.data) {
+					setPoolsList(data.data);
+				}
+			} else if (appVersion === 'v1') {
+				const data = await dataGetAccountLpListV10(accountAddress);
+				console.log(data);
+				if (data.status === 200 && data.data) {
+					setPoolsList(data.data);
+				}
 			}
-		}).finally(() => {
 			setFetchLoading(false);
-		});
-	}, [accountAddress]);
+		})();
+	}, [accountAddress, appVersion]);
 
 	return (
 		<ComLayoutShadowGlass glass={accountAddress === undefined} className={classNames('page_pools_list')}>
@@ -74,6 +84,11 @@ const PagePoolsList: FC = () => {
 										</div>
 										<p className={classNames('pools_item_symbols')}>
 											{item.tokenOne.symbol} / {item.tokenTwo.symbol}
+											{
+												appVersion === 'v1' && (
+													<small>({item.tokenOne.balance})</small>
+												)
+											}
 										</p>
 									</div>
 									<div className={classNames('pools_item_buttons')}>
@@ -81,18 +96,24 @@ const PagePoolsList: FC = () => {
 										<ComponentFunctionalButton className={classNames('pools_item_btn pools_item_remove')} onClick={() => goToDeletePool(item)}>{t('移除')}</ComponentFunctionalButton>
 									</div>
 								</div>
-								<div className={classNames('pools_item_info')}>
-									<div className={classNames('pools_item_info_head')}>
-										<p className={classNames('pools_item_info_title')}>{item.tokenOne.symbol}</p>
-										<p className={classNames('pools_item_info_title')}>{item.tokenTwo.symbol}</p>
-										<p className={classNames('pools_item_info_title')}>{t('资金池比例')}</p>
-									</div>
-									<div className={classNames('pools_item_info_info')}>
-										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenOne.balance, item.tokenOne.scale)}</p>
-										<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenTwo.balance, item.tokenTwo.scale)}</p>
-										<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
-									</div>
-								</div>
+								{
+									appVersion === 'v2' && (
+										<>
+											<div className={classNames('pools_item_info')}>
+												<div className={classNames('pools_item_info_head')}>
+													<p className={classNames('pools_item_info_title')}>{item.tokenOne.symbol}</p>
+													<p className={classNames('pools_item_info_title')}>{item.tokenTwo.symbol}</p>
+													<p className={classNames('pools_item_info_title')}>{t('资金池比例')}</p>
+												</div>
+												<div className={classNames('pools_item_info_info')}>
+													<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenOne.balance, item.tokenOne.scale)}</p>
+													<p className={classNames('pools_item_info_text')}>{toolNumberStrToFloatForInt(item.tokenTwo.balance, item.tokenTwo.scale)}</p>
+													<p className={classNames('pools_item_info_text')}>{toolNumberToPercentage(item.poolScale??'0')}</p>
+												</div>
+											</div>
+										</>
+									)
+								}
 							</div>
 						))
 					}

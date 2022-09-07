@@ -6,13 +6,13 @@ import { toast } from 'react-toastify';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { ComponentSlippage } from '$components/functional/slippage';
-import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLocalSlip, dataGetSwapEffect, dataGetSwapLpV10, dataSetApprove, dataSetLocalSlip, dataSetSwapV1, dataSetTokenTransfer, InEvmBalanceToken, swapGetAmountsOut } from '$database';
+import { dataGetAccountTokenBalance, dataGetAllowVolume, dataGetLocalSlip, dataGetSwapEffect, dataGetSwapLpV10, dataSearchToken, dataSetApprove, dataSetLocalSlip, dataSetSwapV1, dataSetTokenTransfer, InEvmBalanceToken, swapGetAmountsOut } from '$database';
 import { toolNumberAdd, toolNumberCut, toolNumberDiv, toolNumberMul, toolNumberSplit, toolNumberStrToFloatForInt, toolNumberStrToIntForFloat, toolNumberToPercentage } from '$tools';
 import ComponentSwapInputBox from '$components/functional/swap-input-box';
 import { layoutModalHide, layoutModalShow } from '$database/layout-data';
 import { ComModalSelectToken } from '$components/functional/modal-select-token';
 import ComLayoutShadowGlass from '$components/layout/shadow-glass';
-import { useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
+import { useCustomFormatSearch, useCustomGetAccountAddress, useCustomGetAppVersion } from '$hooks';
 
 const PageSwap: FC = () => {
 	const [ appVersion ] = useCustomGetAppVersion();
@@ -27,7 +27,6 @@ const PageSwap: FC = () => {
 
 const PageSwapV10: FC = () => {
 	const {t} = useTranslation();
-	const [ appVersion ] = useCustomGetAppVersion();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
 	// 支付数量
@@ -74,6 +73,7 @@ const PageSwapV10: FC = () => {
 			const result = await dataSetSwapV1({
 				poolId: lpId,
 				fromSymbol: fromTokenInfo.minUnit,
+				showFromAmount: fromVolume,
 				fromAmount: toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale),
 				toSymbol: toTokenInfo.minUnit,
 				orderPrice: parseFloat(orderPrice),
@@ -81,6 +81,9 @@ const PageSwapV10: FC = () => {
 			});
 			if (typeof result === 'string') {
 				toast.info(t('交易已发送' + ' hash: \n' + result), { delay: 0 });
+				setFromVolume('0');
+				setToVolume('0');
+				setTimeout(() => setTokenBalance(), 5000);
 			} else if (result?.status === 0 && result?.data?.result?.txs?.[0]?.tx_result?.code === 0) {
 				await setTokenBalance();
 				setFromVolume('0');
@@ -374,6 +377,7 @@ const PageSwapV10: FC = () => {
 const PageSwapV20: FC = () => {
 	const {t} = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
+	const search = useCustomFormatSearch<{one?: string, two?: string}>();
 	// 支付数量
 	const [fromVolume, setFromVolume] = useState('0.0');
 	// 兑换出来的数量
@@ -517,6 +521,44 @@ const PageSwapV20: FC = () => {
 		}
 	};
 
+
+	// 获取头部信息
+	useEffect(() => {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v2'),
+				dataSearchToken(search.two, 'v2'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??'', search.two??''])
+			]).then(([one, two, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+				if (two.status === 200 && two.data && two.data.length) {
+					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v2'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		}
+	}, [search, accountAddress]);
 	// 监听支付输入框
 	useEffect(() => {
 		if (focusIndexRef.current !== 0) return;
