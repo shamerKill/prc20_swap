@@ -1,10 +1,11 @@
-import { FC, useEffect,useState } from 'react';
+import { FC, useEffect,useState,useRef } from 'react';
 import ComponentOverviewCharts from './charts';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import * as echarts from 'echarts';
 import { toolApi,toolGet } from '$tools';
 import { useCustomGetAppVersion } from '$hooks';
+import { TypeAppVersion } from '$types';
 
 import './index.scss';
 type dataType = {
@@ -20,6 +21,7 @@ const ComponentBrowserOverview: FC<{
 }) => {
 	const { t } = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
+	let versoins = useRef<TypeAppVersion>();
 	const [dataInfo,setDataInfo] = useState<dataType>(Object);
 	const [chartType,setChartType] = useState<'day'|'week'>('day');
 	const [optionValue,setOptionValue] = useState<Array<string>>([]);
@@ -67,11 +69,15 @@ const ComponentBrowserOverview: FC<{
     ],
   };
 	useEffect(() => {
-    if (coinPair == 'pc'&&appVersion) {
-      getTopInfo();
-      getChart();
+    if (coinPair == 'pc') {
+      if (appVersion != undefined) {
+        getTopInfo();
+        getChart();
+      }
     }
-	}, [coinPair,appVersion]);
+	}, [coinPair,appVersion,chartType]);
+	useEffect(() => {
+	}, []);
   const getTopInfo = () => {
     toolGet(toolApi('/browser/home/info'),{version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
@@ -87,7 +93,7 @@ const ComponentBrowserOverview: FC<{
         if (res.data!=null) {
           let beforeArr:any = res.data.reverse();
           for (let index = 0; index < beforeArr.length; index++) {
-            timeArr.push(beforeArr[index].day)
+            timeArr.push(beforeArr[index].day.substr(-4))
             dataArr.push(beforeArr[index].num)
           }
         }
@@ -102,7 +108,7 @@ const ComponentBrowserOverview: FC<{
         if (res.data!=null) {
           let beforeArr:any = res.data.reverse();
           for (let index = 0; index < beforeArr.length; index++) {
-            timeArr.push(beforeArr[index].day)
+            timeArr.push(beforeArr[index].day.substr(-4))
             dataArr.push(beforeArr[index].num)
           }
         }
@@ -115,11 +121,11 @@ const ComponentBrowserOverview: FC<{
     if (type == chartType) return
     setChartType(type);
   }
-	useEffect(() => {
-    if (chartType) {
-      getChart();
-    }
-	}, [chartType]);
+	// useEffect(() => {
+  //   if (chartType) {
+  //     getChart();
+  //   }
+	// }, []);
 	return (
     <div className="overview-info">
       <div className="browser-overview">
@@ -147,7 +153,7 @@ const ComponentBrowserOverview: FC<{
             {t('liquidity')}
             </div>
             <div className="overview-info-title-item-value">
-              ${optionValue[optionValue.length-1] ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{optionValue[optionValue.length-2] ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : '100'}%</span>
+              ${Number(optionValue[optionValue.length-1]) ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{Number(optionValue[optionValue.length-2]) ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : Number(optionValue[optionValue.length-1]) ? '100' : '0'}%</span>
             </div>
           </div>
           <div className="overview-info-title-item other">
@@ -156,7 +162,7 @@ const ComponentBrowserOverview: FC<{
                 24H {t('turnover')}
               </div>
               <div className="overview-info-title-item-value">
-                ${optionValue1[optionValue1.length-1] ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{optionValue1[optionValue1.length-2] ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : '100'}%</span>
+                ${Number(optionValue1[optionValue1.length-1]) ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{Number(optionValue1[optionValue1.length-2]) ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : Number(optionValue1[optionValue1.length-1]) ? '100' : '0'}%</span>
               </div>
             </div>
             <div className="flex-item">

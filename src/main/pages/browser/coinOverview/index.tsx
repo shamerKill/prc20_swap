@@ -65,8 +65,8 @@ const ComponentBrowserLpOverview: FC<{
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
         </div>
         <div className="overview-info-title-btns">
-          <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
-          <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
+          <div className="overview-info-title-btns-item1 active" onClick={goLp}>{t('增加流动性')}</div>
+          <div className="overview-info-title-btns-item1" onClick={goSwap}>{t('交易')}</div>
         </div>
       </div>
       <div className="overview-info">
