@@ -3,6 +3,7 @@ import ComponentFunctionalPagenation from '$components/functional/pagination';
 import { toolApi,toolGet,toolHideAddressCenter,timestampToTime } from '$tools';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
+import { useCustomGetAppVersion } from '$hooks';
 type tradeItem = {
   address: string,
   date: number,
@@ -20,11 +21,12 @@ const ComponentBrowserTabList: FC<{
   token
 }) => {
 	const { t } = useTranslation();
+	const [ appVersion ] = useCustomGetAppVersion();
 	useEffect(() => {
-    if (token) {
+    if (token&&appVersion != undefined) {
       getList();
     }
-	}, [token]);
+	}, [token,appVersion]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tradeItem[]>([]);
 	const [pageSize, setPageSize] = useState(10);
@@ -45,7 +47,7 @@ const ComponentBrowserTabList: FC<{
     }
 	}, [currentPage]);
   const getList = () => {
-    toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType}).then((res:any) => {
+    toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno == 200) {
         setTotal(res.data.total);
         if (res.data.list != null) {
