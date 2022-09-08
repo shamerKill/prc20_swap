@@ -97,6 +97,9 @@ const ComponentBrowserCoinOverview: FC<{
     }
 	}, [coinPair]);
   useEffect(() => {
+    ws.current?.close();
+    optionValues = [];
+    setOptionValue([])
     if (tabIndex == 1) {
       getVolumeData();
     } else if (tabIndex ==2) {
