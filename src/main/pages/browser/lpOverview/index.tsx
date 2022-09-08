@@ -184,7 +184,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(toolApiKline('/kline/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;
