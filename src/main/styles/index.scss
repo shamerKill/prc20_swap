@@ -22,3 +22,46 @@ html {
 	font-size: 0.8rem;
 	color: var(--color-browser-tips-color);
 }
+.root-loading {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	background-color: var(--color-background-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	filter: blur(2px);
+}
+.root-loading-inner {
+  position: relative;
+  width: 10%;
+  height: 0;
+	padding-bottom: 10%;
+  animation: satellite 3s infinite linear;
+  border: 1px solid var(--color-primary-color);
+  border-radius: 100%;
+	box-sizing: content-box;
+	&:before,
+	&:after {
+		position: absolute;
+		left: 1px;
+		top: 1px;
+		width: 10%;
+		height: 0;
+		padding-bottom: 10%;
+		content: "";
+		border-radius: 100%;
+		background-color: var(--color-primary-color);
+		box-shadow: 0 0 5px var(--color-primary-color);
+	}
+	&:after {
+		right: 0;
+		width: 30%;
+		padding-bottom: 30%;
+		height: 0;
+		margin: 50%;
+	}
+}

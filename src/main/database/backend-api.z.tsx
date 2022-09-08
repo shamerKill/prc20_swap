@@ -1,5 +1,7 @@
+import web3Utils from 'web3-utils';
+import web3EthAbi from 'web3-eth-abi';
 import { accountStore } from "./appStore";
-import { swapRouterAddress, web3, wPlugcnAddress } from "./backend-api";
+import { swapRouterAddress, wPlugcnAddress } from "./backend-api";
 import cosmo from 'cosmo-wallet-tool';
 import { toolNumberDiv, toolNumberSplit } from "$tools";
 
@@ -21,9 +23,9 @@ export const dataSetLpPoolAddVolume = async (
 			tokenVolume = volumes[1];
 			volumePlug = volumes[0];
 		}
-		raw = web3.eth.abi.encodeFunctionSignature('addLiquidityPLUG(address,uint256,uint256,uint256,address,uint256)') + 
-					web3.utils.stripHexPrefix(
-						web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('addLiquidityPLUG(address,uint256,uint256,uint256,address,uint256)') + 
+					web3Utils.stripHexPrefix(
+						web3EthAbi.encodeParameters(
 							['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
 							[
 								cosmo.addressForBech32ToHex(tokenContract),
@@ -35,9 +37,9 @@ export const dataSetLpPoolAddVolume = async (
 						)
 					);
 	} else {
-		raw = web3.eth.abi.encodeFunctionSignature('addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)') + 
-					web3.utils.stripHexPrefix(
-						web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)') + 
+					web3Utils.stripHexPrefix(
+						web3EthAbi.encodeParameters(
 							['address', 'address', 'uint256', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
 							[
 								cosmo.addressForBech32ToHex(contracts[0]), cosmo.addressForBech32ToHex(contracts[1]),
@@ -101,8 +103,8 @@ export const dataSetLpPoolCreateVolumeV1 = async (input: {
 export const dataGetLpPoolDidVolume = async (contract: string, userAccount: string): Promise<string|undefined> => {
 	let result: string = '';
 	let raw = '';
-	raw = web3.eth.abi.encodeFunctionSignature('balanceOf(address)') + 
-				web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['address'], [cosmo.addressForBech32ToHex(userAccount)]));
+	raw = web3EthAbi.encodeFunctionSignature('balanceOf(address)') + 
+				web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['address'], [cosmo.addressForBech32ToHex(userAccount)]));
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(contract, raw, 0)) ?? '';
 	}
@@ -116,7 +118,7 @@ export const dataGetLpPoolDidVolume = async (contract: string, userAccount: stri
 export const dataGetLpPoolTotalVolume = async (contract: string): Promise<string|undefined> => {
 	let result: string = '';
 	let raw = '';
-	raw = web3.eth.abi.encodeFunctionSignature('totalSupply()');
+	raw = web3EthAbi.encodeFunctionSignature('totalSupply()');
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(contract, raw, 0)) ?? '';
 	}
@@ -140,9 +142,9 @@ export const dataSetRemoveLpVolume = async (contracts: string[], lpVolume: strin
 			tokenVolume = volumes[1];
 			volumePlug = volumes[0];
 		}
-		raw = web3.eth.abi.encodeFunctionSignature('removeLiquidityPLUG(address,uint256,uint256,uint256,address,uint256)') + 
-					web3.utils.stripHexPrefix(
-						web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('removeLiquidityPLUG(address,uint256,uint256,uint256,address,uint256)') + 
+					web3Utils.stripHexPrefix(
+						web3EthAbi.encodeParameters(
 							['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
 							[
 								cosmo.addressForBech32ToHex(tokenContract),
@@ -154,9 +156,9 @@ export const dataSetRemoveLpVolume = async (contracts: string[], lpVolume: strin
 						)
 					);
 	} else {
-		raw = web3.eth.abi.encodeFunctionSignature('removeLiquidity(address,address,uint256,uint256,uint256,address,uint256)') + 
-					web3.utils.stripHexPrefix(
-						web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('removeLiquidity(address,address,uint256,uint256,uint256,address,uint256)') + 
+					web3Utils.stripHexPrefix(
+						web3EthAbi.encodeParameters(
 							['address', 'address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
 							[
 								cosmo.addressForBech32ToHex(contracts[0]), cosmo.addressForBech32ToHex(contracts[1]),

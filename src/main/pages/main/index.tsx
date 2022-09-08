@@ -83,7 +83,7 @@ const PageHome: FC = () => {
 
 	useEffect(() => {
 		linkWallet(true);
-		return accountStore.pipe(map(item => item.accountAddress)).subscribe((accountAddress) => {
+		const sub = accountStore.pipe(map(item => item.accountAddress)).subscribe((accountAddress) => {
 			if (accountAddress && accountAddress != '') {
 				setWalletLinking(true);
 				setAccountAddress(accountAddress);
@@ -91,7 +91,8 @@ const PageHome: FC = () => {
 				setWalletLinking(false);
 				setAccountAddress('');
 			}
-		}).unsubscribe;
+		});
+		return () => sub.unsubscribe();
 	}, []);
 
 	return (
