@@ -75,7 +75,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('pool')}
             </div>
-            ${dataInfo.fluidity?.num} 
+            ${Number(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item1-value">
