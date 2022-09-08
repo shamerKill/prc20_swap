@@ -157,7 +157,7 @@ const ComponentBrowserCoinOverview: FC<{
   }
   const connectWs = () => {
     optionValues = optionValue
-    ws.current = new WebSocket('ws://api.gxswap.io/kline/marquee');
+    ws.current = new WebSocket('wss://api.gxswap.io/kline/marquee');
     ws.current.onopen = _e => {
       let infoStr = coinPair+','+lineList[lineIndex]+','+'v2';
       let sendInfo:any = {"type":"kline","data":infoStr}
