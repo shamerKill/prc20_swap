@@ -224,10 +224,10 @@ const ComponentBrowserCoinOverview: FC<{
     setLineIndex(i);
   }
   const goLp = () => {
-    navigate('/swap/poolsList');
+    navigate(`/swap/poolsList/add?one=${dataInfo.token[0].token}&two=${dataInfo.token[1].token}`);
   }
   const goSwap = () => {
-    navigate('/swap/swap');
+    navigate(`/swap/swap?one=${dataInfo.token[0].token}&two=${dataInfo.token[1].token}`);
   }
 	return (
     <div className="overview-info-detail">

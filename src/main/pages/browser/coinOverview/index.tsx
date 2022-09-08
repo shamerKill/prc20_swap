@@ -52,7 +52,7 @@ const ComponentBrowserLpOverview: FC<{
     })
   }
   const goLp = () => {
-    navigate('/swap/poolsList');
+    navigate(`/swap/poolsList/add?one=${dataInfo.token}`);
   }
   const goSwap = () => {
     navigate(`/swap/swap?one=${dataInfo.token}`);
