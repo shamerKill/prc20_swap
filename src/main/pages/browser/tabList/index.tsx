@@ -26,7 +26,7 @@ const ComponentBrowserTabList: FC<{
     if (token&&appVersion != undefined) {
       getList();
     }
-	}, [token,appVersion]);
+	}, [token,appVersion,listType]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tradeItem[]>([]);
 	const [pageSize, setPageSize] = useState(10);
@@ -52,6 +52,8 @@ const ComponentBrowserTabList: FC<{
         setTotal(res.data.total);
         if (res.data.list != null) {
           setList(res.data.list);
+        } else {
+          setList([]);
         }
       }
     })

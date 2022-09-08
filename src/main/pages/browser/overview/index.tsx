@@ -69,15 +69,11 @@ const ComponentBrowserOverview: FC<{
     ],
   };
 	useEffect(() => {
-    if (coinPair == 'pc') {
-      if (appVersion != undefined) {
-        getTopInfo();
-        getChart();
-      }
+    if (coinPair == 'pc'&&chartType&&appVersion) {
+      getTopInfo();
+      getChart();
     }
 	}, [coinPair,appVersion,chartType]);
-	useEffect(() => {
-	}, []);
   const getTopInfo = () => {
     toolGet(toolApi('/browser/home/info'),{version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
@@ -121,11 +117,6 @@ const ComponentBrowserOverview: FC<{
     if (type == chartType) return
     setChartType(type);
   }
-	// useEffect(() => {
-  //   if (chartType) {
-  //     getChart();
-  //   }
-	// }, []);
 	return (
     <div className="overview-info">
       <div className="browser-overview">

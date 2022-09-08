@@ -87,6 +87,9 @@ const ComponentBrowserCoinOverview: FC<{
 	useEffect(() => {
     if (coinPair) {
       getTopInfo();
+      ws.current?.close();
+      optionValues = [];
+      setOptionValue([])
       if (tabIndex == 1) {
         getVolumeData();
       } else if (tabIndex ==2) {
@@ -95,19 +98,7 @@ const ComponentBrowserCoinOverview: FC<{
         getPriceData();
       }
     }
-	}, [coinPair]);
-  useEffect(() => {
-    ws.current?.close();
-    optionValues = [];
-    setOptionValue([])
-    if (tabIndex == 1) {
-      getVolumeData();
-    } else if (tabIndex ==2) {
-      getTvlData();
-    } else {
-      getPriceData();
-    }
-	}, [tabIndex]);
+	}, [coinPair,tabIndex]);
   useEffect(() => {
     ws.current?.close();
     optionValues = [];
@@ -116,14 +107,14 @@ const ComponentBrowserCoinOverview: FC<{
 	}, [lineIndex]);
   
   const getTopInfo = () => {
-    toolGet(toolApi('/browser/trading/info'), {token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/trading/info'), {token:coinPair,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }
     })
   }
   const getVolumeData = () => {
-    toolGet(toolApi('/browser/token/volume'),{token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/volume'),{token:coinPair,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -139,7 +130,7 @@ const ComponentBrowserCoinOverview: FC<{
     })
   }
   const getTvlData = () => {
-    toolGet(toolApi('/browser/token/tvl'),{token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/tvl'),{token:coinPair,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         let timeArr = []
         let dataArr = [];
@@ -187,7 +178,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex],version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;
