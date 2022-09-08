@@ -13,7 +13,7 @@ export const ComponentLayoutLoading: FC<{showLoading: boolean, id?: string}> = (
 		if (showLoading == false) {
 			updateDidTimer.current = setTimeout(() => {
 				setRemoveBox(true);
-			}, 1000);
+			}, 1000) as any;
 		} else {
 			if (updateDidStatus.current === false) clearTimeout(updateDidTimer.current);
 			setRemoveBox(false);

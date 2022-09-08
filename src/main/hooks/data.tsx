@@ -36,7 +36,8 @@ export const useCustomGetAccountAddress = () => {
 	const [ accountAddress, setAccountAddress ] = useState<string>();
 	// 获取账户地址
 	useEffect(() => {
-		return accountStore.pipe(map(item => item.accountAddress)).subscribe(setAccountAddress).unsubscribe;
+		const sub = accountStore.pipe(map(item => item.accountAddress)).subscribe(setAccountAddress);
+		return () => sub.unsubscribe();
 	}, []);
 	return {accountAddress, setAccountAddress};
 };
@@ -49,9 +50,10 @@ export const useCustomGetAppVersion = (): [ TypeAppVersion | undefined, (version
 		if (!appVersionSub.value) dataGetAppVersion().then(data => {
 			appVersionSub.next(data);
 		});
-		return appVersionSub.subscribe(data => {
+		const sub = appVersionSub.subscribe(data => {
 			setVersion(data)
-		}).unsubscribe;
+		});
+		return () => sub.unsubscribe();
 	}, []);
 	useEffect(() => {
 		if (version) dataSetAppVersion(version);

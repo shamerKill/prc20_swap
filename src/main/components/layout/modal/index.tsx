@@ -25,7 +25,7 @@ const ComponentLayoutModal: FC = () => {
 	// 订阅显示状态
 	useEffect(() => {
 		let timer;
-		return layoutModalStore.pipe(map(data => data.showStatus)).subscribe((showStatus) => {
+		const sub = layoutModalStore.pipe(map(data => data.showStatus)).subscribe((showStatus) => {
 			if (showStatus == false) {
 				timer = setTimeout(() => setShowModal(showStatus), 500);
 				setHideModal(!showStatus);
@@ -33,19 +33,21 @@ const ComponentLayoutModal: FC = () => {
 				setHideModal(!showStatus);
 				setShowModal(showStatus);
 			}
-		}).unsubscribe;
+		});
+		return () => sub.unsubscribe();
 	}, []);
 
 	// 订阅子节点
 	useEffect(() => {
-		return layoutModalStore.pipe(map(data => data.children)).subscribe((children) => {
+		const sub = layoutModalStore.pipe(map(data => data.children)).subscribe((children) => {
 			if (children) setChildren(children);
-		}).unsubscribe;
+		});
+		return () => sub.unsubscribe();
 	}, []);
 	
 	// 订阅更多数据
 	useEffect(() => {
-		return layoutModalStore.pipe(map(data => data.options)).subscribe((options) => {
+		const sub = layoutModalStore.pipe(map(data => data.options)).subscribe((options) => {
 			if (options) {
 				if (options.backBtnHandle) {
 					setBackBtnHandle(() => options.backBtnHandle);
@@ -53,7 +55,8 @@ const ComponentLayoutModal: FC = () => {
 				if (options.title) setTitle(options.title);
 				if (options.bgClose) setBgCanClose(options.bgClose);
 			}
-		}).unsubscribe;
+		});
+		return () => sub.unsubscribe();
 	}, []);
 
 	// 关闭弹窗

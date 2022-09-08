@@ -1,10 +1,10 @@
 import cosmo from 'cosmo-wallet-tool';
-import Web3  from 'web3';
 import { toolApi, toolGet, toolReadUTF, toolWriteUTF } from "$tools";
 import { accountStore, InEvmToken, InSwapPoolInfo } from "./appStore";
 import { dataBaseError, dataBaseResult, TypeDataBase } from "./error";
 import { TypeAppVersion } from '$types';
-export const web3 = new Web3();
+import web3Utils from 'web3-utils';
+import web3EthAbi from 'web3-eth-abi';
 export const swapRouterAddress = 'gx1xulgpeuajthdc52eyqhfpsrf8w3thu97lhguxs';
 export const factoryAddress = 'gx18g7wv6uq6p08mkupr8j2cze8hhhz5twu0ml2cz';
 export const wPlugcnAddress = 'gx1d2wdkrvdu4y8l9k8pv0hs4cyrc03emtda8zepz';
@@ -94,8 +94,8 @@ export const dataSetTokenLocalList = async (token: InEvmToken[], address: string
 
 // swap根据支付数量获取支出数量
 export const swapGetAmountsOut = async (amountIn: string, path: string[]): Promise<string> => {
-	const raw = web3.eth.abi.encodeFunctionSignature('getAmountsOut(uint256,address[])') + 
-								web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['uint256', 'address[]'], [amountIn, path.map(item => cosmo.addressForBech32ToHex(item))]));
+	const raw = web3EthAbi.encodeFunctionSignature('getAmountsOut(uint256,address[])') + 
+								web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['uint256', 'address[]'], [amountIn, path.map(item => cosmo.addressForBech32ToHex(item))]));
 	let result: string = '0';
 	if (accountStore.value.isWeb) {
 		result = await cosmo.chromeTool.contractCallRaw(cosmo.addressForBech32ToHex(swapRouterAddress), raw, 0) ?? '';
@@ -103,14 +103,14 @@ export const swapGetAmountsOut = async (amountIn: string, path: string[]): Promi
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(cosmo.addressForBech32ToHex(swapRouterAddress), undefined, undefined, raw))?.data ?? '';
 	}
-	if (result !== '0x') result = web3.eth.abi.decodeParameter('uint256[]', result)[1];
+	if (result !== '0x') result = web3EthAbi.decodeParameter('uint256[]', result)[1];
 	else result = '0';
 	return result;
 };
 // 根据支出数量获取支付数量
 export const swapGetAmountsIn = async (amountOut: string, path: string[]): Promise<string> => {
-	const raw = web3.eth.abi.encodeFunctionSignature('getAmountsIn(uint256,address[])') +
-								web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['uint256', 'address[]'], [amountOut, path.map(item => cosmo.addressForBech32ToHex(item))]));
+	const raw = web3EthAbi.encodeFunctionSignature('getAmountsIn(uint256,address[])') +
+								web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['uint256', 'address[]'], [amountOut, path.map(item => cosmo.addressForBech32ToHex(item))]));
 	let result: string = '0';
 	if (accountStore.value.isWeb) {
 		result = await cosmo.chromeTool.contractCallRaw(cosmo.addressForBech32ToHex(swapRouterAddress), raw, 0) ?? '';
@@ -118,7 +118,7 @@ export const swapGetAmountsIn = async (amountOut: string, path: string[]): Promi
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(cosmo.addressForBech32ToHex(swapRouterAddress), undefined, undefined, raw))?.data ?? '';
 	}
-	if (result !== '0x') result = web3.eth.abi.decodeParameter('uint256[]', result)[0];
+	if (result !== '0x') result = web3EthAbi.decodeParameter('uint256[]', result)[0];
 	else result = '0';
 	return result;
 };
@@ -137,10 +137,10 @@ export const dataSetLocalSlip = async (slip: number, timer: number) => {
 // 获取授权值判断
 export const dataGetAllowVolume = async (contractAddress: string, accountAddress: string) => {
 	if (contractAddress === wPlugcnAddress || contractAddress === cosmo.addressForBech32ToHex(wPlugcnAddress)) {
-		return Promise.resolve(BigInt(web3.utils.padLeft('0x', 64, 'F')).toString());
+		return Promise.resolve(BigInt(web3Utils.padLeft('0x', 64, 'F')).toString());
 	}
-	const raw = web3.eth.abi.encodeFunctionSignature('allowance(address,address)') + 
-								web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(accountAddress), cosmo.addressForBech32ToHex(swapRouterAddress)]));
+	const raw = web3EthAbi.encodeFunctionSignature('allowance(address,address)') + 
+								web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(accountAddress), cosmo.addressForBech32ToHex(swapRouterAddress)]));
 	let result: string = '0';
 	const contractAddr = /^0x/.test(contractAddress) ? contractAddress : cosmo.addressForBech32ToHex(contractAddress);
 	if (accountStore.value.isWeb) {
@@ -155,9 +155,9 @@ export const dataGetAllowVolume = async (contractAddress: string, accountAddress
 
 // 进行授权
 export const dataSetApprove = async (contractAddress: string) => {
-	const value = web3.utils.padLeft('0x', 64, 'F');
-	const raw = web3.eth.abi.encodeFunctionSignature('approve(address,uint256)') + 
-								web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['address', 'uint256'], [cosmo.addressForBech32ToHex(swapRouterAddress), value]));
+	const value = web3Utils.padLeft('0x', 64, 'F');
+	const raw = web3EthAbi.encodeFunctionSignature('approve(address,uint256)') + 
+								web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['address', 'uint256'], [cosmo.addressForBech32ToHex(swapRouterAddress), value]));
 	let result: string = '0';
 	const contractAddr = /^0x/.test(contractAddress) ? contractAddress : cosmo.addressForBech32ToHex(contractAddress);
 	if (accountStore.value.isWeb) {
@@ -184,8 +184,8 @@ export const dataGetSwapLpV10 = async (tokenAddress: string[]): Promise<TypeData
 export const dataGetSwapEffect = async (fromContract: string, toContract: string): Promise<string[]|undefined> => {
 	let result: string = '';
 	// 获取lp地址
-	let raw = web3.eth.abi.encodeFunctionSignature('getPair(address,address)') + 
-								web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(fromContract), cosmo.addressForBech32ToHex(toContract)]));
+	let raw = web3EthAbi.encodeFunctionSignature('getPair(address,address)') + 
+								web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(fromContract), cosmo.addressForBech32ToHex(toContract)]));
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(cosmo.addressForBech32ToHex(factoryAddress), raw, 0)) ?? '';
 	}
@@ -193,12 +193,12 @@ export const dataGetSwapEffect = async (fromContract: string, toContract: string
 		result = (await cosmo.walletTool.contractCall(cosmo.addressForBech32ToHex(factoryAddress), undefined, undefined, raw))?.data ?? '';
 	}
 	if (!result) return;
-	const lpAddress = web3.eth.abi.decodeParameter('address', result) as unknown as string;
+	const lpAddress = web3EthAbi.decodeParameter('address', result) as unknown as string;
 	// 是否反转lp结果
 	const reserve = (BigInt(cosmo.addressForBech32ToHex(fromContract)) < BigInt(cosmo.addressForBech32ToHex(toContract))) ? false : true;
 	// 获取池子余额
 	result = '';
-	raw = web3.eth.abi.encodeFunctionSignature('getReserves()');
+	raw = web3EthAbi.encodeFunctionSignature('getReserves()');
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(lpAddress, raw, 0)) ?? '';
 	}
@@ -206,7 +206,7 @@ export const dataGetSwapEffect = async (fromContract: string, toContract: string
 		result = (await cosmo.walletTool.contractCall(lpAddress, undefined, undefined, raw))?.data ?? '';
 	}
 	if (!result) return;
-	const resData = web3.eth.abi.decodeParameters(['uint112', 'uint112', 'uint32'], result);
+	const resData = web3EthAbi.decodeParameters(['uint112', 'uint112', 'uint32'], result);
 	const resultArr = [resData[0], resData[1]];
 	if (reserve) return resultArr.reverse();
 	return resultArr;
@@ -221,9 +221,9 @@ export const dataSetTokenTransfer = async (
 	// 获取lp地址
 	let raw = '';
 	if (fromContractAddress === wPlugcnAddress) {
-		raw = web3.eth.abi.encodeFunctionSignature('swapExactPLUGForTokens(uint256,address[],address,uint256)') + 
-									web3.utils.stripHexPrefix(
-										web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('swapExactPLUGForTokens(uint256,address[],address,uint256)') + 
+									web3Utils.stripHexPrefix(
+										web3EthAbi.encodeParameters(
 											['uint256', 'address[]', 'address', 'uint256'],
 											[
 												toVolume,
@@ -234,9 +234,9 @@ export const dataSetTokenTransfer = async (
 										)
 									);
 	} else if (toContractAddress === wPlugcnAddress) {
-		raw = web3.eth.abi.encodeFunctionSignature('swapExactTokensForPLUG(uint256,uint256,address[],address,uint256)') + 
-									web3.utils.stripHexPrefix(
-										web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('swapExactTokensForPLUG(uint256,uint256,address[],address,uint256)') + 
+									web3Utils.stripHexPrefix(
+										web3EthAbi.encodeParameters(
 											['uint256', 'uint256', 'address[]', 'address', 'uint256'],
 											[
 												fromVolume, toVolume,
@@ -247,9 +247,9 @@ export const dataSetTokenTransfer = async (
 										)
 									);
 	} else {
-		raw = web3.eth.abi.encodeFunctionSignature('swapExactTokensForTokens(uint256,uint256,address[],address,uint256)') + 
-									web3.utils.stripHexPrefix(
-										web3.eth.abi.encodeParameters(
+		raw = web3EthAbi.encodeFunctionSignature('swapExactTokensForTokens(uint256,uint256,address[],address,uint256)') + 
+									web3Utils.stripHexPrefix(
+										web3EthAbi.encodeParameters(
 											['uint256', 'uint256', 'address[]', 'address', 'uint256'],
 											[
 												fromVolume, toVolume,
@@ -274,8 +274,8 @@ export const dataSetTokenTransfer = async (
 export const dataGetLpContractAddress = async (oneContract: string, twoContract: string): Promise<string|undefined> => {
 	let result: string = '';
 	// 获取lp地址
-	let raw = web3.eth.abi.encodeFunctionSignature('getPair(address,address)') + 
-		web3.utils.stripHexPrefix(web3.eth.abi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(oneContract), cosmo.addressForBech32ToHex(twoContract)]));
+	let raw = web3EthAbi.encodeFunctionSignature('getPair(address,address)') + 
+		web3Utils.stripHexPrefix(web3EthAbi.encodeParameters(['address', 'address'], [cosmo.addressForBech32ToHex(oneContract), cosmo.addressForBech32ToHex(twoContract)]));
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(cosmo.addressForBech32ToHex(factoryAddress), raw, 0)) ?? '';
 	}
@@ -283,7 +283,7 @@ export const dataGetLpContractAddress = async (oneContract: string, twoContract:
 		result = (await cosmo.walletTool.contractCall(cosmo.addressForBech32ToHex(factoryAddress), undefined, undefined, raw))?.data ?? '';
 	}
 	if (!result) return;
-	const lpAddress = web3.eth.abi.decodeParameter('address', result) as unknown as string;
+	const lpAddress = web3EthAbi.decodeParameter('address', result) as unknown as string;
 	return lpAddress;
 };
 // 获取lp池子余额
@@ -292,7 +292,7 @@ export const dataGetLpPoolVolume = async (lpContract: string, contracts: [string
 	const reserve = (BigInt(cosmo.addressForBech32ToHex(contracts[0])) < BigInt(cosmo.addressForBech32ToHex(contracts[1]))) ? false : true;
 	// 获取池子余额
 	let result = '';
-	const raw = web3.eth.abi.encodeFunctionSignature('getReserves()');
+	const raw = web3EthAbi.encodeFunctionSignature('getReserves()');
 	if (accountStore.value.isWeb) {
 		result = (await cosmo.chromeTool.contractCallRaw(lpContract, raw, 0)) ?? '';
 	}
@@ -300,7 +300,7 @@ export const dataGetLpPoolVolume = async (lpContract: string, contracts: [string
 		result = (await cosmo.walletTool.contractCall(lpContract, undefined, undefined, raw))?.data ?? '';
 	}
 	if (!result) return;
-	const resData = web3.eth.abi.decodeParameters(['uint112', 'uint112'], result);
+	const resData = web3EthAbi.decodeParameters(['uint112', 'uint112'], result);
 	let resultArr: [string, string] = [resData[0], resData[1]];
 	if (reserve) resultArr = (resultArr.reverse() as [string, string]);
 	return resultArr;

@@ -1,10 +1,11 @@
 {
-  "name": "react_template",
+  "name": "gx_swap",
   "version": "0.1.0",
   "description": "react template project",
   "scripts": {
     "start": "rimraf ./dist && parcel serve --no-cache",
-    "build": "rimraf ./dist && parcel build  --no-cache --no-optimize --no-source-maps",
+    "build": "rimraf ./dist && parcel build --no-cache --no-source-maps",
+    "build-source": "rimraf ./dist && parcel build --no-cache --no-optimize",
     "parcel": "parcel"
   },
   "repository": "https://github.com/shamerKill/react-template.git",
