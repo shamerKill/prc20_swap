@@ -52,7 +52,7 @@ const ComponentBrowserLpOverview: FC<{
     })
   }
   const goLp = () => {
-    navigate('/swap/poolsList');
+    navigate(`/swap/poolsList/add?one=${dataInfo.token}`);
   }
   const goSwap = () => {
     navigate(`/swap/swap?one=${dataInfo.token}`);
@@ -65,8 +65,8 @@ const ComponentBrowserLpOverview: FC<{
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
         </div>
         <div className="overview-info-title-btns">
-          <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
-          <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
+          <div className="overview-info-title-btns-item1 active" onClick={goLp}>{t('增加流动性')}</div>
+          <div className="overview-info-title-btns-item1" onClick={goSwap}>{t('交易')}</div>
         </div>
       </div>
       <div className="overview-info">
@@ -75,7 +75,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('pool')}
             </div>
-            ${dataInfo.fluidity?.num} 
+            ${Number(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item1-value">

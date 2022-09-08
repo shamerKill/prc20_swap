@@ -157,7 +157,7 @@ const ComponentBrowserCoinOverview: FC<{
   }
   const connectWs = () => {
     optionValues = optionValue
-    ws.current = new WebSocket('ws://192.168.3.5:8554/marquee');
+    ws.current = new WebSocket('ws://api.gxswap.io/kline/marquee');
     ws.current.onopen = _e => {
       let infoStr = coinPair+','+lineList[lineIndex]+','+'v2';
       let sendInfo:any = {"type":"kline","data":infoStr}
@@ -184,7 +184,7 @@ const ComponentBrowserCoinOverview: FC<{
     ws.current?.send(data)
   }
   const getPriceData = () => {
-    toolGet(toolApiKline('/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
+    toolGet(toolApiKline('/kline/kline'),{token:coinPair,date:lineList[lineIndex]}).then((res:any) => {
       if (res.errno==200) {
         if (res.data!=null) {
           let dataArr = res.data;
@@ -224,25 +224,25 @@ const ComponentBrowserCoinOverview: FC<{
     setLineIndex(i);
   }
   const goLp = () => {
-    navigate('/swap/poolsList');
+    navigate(`/swap/poolsList/add?one=${dataInfo.token[0].token}&two=${dataInfo.token[1].token}`);
   }
   const goSwap = () => {
-    navigate('/swap/swap');
+    navigate(`/swap/swap?one=${dataInfo.token[0].token}&two=${dataInfo.token[1].token}`);
   }
 	return (
     <div className="overview-info-detail">
     <div className="overview-info-title">
       <div className="overview-info-title-price">
-      {dataInfo.token?.[0]?.name} / {dataInfo.token?.[1]?.name}  (${dataInfo.price?.num})  
+      {dataInfo.token ?dataInfo.token[0]?.name :''} / {dataInfo.token?dataInfo.token[1]?.name:''}  (${dataInfo.price?.num})  
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
       <div className="overview-info-title-btns">
-        <div className="overview-info-title-btns-item active" onClick={goLp}>{t('增加流动性')}</div>
-        <div className="overview-info-title-btns-item" onClick={goSwap}>{t('交易')}</div>
+        <div className="overview-info-title-btns-item2 active" onClick={goLp}>{t('增加流动性')}</div>
+        <div className="overview-info-title-btns-item2" onClick={goSwap}>{t('交易')}</div>
       </div>
     </div>
-      <div className="overview-info">
-        <div className="overview-info-item other">
+      <div className="overview-info lpinfos">
+        <div className="overview-info-item lpinfo">
           <div className="overview-info-item-value">
             <div className="overview-info-item-tips">
             {t('liquidity')}
@@ -267,7 +267,7 @@ const ComponentBrowserCoinOverview: FC<{
 
           </div>
         </div>
-        <div className="overview-info-item other">
+        <div className="overview-info-item lpinfo">
           <div className="overview-info-item-title">
 
             {
@@ -277,7 +277,7 @@ const ComponentBrowserCoinOverview: FC<{
             }
             {
               tabIndex==0&&<div className="overview-info-item-value">
-              ${optionValue?.[optionValue.length-1]?.close} <span className="rate">({optionValue[optionValue.length-1]?.createTime})</span>
+              ${optionValue ? optionValue[optionValue.length-1]?.close : ''} <span className="rate">({optionValue?optionValue[optionValue.length-1]?.createTime:''})</span>
             </div>
             }
             <div className="overview-info-item-tab">
@@ -286,14 +286,17 @@ const ComponentBrowserCoinOverview: FC<{
               })}
             </div>
           </div>
+          {
+            tabIndex==0&&
+            <><div className="linetype-tab">
+              {lineList.map((item, index) => {
+                return <div key={index} className={classNames('linetype-tab-item', lineIndex == index ? 'linetype-active' : '')} onClick={() => doChange(index)}>{item}</div>;
+              })}
+            </div></>
+          }
           <div className="overview-charts-list-item">
             {
-              tabIndex==0&&
-             <><div className="linetype-tab">
-                {lineList.map((item, index) => {
-                  return <div key={index} className={classNames('linetype-tab-item', lineIndex == index ? 'linetype-active' : '')} onClick={() => doChange(index)}>{item}</div>;
-                })}
-              </div><ComponentOverviewKline optionValue={optionValue} domId={'chartDom2'}></ComponentOverviewKline></>
+              tabIndex==0&&<ComponentOverviewKline optionValue={optionValue} domId={'chartDom2'}></ComponentOverviewKline>
             }
             {
               tabIndex!=0&&<ComponentOverviewCharts option={option1} domId={'chartDom2'}></ComponentOverviewCharts>

@@ -64,7 +64,11 @@ const ComponentBrowserList: FC<{
 	};
 	useEffect(() => {
     if (currentPage) {
-      getList();
+      if (coinPair == 'pc') {
+        getList();
+      } else if (coinPair.length == 41) {
+        getTokenList();
+      }
     }
 	}, [currentPage]);
   const getList = () => {

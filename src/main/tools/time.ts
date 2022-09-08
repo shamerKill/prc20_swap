@@ -10,7 +10,7 @@ export const toolTimeSleep = async (time: number, callBack?: () => void) => {
 const fillZero = (n: number): string => n < 10 ? '0' + n : '' + n;
 
 export const timestampToTime = (timestamp:number) => {
-	let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+	let date = new Date(timestamp*1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
 	let Y = date.getFullYear() + '-';
 	let M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
 	let D = fillZero(date.getDate()) + ' ';
