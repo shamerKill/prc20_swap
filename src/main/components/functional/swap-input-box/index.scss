@@ -27,24 +27,6 @@
 			display: flex;
 			justify-content: space-between;
 		}
-		.com-swap-input-step {
-			$size: 2.8rem;
-			position: absolute;
-			height: $size;
-			width: $size;
-			bottom: math.div(-($size + 1rem), 2);
-			left: 50%;
-			margin-left: math.div(-$size, 2);
-			background-color: var(--color-background-color);
-			box-shadow: 0 0 0.5rem 1px var(--color-main-background-color);
-			z-index: 10;
-			border-radius: 0.3rem;
-			font-size: 2rem;
-			color: var(--color-gray-color);
-			line-height: $size;
-			text-align: center;
-			filter: blur(1px);
-		}
 		.com-swap-content {
 			display: flex;
 			padding-top: 0.5rem;
@@ -99,6 +81,29 @@
 				display: none;
 			}
 		}
+	}
+	.com-swap-input-step-box {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+	.com-swap-input-step {
+		$size: 2.8rem;
+		margin-top: -2rem;
+		margin-bottom: -0.5rem;
+		height: $size;
+		width: $size;
+		margin-left: math.div(-$size, 2);
+		background-color: var(--color-background-color);
+		box-shadow: 0 0 0.5rem 1px var(--color-main-background-color);
+		z-index: 10;
+		border-radius: 0.3rem;
+		font-size: 2rem;
+		color: var(--color-gray-color);
+		line-height: $size;
+		text-align: center;
+		filter: blur(1px);
+		cursor: pointer;
 	}
 	.com-swap-hint {
 		padding: 0.5rem 0;
