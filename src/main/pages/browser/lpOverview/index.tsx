@@ -159,12 +159,13 @@ const ComponentBrowserCoinOverview: FC<{
     }
     ws.current.onerror = _e => connectWs();
     ws.current.onmessage = e => {
-      let data = JSON.parse(e.data);
       SendWsData('ping')
+      let data = JSON.parse(e.data);
       if (data.Type=='kline') {
         if (data.Data) {
         let infos:klineItem[] = [JSON.parse(data.Data)]
           if (optionValues) {
+            infos[0].createTime = returnTime(infos[0].time)
             if (optionValues[optionValues.length-1]?.time == infos[0].time) {
               optionValues[optionValues.length-1] = infos[0];
             } else {
