@@ -160,8 +160,8 @@ const ComponentBrowserOverview: FC<{
             </div>
             <div className="flex-item">
               <div className="overview-info-title-btns">
-                <div className={classNames('overview-info-title-btns-item', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>{t('每天')}</div>
-                <div className={classNames('overview-info-title-btns-item', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>{t('每周')}</div>
+                <div className={classNames('overview-info-title-btns-item0', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>{t('每天')}</div>
+                <div className={classNames('overview-info-title-btns-item0', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>{t('每周')}</div>
               </div>
             </div>
           </div>

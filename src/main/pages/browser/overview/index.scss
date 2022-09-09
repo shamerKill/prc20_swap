@@ -81,7 +81,7 @@
     .overview-info-title-btns{
       display: flex;
       padding-right: 1.3rem;
-      &-item{
+      &-item0{
         width: 8.3rem;
         height: 3rem;
         background: var(--color-background-color);
@@ -98,6 +98,7 @@
           color: var(--color-primary-color);
           position: relative;
           z-index: 1;
+          margin-right: -2rem;
         }
         &.active1{
           background: var(--color-browser-title-color);
