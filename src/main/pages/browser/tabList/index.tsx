@@ -74,7 +74,7 @@ const ComponentBrowserTabList: FC<{
             list.map((item, index) => 
               <div className="list-content-detail" key={index} onClick={() => goDetail(item.hash)}>
                 <div className="list-content-detail-item">{item.operation}</div>
-                <div className="list-content-detail-item">$ {toNonExponential(item.now_balance)}</div>
+                <div className="list-content-detail-item">$ {item.now_balance}</div>
                 <div className="list-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
                 <div className="list-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
                 <div className="list-content-detail-item">{toolHideAddressCenter(item.address??'')}</div>

@@ -6,7 +6,6 @@ import * as echarts from 'echarts';
 import { toolApi,toolGet } from '$tools';
 import { useCustomGetAppVersion } from '$hooks';
 import { TypeAppVersion } from '$types';
-import { toNonExponential } from '$tools';
 
 
 
@@ -147,7 +146,7 @@ const ComponentBrowserOverview: FC<{
             {t('liquidity')}
             </div>
             <div className="overview-info-title-item-value">
-              ${toNonExponential(optionValue[optionValue.length-1]) ? toNonExponential(optionValue[optionValue.length-1]) : '0'} <span className="rate">{Number(optionValue[optionValue.length-2]) ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : toNonExponential(optionValue[optionValue.length-1]) ? '100' : '0'}%</span>
+              ${Number(optionValue[optionValue.length-1]) ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{Number(optionValue[optionValue.length-2]) ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : Number(optionValue[optionValue.length-1]) ? '100' : '0'}%</span>
             </div>
           </div>
           <div className="overview-info-title-item other">
@@ -156,7 +155,7 @@ const ComponentBrowserOverview: FC<{
                 24H {t('turnover')}
               </div>
               <div className="overview-info-title-item-value">
-                ${Number(optionValue1[optionValue1.length-1]) ? toNonExponential(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{Number(optionValue1[optionValue1.length-2]) ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : toNonExponential(optionValue1[optionValue1.length-1]) ? '100' : '0'}%</span>
+                ${Number(optionValue1[optionValue1.length-1]) ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{Number(optionValue1[optionValue1.length-2]) ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : Number(optionValue1[optionValue1.length-1]) ? '100' : '0'}%</span>
               </div>
             </div>
             <div className="flex-item">

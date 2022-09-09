@@ -75,7 +75,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('pool')}
             </div>
-            ${toNonExponential(dataInfo.fluidity?.num)} 
+            ${Number(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item1-value">
@@ -88,7 +88,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('turnover')}
             </div>
-            ${toNonExponential(dataInfo.turnover?.num)}
+            ${Number(dataInfo.turnover?.num)}
              {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
           </div>
         </div>

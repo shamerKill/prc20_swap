@@ -246,7 +246,7 @@ const ComponentBrowserCoinOverview: FC<{
             <div className="overview-info-item-tips">
             {t('liquidity')}
             </div>
-            ${dataInfo.fluidity?.num} 
+            ${Number(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item-item">
@@ -260,7 +260,7 @@ const ComponentBrowserCoinOverview: FC<{
               <div className="overview-info-item-tips">
               {t('turnover')}
               </div>
-              ${dataInfo.turnover?.num} 
+              ${Number(dataInfo.turnover?.num)} 
               {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
             </div>
 
@@ -271,7 +271,7 @@ const ComponentBrowserCoinOverview: FC<{
 
             {
               tabIndex!=0&&<div className="overview-info-item-value">
-              ${option1.series[0].data[option1.series[0].data.length-1] ? toNonExponential(option1.series[0].data[option1.series[0].data.length-1]):'0'} <span className="rate">({option1.data[option1.data.length-1]})</span>
+              ${option1.series[0].data[option1.series[0].data.length-1] ? Number(option1.series[0].data[option1.series[0].data.length-1]):'0'} <span className="rate">({option1.data[option1.data.length-1]})</span>
             </div>
             }
             {
