@@ -82,7 +82,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('tradNum')}
             </div>
-            {dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span>
+            <div>{dataInfo.trading?.num} <span className="rate">({dataInfo.trading?.change}%)</span></div>
           </div>
           <div className="overview-info-item1-value">
             <div className="overview-info-item1-tips">

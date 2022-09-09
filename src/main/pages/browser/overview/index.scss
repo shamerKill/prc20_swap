@@ -41,7 +41,7 @@
     margin: 0 0.5rem;
     border-radius: 1rem;
   }
-  .overview-info-title{
+  .overview-info-title1{
     display: flex;
     align-items: center;
     padding-top: 1rem;
@@ -78,7 +78,7 @@
         }
       }
     }
-    .overview-info-title-btns{
+    .overview-info-title1-btns{
       display: flex;
       padding-right: 1.3rem;
       &-item0{
@@ -106,6 +106,12 @@
           position: relative;
           z-index: 1;
           margin-left: -2rem;
+        }
+        @include media-phone {
+          width: 6rem;
+          height: 2.5rem;
+          background: var(--color-background-color);
+          border-radius: 1.2rem;
         }
       }
     }

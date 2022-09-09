@@ -17,8 +17,8 @@
     @include media-phone {
       flex-direction: column;
     }
-    &-title{
-      height: 5.5rem;
+    &-title3{
+      height: 6.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -26,11 +26,11 @@
         height: 6.5rem;
         flex-direction: column;
         align-items: flex-start;
-        .overview-info-title-btns{
+        .overview-info-title3-btns{
           position: relative;
           right: 1rem;
         }
-        .overview-info-title-price{
+        .overview-info-title3-price{
           padding: 0.5rem 1.5rem;
         }
       }
@@ -42,6 +42,9 @@
         display: flex;
         align-items: flex-end;
         width: 50%;
+        @include media-phone {
+          width: 100%;
+        }
         .rate{
           color: var(--color-primary-color);
           font-size: 1rem;
