@@ -162,14 +162,16 @@ const ComponentBrowserCoinOverview: FC<{
       let data = JSON.parse(e.data);
       SendWsData('ping')
       if (data.Type=='kline') {
+        if (data.Data) {
         let infos:klineItem[] = [JSON.parse(data.Data)]
-        if (optionValues) {
-          if (optionValues[optionValues.length-1]?.time == infos[0].time) {
-            optionValues[optionValues.length-1] = infos[0];
-          } else {
-            optionValues = optionValues.concat(infos);
+          if (optionValues) {
+            if (optionValues[optionValues.length-1]?.time == infos[0].time) {
+              optionValues[optionValues.length-1] = infos[0];
+            } else {
+              optionValues = optionValues.concat(infos);
+            }
+            setOptionValue(optionValues)
           }
-          setOptionValue(optionValues)
         }
       }
       };
