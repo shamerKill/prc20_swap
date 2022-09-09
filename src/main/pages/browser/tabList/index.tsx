@@ -1,6 +1,6 @@
 import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
-import { toolApi,toolGet,toolHideAddressCenter,timestampToTime } from '$tools';
+import { toolApi,toolGet,toolHideAddressCenter,timestampToTime,toNonExponential } from '$tools';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { useCustomGetAppVersion } from '$hooks';
@@ -74,9 +74,9 @@ const ComponentBrowserTabList: FC<{
             list.map((item, index) => 
               <div className="list-content-detail" key={index} onClick={() => goDetail(item.hash)}>
                 <div className="list-content-detail-item">{item.operation}</div>
-                <div className="list-content-detail-item">$ {item.now_balance}</div>
-                <div className="list-content-detail-item">{Number(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
-                <div className="list-content-detail-item">{Number(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
+                <div className="list-content-detail-item">$ {toNonExponential(item.now_balance)}</div>
+                <div className="list-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
+                <div className="list-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
                 <div className="list-content-detail-item">{toolHideAddressCenter(item.address??'')}</div>
                 <div className="list-content-detail-item">{timestampToTime(item.date??0)}</div>
               </div>

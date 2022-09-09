@@ -167,3 +167,10 @@ export const toolPercentageToNumber = (input: string): string => {
 	const inputStr = input.replace(/%$/, '');
 	return (parseFloat(inputStr) / 100).toString();
 }
+
+// 处理小数精度
+export const toNonExponential = (num:any) => {
+	num = Number(num);
+	let m:any = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/);
+	return num.toFixed(Math.max(0, (m[1] || '').length - m[2]));
+}

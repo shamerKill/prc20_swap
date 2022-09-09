@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import classNames from 'classnames';
-import { toolGet,toolApi } from '$tools';
+import { toolGet,toolApi,toNonExponential } from '$tools';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,7 +75,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('pool')}
             </div>
-            ${Number(dataInfo.fluidity?.num)} 
+            ${toNonExponential(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item1-value">
@@ -88,7 +88,7 @@ const ComponentBrowserLpOverview: FC<{
             <div className="overview-info-item1-tips">
             {t('turnover')}
             </div>
-            ${Number(dataInfo.turnover?.num)}
+            ${toNonExponential(dataInfo.turnover?.num)}
              {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
           </div>
         </div>

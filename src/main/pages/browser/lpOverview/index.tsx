@@ -5,7 +5,7 @@ import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { toolApi,toolApiKline,toolGet } from '$tools';
+import { toolApi,toolApiKline,toolGet,toNonExponential } from '$tools';
 import * as echarts from 'echarts';
 
 import './index.scss';
@@ -271,7 +271,7 @@ const ComponentBrowserCoinOverview: FC<{
 
             {
               tabIndex!=0&&<div className="overview-info-item-value">
-              ${option1.series[0].data[option1.series[0].data.length-1] ? Number(option1.series[0].data[option1.series[0].data.length-1]):'0'} <span className="rate">({option1.data[option1.data.length-1]})</span>
+              ${option1.series[0].data[option1.series[0].data.length-1] ? toNonExponential(option1.series[0].data[option1.series[0].data.length-1]):'0'} <span className="rate">({option1.data[option1.data.length-1]})</span>
             </div>
             }
             {
