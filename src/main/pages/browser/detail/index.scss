@@ -1,0 +1,22 @@
+.linetype-tab1{
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1rem 6rem 0 6rem;
+  font-size: 1em;
+  &-item{
+    width: 5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3f3e4c;
+    box-sizing: content-box;
+    &.linetype-active{
+      color: #000000;
+      font-weight: bold;
+      border-bottom: 0.25rem solid #31d87f;
+    }
+  }
+}

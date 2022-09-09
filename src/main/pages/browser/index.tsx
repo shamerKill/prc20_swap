@@ -2,13 +2,14 @@ import { FC,useEffect,useState } from 'react';
 import ComponentBrowserOverview from './overview';
 
 import ComponentBrowserList from './list';
-import ComponentBrowserTabList from './tabList';
 import { useParams } from 'react-router-dom';
 const PageInfo: FC = () => {
 	const [coinPair,setCoinPair] = useState('')
 	const params:any = useParams();
 	useEffect(() => {
-		setCoinPair(params.id)
+		if (params.id) {
+			setCoinPair(params.id)
+		}
 	}, [params]);
 	return (
 		<div>

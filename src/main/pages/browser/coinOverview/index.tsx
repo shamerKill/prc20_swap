@@ -45,7 +45,7 @@ const ComponentBrowserLpOverview: FC<{
 	}, [coinPair]);
   
   const getTopInfo = () => {
-    toolGet(toolApi('/browser/token/info'), {token:coinPair}).then((res:any) => {
+    toolGet(toolApi('/browser/token/info'), {token:coinPair,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno==200) {
         setDataInfo(res.data)
       }
