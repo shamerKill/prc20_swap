@@ -68,8 +68,6 @@ const ComponentBrowserCoinOverview: FC<{
   let optionValues:klineItem[] = [];
 	const [optionValue1,setOptionValue1] = useState<Array<string>>([]);
 	const [optionDate1,setOptionDate1] = useState<Array<string>>([]);
-	const [tabIndex,setTabIndex] = useState(0)
-	const [lineIndex,setLineIndex] = useState(0)
   const ws = useRef<WebSocket | null>(null);
   const tabList:Array<tabType> = [
     {
@@ -84,6 +82,8 @@ const ComponentBrowserCoinOverview: FC<{
     }
   ]
   const lineList:string[] = ['1min','15min','30min','60min','1day','1week','1mon']
+	const [tabIndex,setTabIndex] = useState(0)
+	const [lineIndex,setLineIndex] = useState(2)
 	useEffect(() => {
     if (coinPair) {
       getTopInfo();
