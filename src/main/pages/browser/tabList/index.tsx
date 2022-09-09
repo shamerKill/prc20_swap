@@ -22,11 +22,6 @@ const ComponentBrowserTabList: FC<{
 }) => {
 	const { t } = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
-	useEffect(() => {
-    if (token&&appVersion != undefined) {
-      getList();
-    }
-	}, [token,appVersion,listType]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tradeItem[]>([]);
 	const [pageSize, setPageSize] = useState(10);
@@ -42,10 +37,12 @@ const ComponentBrowserTabList: FC<{
 		setCurrentPage(1)
 	};
 	useEffect(() => {
-    if (currentPage) {
-      getList();
+    if (appVersion != undefined&&currentPage) {
+      if (token) {
+        getList();
+      }
     }
-	}, [currentPage]);
+	}, [token,appVersion,listType,currentPage]);
   const getList = () => {
     toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno == 200) {

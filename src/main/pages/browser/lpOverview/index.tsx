@@ -100,10 +100,12 @@ const ComponentBrowserCoinOverview: FC<{
     }
 	}, [coinPair,tabIndex]);
   useEffect(() => {
-    ws.current?.close();
-    optionValues = [];
-    setOptionValue([])
-    getPriceData();
+    if (coinPair) {
+      ws.current?.close();
+      optionValues = [];
+      setOptionValue([])
+      getPriceData();
+    }
 	}, [lineIndex]);
   
   const getTopInfo = () => {
