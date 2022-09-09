@@ -48,6 +48,7 @@
         }
         &:nth-child(1){
           width: 8rem;
+          color: var(--color-rate-up-color);
         }
         &:nth-child(2){
           width: 13rem;
@@ -63,6 +64,7 @@
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
+          color: var(--color-rate-up-color);
         }
         &:nth-child(6){
           width: 8rem;

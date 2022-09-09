@@ -58,6 +58,9 @@ const ComponentBrowserTabList: FC<{
   const goDetail = (hash:string) => {
     (window as any).open(`https://www.plugchain.network/v2/transDetail?id=${hash}`)
   }
+  const goAccount = (address:string) => {
+    (window as any).open(`https://www.plugchain.network/v2/addressDetail?id=${address}`)
+  }
 	return (
 		<div className='browser-list'>
       <div className="list-content">
@@ -72,12 +75,12 @@ const ComponentBrowserTabList: FC<{
           </div>
           {
             list.map((item, index) => 
-              <div className="list-content-detail" key={index} onClick={() => goDetail(item.hash)}>
-                <div className="list-content-detail-item">{item.operation}</div>
+              <div className="list-content-detail" key={index}>
+                <div className="list-content-detail-item" onClick={() => goDetail(item.hash)}>{item.operation}</div>
                 <div className="list-content-detail-item">$ {item.now_balance}</div>
                 <div className="list-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
                 <div className="list-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
-                <div className="list-content-detail-item">{toolHideAddressCenter(item.address??'')}</div>
+                <div className="list-content-detail-item" onClick={() => goAccount(item.address)}>{toolHideAddressCenter(item.address??'')}</div>
                 <div className="list-content-detail-item">{timestampToTime(item.date??0)}</div>
               </div>
             )

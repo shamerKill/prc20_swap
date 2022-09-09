@@ -159,7 +159,7 @@ const ComponentBrowserCoinOverview: FC<{
       let sendInfo:any = {"type":"kline","data":infoStr}
       SendWsData(JSON.stringify(sendInfo))
     }
-    ws.current.onerror = _e => connectWs();
+    // ws.current.onerror = _e => connectWs();
     ws.current.onmessage = e => {
       SendWsData('ping')
       let data = JSON.parse(e.data);
@@ -276,7 +276,8 @@ const ComponentBrowserCoinOverview: FC<{
             }
             {
               tabIndex==0&&<div className="overview-info-item-value">
-              ${optionValue ? optionValue[optionValue.length-1]?.close : ''} <span className="rate">({optionValue?optionValue[optionValue.length-1]?.createTime:''})</span>
+                {/* {dataInfo.token?dataInfo.token[1]?.name:''} */}
+              {optionValue ? optionValue[optionValue.length-1]?.close : ''}  <span className="rate">({optionValue?optionValue[optionValue.length-1]?.createTime:''})</span>
             </div>
             }
             <div className="overview-info-item-tab">
