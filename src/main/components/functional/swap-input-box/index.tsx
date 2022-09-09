@@ -1,4 +1,4 @@
-import { FC, MouseEventHandler, MutableRefObject, ReactNode } from 'react';
+import React, { FC, MouseEventHandler, MutableRefObject, ReactNode } from 'react';
 import classNames from 'classnames';
 import { InEvmBalanceToken } from '$database';
 import { ComponentFunctionalButton } from '../button';
@@ -24,10 +24,11 @@ const ComponentSwapInputBox: FC<{
 	hintText?: string;
 	buttonText?: string;
 	buttonOnClick?:  MouseEventHandler<HTMLButtonElement>;
+	tokenTransfer?: () => void;
 	loading?: boolean;
 	focusIndex?: MutableRefObject<number | undefined>;
 }> = ({
-	inputs, hintText, buttonOnClick, buttonText, loading, focusIndex,
+	inputs, hintText, buttonOnClick, buttonText, loading, focusIndex, tokenTransfer,
 }) => {
 	const {t} = useTranslation();
 	return (
@@ -35,61 +36,69 @@ const ComponentSwapInputBox: FC<{
 			<div className={classNames('com-swap-input-list')}>
 				{
 					inputs?.map((item, index) => (
-						<div key={item.key} className={classNames('com-swap-input-inner')}>
-							<p className={classNames('com-swap-label')}>
-								<span>{item.labelText}</span>
-								{
-									item.labelToken && <span>{t('余额')}: {item.labelToken?.balance}</span>
-								}
-							</p>
-							<div className={classNames('com-swap-content')}>
-								<input
-									className={classNames('com-swap-input')}
-									type="number"
-									value={item.inputText}
-									disabled={item.disabled??false}
-									onBlur={e => {
-										if (Number.isNaN(parseFloat(e.target.value))) {
-											item.inputChange?.('0');
-										}
-										if (focusIndex) focusIndex.current = undefined;
-									}}
-									onFocus={e => {
-										const value = parseFloat(e.target.value);
-										if (value === 0) item.inputChange?.('');
-										if (focusIndex) focusIndex.current = index;
-									}}
-									onChange={e => {
-										let value: string = e.target.value;
-										if (!item.labelToken) return;
-										if (/-/.test(value)) return;
-										if (item.checkMax === true) {
-											if (parseFloat(value??'0') > parseFloat(item.labelToken?.balance??'0')) {
-												value = item.labelToken?.balance || '0';
-											}
-										}
-										if (toolNumberGetDecimalLength(value) > (item.labelToken?.scale??0)) return;
-										item.inputChange?.(value);
-									}}  />
-								<ComponentFunctionalButton
-									className={classNames('com-swap-button', item.labelToken && 'com-swap-button-selected')}
-									onClick={item.selectToken}>
+						<React.Fragment key={item.key}>
+							<div className={classNames('com-swap-input-inner')}>
+								<p className={classNames('com-swap-label')}>
+									<span>{item.labelText}</span>
 									{
-										item.labelToken ? (
-											<>
-												<img className={classNames('com-swap-button-logo')} src={item.labelToken.logo} alt={item.labelToken.symbol} />
-												<span className={classNames('com-swap-button-span')}>{item.labelToken.symbol}</span>
-											</>
-										) : (
-											<span className={classNames('com-swap-button-span')}>{t('选择代币')}</span>
-										)
+										item.labelToken && <span>{t('余额')}: {item.labelToken?.balance}</span>
 									}
-									<i className={classNames('com-swap-icon', 'iconfont', 'icon-xiajiantou')}></i>
-								</ComponentFunctionalButton>
+								</p>
+								<div className={classNames('com-swap-content')}>
+									<input
+										className={classNames('com-swap-input')}
+										type="number"
+										value={item.inputText}
+										disabled={item.disabled??false}
+										onBlur={e => {
+											if (Number.isNaN(parseFloat(e.target.value))) {
+												item.inputChange?.('0');
+											}
+											if (focusIndex) focusIndex.current = undefined;
+										}}
+										onFocus={e => {
+											const value = parseFloat(e.target.value);
+											if (value === 0) item.inputChange?.('');
+											if (focusIndex) focusIndex.current = index;
+										}}
+										onChange={e => {
+											let value: string = e.target.value;
+											if (!item.labelToken) return;
+											if (/-/.test(value)) return;
+											if (item.checkMax === true) {
+												if (parseFloat(value??'0') > parseFloat(item.labelToken?.balance??'0')) {
+													value = item.labelToken?.balance || '0';
+												}
+											}
+											if (toolNumberGetDecimalLength(value) > (item.labelToken?.scale??0)) return;
+											item.inputChange?.(value);
+										}}  />
+									<ComponentFunctionalButton
+										className={classNames('com-swap-button', item.labelToken && 'com-swap-button-selected')}
+										onClick={item.selectToken}>
+										{
+											item.labelToken ? (
+												<>
+													<img className={classNames('com-swap-button-logo')} src={item.labelToken.logo} alt={item.labelToken.symbol} />
+													<span className={classNames('com-swap-button-span')}>{item.labelToken.symbol}</span>
+												</>
+											) : (
+												<span className={classNames('com-swap-button-span')}>{t('选择代币')}</span>
+											)
+										}
+										<i className={classNames('com-swap-icon', 'iconfont', 'icon-xiajiantou')}></i>
+									</ComponentFunctionalButton>
+								</div>
 							</div>
 							{/* 下一步 */}
-							<span className={classNames('com-swap-input-step', 'iconfont', 'icon-angle-double-down')}></span>
-						</div>
+							{
+								index !== inputs.length - 1 && (
+									<div className={classNames('com-swap-input-step-box')}>
+										<ComponentFunctionalButton onClick={tokenTransfer} className={classNames('com-swap-input-step', 'iconfont', 'icon-angle-double-down')}></ComponentFunctionalButton>
+									</div>
+								)
+							}
+						</React.Fragment>
 					))
 				}
 			</div>

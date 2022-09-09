@@ -27,6 +27,7 @@ const PageSwap: FC = () => {
 
 const PageSwapV10: FC = () => {
 	const {t} = useTranslation();
+	const search = useCustomFormatSearch<{one?: string, two?: string}>();
 	// 账户地址
 	const { accountAddress } = useCustomGetAccountAddress();
 	// 支付数量
@@ -133,6 +134,57 @@ const PageSwapV10: FC = () => {
 			}
 		});
 	}
+	// 代币转换
+	const onTokenTransfer = () => {
+		setToVolume('0');
+		setToTokenVolume('0');
+		setFromVolume('0');
+		setFromTokenVolume('0');
+		setMinReceive('0.0');
+		setFeeVolume('0.0');
+		setToTokenInfo(toToken => {
+			setFromTokenInfo(toToken);
+			return fromTokenInfo;
+		});
+	};
+
+	// 获取头部信息
+	useEffect(() => {
+		if (!accountAddress) return;
+		if (search?.one && search?.two) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataSearchToken(search.two, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??'', search.two??''])
+			]).then(([one, two, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+				if (two.status === 200 && two.data && two.data.length) {
+					setToTokenInfo({...two.data[0], balance: toolNumberStrToFloatForInt(balances.data[1], two.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		} else if (search?.one) {
+			// 搜索代币信息
+			setLoading(true);
+			Promise.all([
+				dataSearchToken(search.one, 'v1'),
+				dataGetAccountTokenBalance(accountAddress, [search.one??''])
+			]).then(([one, balances]) => {
+				if (!balances.data) return;
+				if (one.status === 200 && one.data && one.data.length) {
+					setFromTokenInfo({...one.data[0], balance: toolNumberStrToFloatForInt(balances.data[0], one.data[0].scale)});
+				}
+			}).finally(() => {
+				setLoading(false);
+			});
+		}
+	}, [search, accountAddress]);
 	// 判断是否有交易池
 	useEffect(() => {
 		if (!toTokenInfo || !fromTokenInfo) return;
@@ -318,6 +370,7 @@ const PageSwapV10: FC = () => {
 					<ComponentSwapInputBox
 						hintText={tokenSwapShow}
 						focusIndex={focusIndexRef}
+						tokenTransfer={onTokenTransfer}
 						loading={loading}
 						buttonOnClick={(canNotSwap || (parseFloat(fromVolume) > parseFloat(fromTokenInfo?.balance??''))) ? undefined : () => {
 							if (fromTokenInfo === null) return onSelectToken('from');
@@ -438,6 +491,19 @@ const PageSwapV20: FC = () => {
 			}
 		});
 	}
+	// 代币转换
+	const onTokenTransfer = () => {
+		setToVolume('0');
+		setToTokenVolume('0');
+		setFromVolume('0');
+		setFromTokenVolume('0');
+		setSwapRateParameter('0.0');
+		setMinReceive('0.0');
+		setToTokenInfo(toToken => {
+			setFromTokenInfo(toToken);
+			return fromTokenInfo;
+		});
+	};
 
 	// 高级设置
 	const onHighSetting = () => {
@@ -711,6 +777,7 @@ const PageSwapV20: FC = () => {
 							if (toTokenInfo === null) return onSelectToken('to');
 							onSwapButtonClick();
 						}}
+						tokenTransfer={onTokenTransfer}
 						buttonText={
 							(fromTokenInfo === null || toTokenInfo === null) ? t('选择代币')
 							: (
