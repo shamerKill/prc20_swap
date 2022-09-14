@@ -24,6 +24,7 @@
         height: 6.5rem;
         flex-direction: column;
         align-items: flex-start;
+        padding-bottom: 1rem;
         .overview-info-title-btns{
           position: relative;
           right: 1rem;
@@ -73,12 +74,20 @@
         }
       }
     }
+    &-token{
+      padding: 1rem 1.5rem;
+      color: var(--color-contract-color);
+      background: var(--color-contract-background);
+      font-size: 0.9rem;
+      .address{
+        cursor: pointer;
+      }
+    }
     &-item1{
       width: 100%;
-      padding: 1rem;
       display: flex;
       justify-content: space-between;
-      padding: 0.65rem;
+      padding: 0 0.65rem;
       &.other{
         background: var(--color-content-background-color);
         border-radius: 2.5rem;

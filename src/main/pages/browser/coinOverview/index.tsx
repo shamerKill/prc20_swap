@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import './index.scss';
+import TokenInfo from '../token';
 type dataType = {
   fluidity: {
     change: string,
@@ -57,6 +58,9 @@ const ComponentBrowserLpOverview: FC<{
   const goSwap = () => {
     navigate(`/swap/swap?one=${dataInfo.token}`);
   }
+  const goDetail = () => {
+    (window as any).open(`https://www.plugchain.network/v2/addressDetail?id=${dataInfo.token}`)
+  }
   return (
     <div className="overview-info-detail">
       <div className="overview-info-title">
@@ -69,6 +73,7 @@ const ComponentBrowserLpOverview: FC<{
           <div className="overview-info-title-btns-item1" onClick={goSwap}>{t('交易')}</div>
         </div>
       </div>
+      <div className="overview-info-token">{t('合约地址')}：<span className='address' onClick={goDetail}>{dataInfo?.token}</span></div>
       <div className="overview-info">
         <div className="overview-info-item1">
           <div className="overview-info-item1-value">
