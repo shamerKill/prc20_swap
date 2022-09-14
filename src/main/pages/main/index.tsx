@@ -8,7 +8,7 @@ import { ComponentLayoutBase, ComponentFunctionalButton } from '$components';
 import { assertLogoImg } from '$services';
 import { accountStore } from '$database';
 import { useCustomGetAccountAddress, useCustomGetAppVersion, useCustomRouteFormatPath } from '$hooks';
-import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet, toolTimeSleep } from '$tools';
+import { LANGUAGE_EN, LANGUAGE_ZH, toolHideAddressCenter, toolFormatPath, toolLinkWallet, toolTimeSleep, setDefaultLanguage } from '$tools';
 
 import './index.scss';
 import { TypeAppVersion } from '$types';
@@ -45,15 +45,17 @@ const PageHome: FC = () => {
 	// 切换语言
 	const changeLanguage = async () => {
 		if (i18n.language == LANGUAGE_EN) {
-			i18n.changeLanguage(LANGUAGE_ZH);
+			setDefaultLanguage(LANGUAGE_ZH);
 		} else if (i18n.language == LANGUAGE_ZH) {
-			i18n.changeLanguage(LANGUAGE_EN);
+			setDefaultLanguage(LANGUAGE_EN);
 		}
 	};
 
 	// 切换版本
 	const changeVersion = async (type?: TypeAppVersion) => {
 		setShowLoading(true);
+		await toolTimeSleep(100);
+		navigate(window.location.pathname, { replace: true });
 		await toolTimeSleep(1000);
 		if (type) {
 			setAppVersion(type);
@@ -182,6 +184,14 @@ const PageHome: FC = () => {
 			</div>
 
 			<div className={classNames('main_base_content', walletLinking && 'main_base_content_linked')}>
+				<ComponentFunctionalButton className={classNames('main_base_version_btn')} onClick={() => changeVersion()}>
+					<span className={classNames('main_base_nav_link_icon')}>
+						<i className={classNames('iconfont', 'icon-duihuan')}></i>
+					</span>
+					<span className={classNames('main_base_nav_link_text')}>
+						{t('版本切换')}
+					</span>
+				</ComponentFunctionalButton>
 				<div className={classNames('main_base_route')}>
 					<Outlet />
 					{

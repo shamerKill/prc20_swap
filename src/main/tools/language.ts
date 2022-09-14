@@ -8,10 +8,14 @@ export const LANGUAGE_ZH = 'zh';
 export const LANGUAGE_EN = 'en';
 
 const getDefaultLanguage = () => {
-  const language = window.navigator.language;
+  const language = localStorage.getItem('swap_language') || window.navigator.language;
   if (new RegExp(LANGUAGE_ZH).test(language)) return LANGUAGE_ZH;
   if (new RegExp(LANGUAGE_EN).test(language)) return LANGUAGE_EN;
   return LANGUAGE_EN;
+};
+export const setDefaultLanguage = (language: string) => {
+  localStorage.setItem('swap_language', language);
+  i18n.changeLanguage(language);
 };
 
 export const toolInitI18n = () => {

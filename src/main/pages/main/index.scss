@@ -168,8 +168,10 @@
 	@extend .main_base_nav_link;
 	background-color: transparent;
 	color: var(--color-primary-color);
-}
-.main_base_nav_btn {
+	display: none;
+	@include media-phone {
+		display: block;
+	}
 	.main_base_nav_link_icon .iconfont {
 		font-size: 1rem;
 		width: 2.2rem;
@@ -232,11 +234,33 @@
 	padding: 3rem 1rem 3rem 0;
 	flex: 5;
 	overflow-y: scroll;
+	position: relative;
 	@include media-phone {
 		padding: 0;
 		padding-bottom: 2.5rem;
 		&.main_base_content_linked {
 			padding-bottom: 0;
+		}
+	}
+	.main_base_version_btn {
+		position: absolute;
+		top: 0.5rem;
+		right: 1rem;
+		background-color: transparent;
+		color: var(--color-primary-color);
+		@include media-phone {
+			display: none;
+		}
+		.main_base_nav_link_icon .iconfont {
+			font-size: 2rem;
+			width: 2.2rem;
+			display: inline-block;
+			vertical-align: middle;
+		}
+		.main_base_nav_link_text {
+			line-height: 2rem;
+			display: inline-block;
+			vertical-align: middle;
 		}
 	}
 }
