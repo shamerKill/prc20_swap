@@ -5,7 +5,7 @@ import ComponentOverviewKline from './kline';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { toolApi,toolApiKline,toolGet } from '$tools';
+import { toolApi,toolApiKline,toolGet,toNonExponential } from '$tools';
 import * as echarts from 'echarts';
 
 import './index.scss';
@@ -68,8 +68,6 @@ const ComponentBrowserCoinOverview: FC<{
   let optionValues:klineItem[] = [];
 	const [optionValue1,setOptionValue1] = useState<Array<string>>([]);
 	const [optionDate1,setOptionDate1] = useState<Array<string>>([]);
-	const [tabIndex,setTabIndex] = useState(0)
-	const [lineIndex,setLineIndex] = useState(0)
   const ws = useRef<WebSocket | null>(null);
   const tabList:Array<tabType> = [
     {
@@ -84,6 +82,8 @@ const ComponentBrowserCoinOverview: FC<{
     }
   ]
   const lineList:string[] = ['1min','15min','30min','60min','1day','1week','1mon']
+	const [tabIndex,setTabIndex] = useState(0)
+	const [lineIndex,setLineIndex] = useState(2)
 	useEffect(() => {
     if (coinPair) {
       getTopInfo();
@@ -100,10 +100,12 @@ const ComponentBrowserCoinOverview: FC<{
     }
 	}, [coinPair,tabIndex]);
   useEffect(() => {
-    ws.current?.close();
-    optionValues = [];
-    setOptionValue([])
-    getPriceData();
+    if (coinPair) {
+      ws.current?.close();
+      optionValues = [];
+      setOptionValue([])
+      getPriceData();
+    }
 	}, [lineIndex]);
   
   const getTopInfo = () => {
@@ -157,7 +159,7 @@ const ComponentBrowserCoinOverview: FC<{
       let sendInfo:any = {"type":"kline","data":infoStr}
       SendWsData(JSON.stringify(sendInfo))
     }
-    ws.current.onerror = _e => connectWs();
+    // ws.current.onerror = _e => connectWs();
     ws.current.onmessage = e => {
       SendWsData('ping')
       let data = JSON.parse(e.data);
@@ -228,14 +230,14 @@ const ComponentBrowserCoinOverview: FC<{
   }
 	return (
     <div className="overview-info-detail">
-    <div className="overview-info-title">
-      <div className="overview-info-title-price">
+    <div className="overview-info-title3">
+      <div className="overview-info-title3-price">
       {dataInfo.token ?dataInfo.token[0]?.name :''} / {dataInfo.token?dataInfo.token[1]?.name:''}  (${dataInfo.price?.num})  
         {/* <span className="rate">({dataInfo.price?.change}%)</span> */}
       </div>
-      <div className="overview-info-title-btns">
-        <div className="overview-info-title-btns-item2 active" onClick={goLp}>{t('增加流动性')}</div>
-        <div className="overview-info-title-btns-item2" onClick={goSwap}>{t('交易')}</div>
+      <div className="overview-info-title3-btns">
+        <div className="overview-info-title3-btns-item2 active" onClick={goLp}>{t('增加流动性')}</div>
+        <div className="overview-info-title3-btns-item2" onClick={goSwap}>{t('交易')}</div>
       </div>
     </div>
       <div className="overview-info lpinfos">
@@ -244,7 +246,7 @@ const ComponentBrowserCoinOverview: FC<{
             <div className="overview-info-item-tips">
             {t('liquidity')}
             </div>
-            ${dataInfo.fluidity?.num} 
+            ${Number(dataInfo.fluidity?.num)} 
             {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item-item">
@@ -258,7 +260,7 @@ const ComponentBrowserCoinOverview: FC<{
               <div className="overview-info-item-tips">
               {t('turnover')}
               </div>
-              ${dataInfo.turnover?.num} 
+              ${Number(dataInfo.turnover?.num)} 
               {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
             </div>
 
@@ -274,7 +276,8 @@ const ComponentBrowserCoinOverview: FC<{
             }
             {
               tabIndex==0&&<div className="overview-info-item-value">
-              ${optionValue ? optionValue[optionValue.length-1]?.close : ''} <span className="rate">({optionValue?optionValue[optionValue.length-1]?.createTime:''})</span>
+                {/* {dataInfo.token?dataInfo.token[1]?.name:''} */}
+              {optionValue ? optionValue[optionValue.length-1]?.close : ''}  <span className="rate">({optionValue?optionValue[optionValue.length-1]?.createTime:''})</span>
             </div>
             }
             <div className="overview-info-item-tab">

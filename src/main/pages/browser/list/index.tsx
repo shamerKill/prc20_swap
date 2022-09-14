@@ -39,7 +39,6 @@ const ComponentBrowserList: FC<{
 	const [ appVersion ] = useCustomGetAppVersion();
 	useEffect(() => {
     if (appVersion != undefined) {
-      console.log(coinPair)
       if (coinPair == 'pc') {
         getList();
       } else if (coinPair) {

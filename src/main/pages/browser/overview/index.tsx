@@ -7,6 +7,8 @@ import { toolApi,toolGet } from '$tools';
 import { useCustomGetAppVersion } from '$hooks';
 import { TypeAppVersion } from '$types';
 
+
+
 import './index.scss';
 type dataType = {
   new_trading_pair: number,
@@ -138,28 +140,28 @@ const ComponentBrowserOverview: FC<{
         </div>
       </div>
       <div className="overview-info-detail">
-        <div className="overview-info-title">
-          <div className="overview-info-title-item">
-            <div className="overview-info-title-item-title">
+        <div className="overview-info-title1">
+          <div className="overview-info-title1-item">
+            <div className="overview-info-title1-item-title">
             {t('liquidity')}
             </div>
-            <div className="overview-info-title-item-value">
+            <div className="overview-info-title1-item-value">
               ${Number(optionValue[optionValue.length-1]) ? Number(optionValue[optionValue.length-1]) : '0'} <span className="rate">{Number(optionValue[optionValue.length-2]) ? (((Number(optionValue[optionValue.length-1])-Number(optionValue[optionValue.length-2]))/Number(optionValue[optionValue.length-2]))*100).toFixed(2) : Number(optionValue[optionValue.length-1]) ? '100' : '0'}%</span>
             </div>
           </div>
-          <div className="overview-info-title-item other">
+          <div className="overview-info-title1-item other">
             <div className="flex-item">
-              <div className="overview-info-title-item-title">
+              <div className="overview-info-title1-item-title">
                 24H {t('turnover')}
               </div>
-              <div className="overview-info-title-item-value">
+              <div className="overview-info-title1-item-value">
                 ${Number(optionValue1[optionValue1.length-1]) ? Number(optionValue1[optionValue1.length-1]) : '0'} <span className="rate">{Number(optionValue1[optionValue1.length-2]) ? (((Number(optionValue1[optionValue1.length-1])-Number(optionValue1[optionValue1.length-2]))/Number(optionValue1[optionValue1.length-2]))*100).toFixed(2) : Number(optionValue1[optionValue1.length-1]) ? '100' : '0'}%</span>
               </div>
             </div>
             <div className="flex-item">
-              <div className="overview-info-title-btns">
-                <div className={classNames('overview-info-title-btns-item', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>{t('每天')}</div>
-                <div className={classNames('overview-info-title-btns-item', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>{t('每周')}</div>
+              <div className="overview-info-title1-btns">
+                <div className={classNames('overview-info-title1-btns-item0', chartType == 'day' ? 'active':'')} onClick={() => doCheck('day')}>{t('每天')}</div>
+                <div className={classNames('overview-info-title1-btns-item0', chartType == 'week' ? 'active1':'')} onClick={() => doCheck('week')}>{t('每周')}</div>
               </div>
             </div>
           </div>

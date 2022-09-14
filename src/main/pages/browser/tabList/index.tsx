@@ -1,6 +1,6 @@
 import { FC,useEffect,useState } from 'react';
 import ComponentFunctionalPagenation from '$components/functional/pagination';
-import { toolApi,toolGet,toolHideAddressCenter,timestampToTime } from '$tools';
+import { toolApi,toolGet,toolHideAddressCenter,timestampToTime,toNonExponential } from '$tools';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { useCustomGetAppVersion } from '$hooks';
@@ -22,11 +22,6 @@ const ComponentBrowserTabList: FC<{
 }) => {
 	const { t } = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
-	useEffect(() => {
-    if (token&&appVersion != undefined) {
-      getList();
-    }
-	}, [token,appVersion,listType]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tradeItem[]>([]);
 	const [pageSize, setPageSize] = useState(10);
@@ -42,10 +37,12 @@ const ComponentBrowserTabList: FC<{
 		setCurrentPage(1)
 	};
 	useEffect(() => {
-    if (currentPage) {
-      getList();
+    if (appVersion != undefined&&currentPage) {
+      if (token) {
+        getList();
+      }
     }
-	}, [currentPage]);
+	}, [token,appVersion,listType,currentPage]);
   const getList = () => {
     toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno == 200) {
@@ -61,6 +58,9 @@ const ComponentBrowserTabList: FC<{
   const goDetail = (hash:string) => {
     (window as any).open(`https://www.plugchain.network/v2/transDetail?id=${hash}`)
   }
+  const goAccount = (address:string) => {
+    (window as any).open(`https://www.plugchain.network/v2/addressDetail?id=${address}`)
+  }
 	return (
 		<div className='browser-list'>
       <div className="list-content">
@@ -75,12 +75,12 @@ const ComponentBrowserTabList: FC<{
           </div>
           {
             list.map((item, index) => 
-              <div className="list-content-detail" key={index} onClick={() => goDetail(item.hash)}>
-                <div className="list-content-detail-item">{item.operation}</div>
+              <div className="list-content-detail" key={index}>
+                <div className="list-content-detail-item" onClick={() => goDetail(item.hash)}>{item.operation}</div>
                 <div className="list-content-detail-item">$ {item.now_balance}</div>
-                <div className="list-content-detail-item">{Number(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
-                <div className="list-content-detail-item">{Number(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
-                <div className="list-content-detail-item">{toolHideAddressCenter(item.address??'')}</div>
+                <div className="list-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
+                <div className="list-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
+                <div className="list-content-detail-item" onClick={() => goAccount(item.address)}>{toolHideAddressCenter(item.address??'')}</div>
                 <div className="list-content-detail-item">{timestampToTime(item.date??0)}</div>
               </div>
             )
