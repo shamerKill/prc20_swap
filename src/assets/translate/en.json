@@ -80,5 +80,12 @@
 	"每天": "Daily",
 	"每周": "Weekly",
 	"增加": "Add",
-	"合约地址": "Contract"
+	"合约地址": "Contract",
+	"版本切换": "Version",
+	"支付": "Pay",
+	"搜索名称或粘贴地址": "Search name or paste address",
+	"余额": "Balance",
+	"管理代币列表": "Manage token list",
+	"将进行流动池增加": "Flow pool will be increased",
+	"将进行流动池移除": "Flow pool will be removed"
 }
