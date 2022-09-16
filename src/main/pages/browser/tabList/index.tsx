@@ -63,25 +63,25 @@ const ComponentBrowserTabList: FC<{
 
 	return (
 		<div className='browser-list'>
-      <div className="list-content">
+      <div className="list1-content">
         <div className="table-area">
-          <div className="list-content-title">
-            <div className="list-content-title-item">#</div>
-            <div className="list-content-title-item">{t('totalAmount')}</div>
-            <div className="list-content-title-item">{t('totalQuantity')}</div>
-            <div className="list-content-title-item">{t('totalQuantity')}</div>
-            <div className="list-content-title-item">{t('account')}</div>
-            <div className="list-content-title-item">{t('time')}</div>
+          <div className="list1-content-title">
+            <div className="list1-content-title-item">#</div>
+            <div className="list1-content-title-item">{t('totalAmount')}</div>
+            <div className="list1-content-title-item">{t('totalQuantity')}</div>
+            <div className="list1-content-title-item">{t('totalQuantity')}</div>
+            <div className="list1-content-title-item">{t('account')}</div>
+            <div className="list1-content-title-item">{t('time')}</div>
           </div>
           {
             list.map((item, index) => 
-              <div className="list-content-detail" key={index}>
-                <div className="list-content-detail-item" onClick={() => goDetail(item.hash)}>{item.operation}</div>
-                <div className="list-content-detail-item">$ {item.now_balance}</div>
-                <div className="list-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
-                <div className="list-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
-                <div className="list-content-detail-item" onClick={() => goAccount(item.address)}>{toolHideAddressCenter(item.address??'')}</div>
-                <div className="list-content-detail-item">{timestampToTime(item.date??0)}</div>
+              <div className="list1-content-detail" key={index}>
+                <div className="list1-content-detail-item" onClick={() => goDetail(item.hash)}>{item.operation}</div>
+                <div className="list1-content-detail-item">$ {item.now_balance}</div>
+                <div className="list1-content-detail-item">{toNonExponential(item.num_0.split(' ')[0])} {item.num_0.split(' ')[1]}</div>
+                <div className="list1-content-detail-item">{toNonExponential(item.num_1.split(' ')[0])} {item.num_1.split(' ')[1]}</div>
+                <div className="list1-content-detail-item" onClick={() => goAccount(item.address)}>{toolHideAddressCenter(item.address??'')}</div>
+                <div className="list1-content-detail-item">{timestampToTime(item.date??0)}</div>
               </div>
             )
           }
