@@ -34,4 +34,4 @@ const main = async () => {
 toolInitI18n();
 main();
 
-window.console.log = () => {};
+// window.console.log = () => {};

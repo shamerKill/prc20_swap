@@ -586,10 +586,11 @@ const PagePoolsAddV20: FC = () => {
 	useEffect(() => {
 		if (!(parseFloat(fromVolume) > 0)) return;
 		if (!fromTokenInfo || !accountAddress) return;
-		if (!needApproveFrom) return;
+		if (needApproveFrom) return;
 		(async () => {
 			// 判断授权
 			const result = await dataGetAllowVolume(fromTokenInfo.contractAddress, accountAddress);
+			console.log(result);
 			if (BigInt(result) <= BigInt(toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale))) {
 				setNeedApproveFrom(true);
 			} else {

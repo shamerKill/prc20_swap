@@ -111,6 +111,7 @@ export const dataGetLpPoolDidVolume = async (contract: string, userAccount: stri
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(contract, undefined, undefined, raw))?.data ?? '';
 	}
+	if (result === '0x') return '0';
 	return BigInt(result).toString();
 };
 
@@ -125,6 +126,7 @@ export const dataGetLpPoolTotalVolume = async (contract: string): Promise<string
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(contract, undefined, undefined, raw))?.data ?? '';
 	}
+	if (result === '0x') return '0';
 	return BigInt(result).toString();
 }
 

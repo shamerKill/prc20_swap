@@ -695,7 +695,7 @@ const PageSwapV20: FC = () => {
 	useEffect(() => {
 		if (!(parseFloat(fromVolume) > 0)) return;
 		if (!fromTokenInfo || !accountAddress) return;
-		if (!needApprove) return;
+		if (needApprove) return;
 		(async () => {
 			// 判断授权
 			const result = await dataGetAllowVolume(fromTokenInfo.contractAddress, accountAddress);

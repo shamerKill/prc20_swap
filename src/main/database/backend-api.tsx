@@ -300,6 +300,7 @@ export const dataGetLpPoolVolume = async (lpContract: string, contracts: [string
 		result = (await cosmo.walletTool.contractCall(lpContract, undefined, undefined, raw))?.data ?? '';
 	}
 	if (!result) return;
+	if (result === '0x') return ['0', '0'];
 	const resData = web3EthAbi.decodeParameters(['uint112', 'uint112'], result);
 	let resultArr: [string, string] = [resData[0], resData[1]];
 	if (reserve) resultArr = (resultArr.reverse() as [string, string]);
