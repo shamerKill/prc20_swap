@@ -1,3 +1,4 @@
+import { getDefaultLanguage } from "./language";
 
 export const toolApi = (path: string): string => {
 	const testSite = 'api.gxswap.io';
@@ -31,7 +32,9 @@ export const toolGet = async <T>(
 	url: string, search?: { [key in string]: string|number|boolean }
 ): Promise<T> => {
 	let fetchUrl = url;
-	if (search) fetchUrl += '?' + Object.keys(search).map(key => `${key}=${search[key]}`).join('&');
+	let lang = getDefaultLanguage();
+	if (search) fetchUrl += '?lang='+ lang + '&'+ Object.keys(search).map(key => `${key}=${search[key]}`).join('&');
+	else fetchUrl += '?lang='+ lang;
 	return toolAjax(fetchUrl, { method: 'GET', type: 'json' });
 };
 

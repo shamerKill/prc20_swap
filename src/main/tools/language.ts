@@ -7,7 +7,7 @@ import enTranslate from '../../assets/translate/en.json';
 export const LANGUAGE_ZH = 'zh';
 export const LANGUAGE_EN = 'en';
 
-const getDefaultLanguage = () => {
+export const getDefaultLanguage = () => {
   const language = localStorage.getItem('swap_language') || window.navigator.language;
   if (new RegExp(LANGUAGE_ZH).test(language)) return LANGUAGE_ZH;
   if (new RegExp(LANGUAGE_EN).test(language)) return LANGUAGE_EN;

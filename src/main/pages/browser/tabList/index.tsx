@@ -20,14 +20,13 @@ const ComponentBrowserTabList: FC<{
   listType,
   token
 }) => {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const [ appVersion ] = useCustomGetAppVersion();
 	const [currentPage, setCurrentPage] = useState(1);
 	const [list, setList] = useState<tradeItem[]>([]);
 	const [pageSize, setPageSize] = useState(10);
 	const [total, setTotal] = useState(0);
 	const [pageSizeOptions, setPageSizeOptions] = useState([5, 10, 20, 30]);
-
 	const handleChangePage = (val:number) => {
 		setCurrentPage(val)
 	};
@@ -42,7 +41,7 @@ const ComponentBrowserTabList: FC<{
         getList();
       }
     }
-	}, [token,appVersion,listType,currentPage]);
+	}, [token,appVersion,listType,currentPage,i18n.language]);
   const getList = () => {
     toolGet(toolApi('/browser/token/operation'), {from: currentPage,amount: pageSize, token: token,types:listType,version:localStorage.getItem('cosmo_swap_version')?localStorage.getItem('cosmo_swap_version')!:'v2'}).then((res:any) => {
       if (res.errno == 200) {
@@ -61,6 +60,7 @@ const ComponentBrowserTabList: FC<{
   const goAccount = (address:string) => {
     (window as any).open(`https://www.plugchain.network/v2/addressDetail?id=${address}`)
   }
+
 	return (
 		<div className='browser-list'>
       <div className="list-content">
