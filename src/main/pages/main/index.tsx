@@ -184,14 +184,18 @@ const PageHome: FC = () => {
 			</div>
 
 			<div className={classNames('main_base_content', walletLinking && 'main_base_content_linked')}>
-				<ComponentFunctionalButton className={classNames('main_base_version_btn')} onClick={() => changeVersion()}>
-					<span className={classNames('main_base_nav_link_icon')}>
-						<i className={classNames('iconfont', 'icon-duihuan')}></i>
-					</span>
-					<span className={classNames('main_base_nav_link_text')}>
-						{t('版本切换')}
-					</span>
-				</ComponentFunctionalButton>
+				{
+					showVersionBtn && (
+						<ComponentFunctionalButton className={classNames('main_base_version_btn')} onClick={() => changeVersion()}>
+							<span className={classNames('main_base_nav_link_icon')}>
+								<i className={classNames('iconfont', 'icon-duihuan')}></i>
+							</span>
+							<span className={classNames('main_base_nav_link_text')}>
+								{t('版本切换')}
+							</span>
+						</ComponentFunctionalButton>
+					)
+				}
 				<div className={classNames('main_base_route')}>
 					<Outlet />
 					{
