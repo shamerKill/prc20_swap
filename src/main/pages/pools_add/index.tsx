@@ -422,7 +422,8 @@ const PagePoolsAddV20: FC = () => {
 			const result = await dataSetApprove(contractAddress);
 			if (result) {
 				toast(t('授权成功'), { type: 'success' });
-				setNeedApproveFrom(false);
+				if (contractAddress === fromTokenInfo?.contractAddress) setNeedApproveFrom(false);
+				else setNeedApproveTo(false);
 			} else {
 				toast(t('授权错误'), { type: 'warning' });
 			}
@@ -590,7 +591,6 @@ const PagePoolsAddV20: FC = () => {
 		(async () => {
 			// 判断授权
 			const result = await dataGetAllowVolume(fromTokenInfo.contractAddress, accountAddress);
-			console.log(result);
 			if (BigInt(result) <= BigInt(toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale))) {
 				setNeedApproveFrom(true);
 			} else {
@@ -601,7 +601,7 @@ const PagePoolsAddV20: FC = () => {
 	useEffect(() => {
 		if (!(parseFloat(toVolume) > 0)) return;
 		if (!toTokenInfo || !accountAddress) return;
-		if (!needApproveTo) return;
+		if (needApproveTo) return;
 		(async () => {
 			// 判断授权
 			const result = await dataGetAllowVolume(toTokenInfo.contractAddress, accountAddress);
