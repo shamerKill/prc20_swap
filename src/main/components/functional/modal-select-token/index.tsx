@@ -150,7 +150,7 @@ export const ComModalSelectToken: FC<{
 			));
 			if (remoteList.length !== 0) return setSearchTokenList(remoteList);
 			setLoading(true);
-			const result = await dataSearchToken(searchText);
+			const result = await dataSearchToken(searchText, appVersion);
 			setLoading(false);
 			if (result.status === 200 && result.data) {
 				if (result.data?.length === 0) {
@@ -166,7 +166,7 @@ export const ComModalSelectToken: FC<{
 				}
 			}
 		}, 1 * 1000) as unknown as number;
-	}, [searchText]);
+	}, [searchText, appVersion]);
 
 	return (
 		<div className={classNames('com-swap-token-select')}>

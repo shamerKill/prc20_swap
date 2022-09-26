@@ -226,6 +226,8 @@ const PagePoolsDeleteV20: FC = () => {
 	const [ lpUserVolume, setLpUserVolume ] = useState<string>();
 	// 是否需要授权
 	const [needApprove, setNeedApprove] = useState<boolean>();
+	// 删除lp数量
+	const [deleteLpVolume, setDeleteLpVolume] = useState<string>();
 
 	// 修改数量
 	const onEditValue = (input: string) => {
@@ -243,13 +245,13 @@ const PagePoolsDeleteV20: FC = () => {
 		if (!accountAddress) return;
 		if (!(parseFloat(deleteScale) > 0)) return toast.warn(t('请选择数量'));
 		if (!toTokenInfo || !fromTokenInfo) return;
-		if (!lpUserVolume) return;
+		if (!lpUserVolume || !deleteLpVolume) return;
 		setLoading(true);
 		try {
 			toast.info(t('将进行代币兑换'));
 			const result = await dataSetRemoveLpVolume(
 				[fromTokenInfo.contractAddress, toTokenInfo.contractAddress],
-				toolNumberSplit(toolNumberMul(lpUserVolume, deleteScale), 0, true),
+				deleteLpVolume,
 				[toolNumberStrToIntForFloat(fromVolume, fromTokenInfo.scale), toolNumberStrToIntForFloat(toVolume, toTokenInfo.scale)],
 				accountAddress ?? '',
 			);
@@ -342,7 +344,7 @@ const PagePoolsDeleteV20: FC = () => {
 
 	// 设置持有
 	useEffect(() => {
-		setHolderData({from: '19', to: '1234.5', scale: '0.123'});
+		setHolderData({from: '', to: '', scale: ''});
 	}, [fromTokenInfo, toTokenInfo]);
 	// 获取lp地址
 	useEffect(() => {
@@ -399,7 +401,7 @@ const PagePoolsDeleteV20: FC = () => {
 		if (lpTotalVolume === undefined || lpUserVolume === undefined || fromPoolTokenVolume === null || toPoolTokenVolume === null) return;
 		if (!fromTokenInfo || !toTokenInfo) return;
 		// 百分比计算
-		const scale = toolNumberDiv(BigInt(lpUserVolume).toString(), BigInt(lpTotalVolume).toString(), { places: 10 });
+		const scale = toolNumberDiv(BigInt(lpUserVolume).toString(), BigInt(lpTotalVolume).toString(), { places: 20 });
 		// 计算
 		const didFromVolume = toolNumberSplit(toolNumberMul(scale, fromPoolTokenVolume), fromTokenInfo.scale);
 		const didToVolume = toolNumberSplit(toolNumberMul(scale, toPoolTokenVolume), toTokenInfo.scale);
@@ -421,15 +423,16 @@ const PagePoolsDeleteV20: FC = () => {
 	}, [fromPoolTokenVolume, toPoolTokenVolume]);
 	// 根据百分比设置数量
 	useEffect(() => {
-		if (!holderData?.from || !holderData?.to) return;
+		if (!fromPoolTokenVolume || !toPoolTokenVolume || !lpTotalVolume || !lpUserVolume) return;
 		if (!fromTokenInfo?.scale || !toTokenInfo?.scale) return;
-		setFromVolume(
-			toolNumberSplit(toolNumberMul(holderData.from, deleteScale), fromTokenInfo.scale)
-		);
-		setToVolume(
-			toolNumberSplit(toolNumberMul(holderData.to, deleteScale), toTokenInfo.scale)
-		);
-	}, [deleteScale, holderData?.from, holderData?.to, fromTokenInfo?.scale, toTokenInfo?.scale]);
+		const delLpVolume = toolNumberSplit(toolNumberMul(lpUserVolume, deleteScale), 0, false);
+		setDeleteLpVolume(delLpVolume);
+		const deleteLpScale = toolNumberDiv(delLpVolume, lpTotalVolume, { places: 20 });
+		const oneTokenVolume = toolNumberSplit(toolNumberMul(fromPoolTokenVolume, deleteLpScale), fromTokenInfo.scale);
+		setFromVolume(oneTokenVolume);
+		const twoTokenVolume = toolNumberSplit(toolNumberMul(toPoolTokenVolume, deleteLpScale), toTokenInfo.scale);
+		setToVolume(twoTokenVolume);
+	}, [deleteScale, fromTokenInfo?.scale, toTokenInfo?.scale, fromPoolTokenVolume, toPoolTokenVolume, lpTotalVolume, lpUserVolume]);
 
 
 	return (

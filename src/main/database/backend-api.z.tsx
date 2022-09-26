@@ -111,6 +111,7 @@ export const dataGetLpPoolDidVolume = async (contract: string, userAccount: stri
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(contract, undefined, undefined, raw))?.data ?? '';
 	}
+	if (result === '0x') return '0';
 	return BigInt(result).toString();
 };
 
@@ -125,6 +126,7 @@ export const dataGetLpPoolTotalVolume = async (contract: string): Promise<string
 	if (accountStore.value.isWallet) {
 		result = (await cosmo.walletTool.contractCall(contract, undefined, undefined, raw))?.data ?? '';
 	}
+	if (result === '0x') return '0';
 	return BigInt(result).toString();
 }
 
@@ -142,7 +144,7 @@ export const dataSetRemoveLpVolume = async (contracts: string[], lpVolume: strin
 			tokenVolume = volumes[1];
 			volumePlug = volumes[0];
 		}
-		raw = web3EthAbi.encodeFunctionSignature('removeLiquidityPLUG(address,uint256,uint256,uint256,address,uint256)') + 
+		raw = web3EthAbi.encodeFunctionSignature('removeLiquidityPLUGSupportingFeeOnTransferTokens(address,uint256,uint256,uint256,address,uint256)') + 
 					web3Utils.stripHexPrefix(
 						web3EthAbi.encodeParameters(
 							['address', 'uint256', 'uint256', 'uint256', 'address', 'uint256'],
