@@ -234,7 +234,7 @@ export const dataSetTokenTransfer = async (
 										)
 									);
 	} else if (toContractAddress === wPlugcnAddress) {
-		raw = web3EthAbi.encodeFunctionSignature('swapExactTokensForPLUG(uint256,uint256,address[],address,uint256)') + 
+		raw = web3EthAbi.encodeFunctionSignature('swapExactTokensForPLUGSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)') + 
 									web3Utils.stripHexPrefix(
 										web3EthAbi.encodeParameters(
 											['uint256', 'uint256', 'address[]', 'address', 'uint256'],
