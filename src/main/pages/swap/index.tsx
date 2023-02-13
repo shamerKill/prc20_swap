@@ -534,7 +534,7 @@ const PageSwapV20: FC = () => {
 			const result = await dataSetTokenTransfer(
 				accountAddress ?? '',
 				toolNumberStrToIntForFloat(fromVolume, fromTokenInfo?.scale??0),
-				toolNumberStrToIntForFloat(toVolume, toTokenInfo?.scale??0),
+				toolNumberStrToIntForFloat(minReceive, toTokenInfo?.scale??0),
 				fromTokenInfo?.contractAddress??'',
 				toTokenInfo?.contractAddress??'',
 				(Math.floor(new Date().getTime() / 1000) + ((stopTime||0) * 60)).toString()
@@ -896,6 +896,7 @@ const HighSettingModal: FC<{
 							let value = e.target.value === '' ? '0' : e.target.value;
 							let valueArr = value.split('.');
 							if (valueArr.length >= 2 && valueArr[1].length > 1) return;
+							if (parseFloat(value) >= 50) return;
 							setSelectSlipMem(parseFloat(value));
 						}} />
 					<span className={classNames('setting_input_unit')}>%</span>

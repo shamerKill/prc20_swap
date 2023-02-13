@@ -87,5 +87,9 @@
 	"余额": "Balance",
 	"管理代币列表": "Manage token list",
 	"将进行流动池增加": "Flow pool will be increased",
-	"将进行流动池移除": "Flow pool will be removed"
+	"将进行流动池移除": "Flow pool will be removed",
+	"本地列表": "Local List",
+	"全部清除": "Clear All",
+	"提示：自定义代币信息会本地存储在您的浏览器中": "Tip: Customized token information will be stored locally in your browser",
+	"是否删除？": "Are you sure to delete?"
 }
