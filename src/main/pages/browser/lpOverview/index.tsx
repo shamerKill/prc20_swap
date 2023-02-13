@@ -25,10 +25,12 @@ type dataType = {
       logo: string,
       name: string,
       token: string,
+      decimals: number,
     },{
       logo: string,
       name: string,
       token: string,
+      decimals: number,
     }
   ],
   trading: {
@@ -38,7 +40,8 @@ type dataType = {
   turnover: {
     change: string,
     num: string
-  }
+  },
+  token_balance: [string, string]
 }
 type klineItem = {
   close: number,
@@ -196,6 +199,26 @@ const ComponentBrowserCoinOverview: FC<{
       }
     })
   }
+  const nFormatter = (num:number, digits:number=1) => {
+    const si = [
+        { value: 1, symbol: "" },
+        { value: 1E3, symbol: "K" },
+        { value: 1E6, symbol: "M" },
+        { value: 1E9, symbol: "G" },
+        { value: 1E12, symbol: "T" },
+        { value: 1E15, symbol: "P" },
+        { value: 1E18, symbol: "E" }
+    ];
+    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+    let i;
+    for (i = si.length - 1; i > 0; i--) {
+        if (num >= si[i].value) {
+            break;
+        }
+    }
+    return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+}
+
   useEffect(() => {
     if (optionValue.length) {
       connectWs();
@@ -242,12 +265,22 @@ const ComponentBrowserCoinOverview: FC<{
     </div>
       <div className="overview-info lpinfos">
         <div className="overview-info-item lpinfo">
-          <div className="overview-info-item-value">
-            <div className="overview-info-item-tips">
-            {t('liquidity')}
+          <div className="flexcontent">
+            <div className="overview-info-item-value">
+              <div className="overview-info-item-tips">
+              {t('liquidity')}
+              </div>
+              ${nFormatter(Number(dataInfo.fluidity?.num))} 
+              {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
+              <span className='lpinfodetail'>
+                {dataInfo.token ?dataInfo.token[0]?.name :''}：
+              {nFormatter(Number(dataInfo.token_balance?dataInfo.token_balance[0]:'0')/Math.pow(10,dataInfo.token?.[0]?.decimals))}
+              </span>
+              <span className='lpinfodetail'>
+              {dataInfo.token ?dataInfo.token[1]?.name :''}：
+              {nFormatter(Number(dataInfo.token_balance?dataInfo.token_balance[1]:'0')/Math.pow(10,dataInfo.token?.[1]?.decimals))}
+              </span>
             </div>
-            ${Number(dataInfo.fluidity?.num)} 
-            {/* <span className="rate">({dataInfo.fluidity?.change}%)</span> */}
           </div>
           <div className="overview-info-item-item">
             <div className="overview-info-item-value">
@@ -260,7 +293,7 @@ const ComponentBrowserCoinOverview: FC<{
               <div className="overview-info-item-tips">
               {t('turnover')}
               </div>
-              ${Number(dataInfo.turnover?.num)} 
+              ${nFormatter(Number(dataInfo.turnover?.num),3)} 
               {/* <span className="rate">({dataInfo.turnover?.change}%)</span> */}
             </div>
 

@@ -87,6 +87,9 @@
         border-radius: 2.5rem;
         padding: 0;
         margin: 0.65rem;
+        .flexcontent{
+          display: flex;
+        }
       }
       @include media-phone {
         width: 100%;
@@ -115,6 +118,11 @@
           font-size: 1rem;
           font-weight: normal;
           padding-top: 0.5rem;
+        }
+        .lpinfodetail{
+          color: var(--color-primary-color);
+          font-size: 1rem;
+          font-weight: normal;
         }
       }
       &-item{
