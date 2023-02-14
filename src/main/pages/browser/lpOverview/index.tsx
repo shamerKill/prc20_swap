@@ -269,7 +269,7 @@ const ComponentBrowserCoinOverview: FC<{
       <div className="overview-info lpinfos">
         <div className="overview-info-item lpinfo">
           <div className="flexcontent">
-            <div className="overview-info-item-value">
+            <div className="overview-info-item-value flexcontent-top">
               <div className="overview-info-item-tips">
               {t('liquidity')}
               </div>
