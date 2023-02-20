@@ -218,8 +218,17 @@ const ComponentBrowserCoinOverview: FC<{
     // }
     // return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
     let str = num.toString();
-    let reg = str.indexOf(".") > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
-    return str.replace(reg,"$1,");
+    if(num < 1) {
+      let reg = /^([0-9])\.?([0-9]*)e-([0-9])/;
+      if (!reg.test(str)) return str;
+      const numArr = str.match(reg);
+      const n = Number('' + numArr?.[1] + (numArr?.[2] || ''));
+      const num = '0.' + String(Math.pow(10, Number(numArr?.[3]) - 1)).substr(1) + n;
+      return num.replace(/0*$/, '');
+    } else {
+      let reg = str.indexOf(".") > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
+      return str.replace(reg,"$1,");
+    }
 }
 
   useEffect(() => {
