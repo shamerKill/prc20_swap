@@ -243,10 +243,8 @@ const ComponentBrowserCoinOverview: FC<{
         data: optionValue1,
         type: 'bar',
         itemStyle: {
-          color:'#31D87F',  
-          lineStyle:{  
-            color:'#31D87F'  
-          }  
+          color:'#31D87F',
+          borderColor: '#31D87F',
         }
       }
     ],
@@ -344,7 +342,7 @@ const ComponentBrowserCoinOverview: FC<{
               tabIndex==0&&<ComponentOverviewKline optionValue={optionValue} domId={'chartDom2'}></ComponentOverviewKline>
             }
             {
-              tabIndex!=0&&<ComponentOverviewCharts option={option1} domId={'chartDom2'}></ComponentOverviewCharts>
+              tabIndex!=0&&<ComponentOverviewCharts option={option1 as any} domId={'chartDom2'}></ComponentOverviewCharts>
             }
           </div>
         </div>
