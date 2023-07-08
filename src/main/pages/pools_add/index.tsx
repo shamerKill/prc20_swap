@@ -495,7 +495,7 @@ const PagePoolsAddV20: FC = () => {
 		}
 		(async () => {
 			const result = await dataGetLpContractAddress(fromTokenInfo.contractAddress, toTokenInfo.contractAddress);
-			if (result) {
+			if (result && parseFloat(result) !== 0) {
 				setLpContractAddress(result);
 			}
 		})();
@@ -540,25 +540,27 @@ const PagePoolsAddV20: FC = () => {
 		if (focusIndexRef.current !== 0) return;
 		if (!oneFromTransTo) return;
 		if (!fromTokenInfo || !toTokenInfo) return;
+		if (!lpContractAddress) return;
 		const value = parseFloat(fromVolume);
 		if (!(value > 0)) {
 			setToVolume('0');
 			return;
 		}
 		setToVolume(toolNumberSplit(toolNumberMul(fromVolume, oneFromTransTo), toTokenInfo.scale));
-	}, [fromVolume, fromTokenInfo, toTokenInfo, oneFromTransTo]);
+	}, [fromVolume, fromTokenInfo, toTokenInfo, oneFromTransTo, lpContractAddress]);
 	// 监听输出框
 	useEffect(() => {
 		if (focusIndexRef.current !== 1) return;
 		if (!oneToTransFrom) return;
 		if (!fromTokenInfo || !toTokenInfo) return;
+		if (!lpContractAddress) return;
 		const value = parseFloat(toVolume);
 		if (!(value > 0)) {
 			setFromVolume('0');
 			return;
 		}
 		setFromVolume(toolNumberSplit(toolNumberMul(toVolume, oneToTransFrom), fromTokenInfo.scale));
-	}, [toVolume, fromTokenInfo, toTokenInfo, oneToTransFrom]);
+	}, [toVolume, fromTokenInfo, toTokenInfo, oneToTransFrom, lpContractAddress]);
 	// 计算资金池比例
 	useEffect(() => {
 		if (!fromVolume || !fromPoolTokenVolume) return;
@@ -727,7 +729,7 @@ const PagePoolsAddV20: FC = () => {
 								<p className={classNames('hold_content_text')}>{holderData?.to??'-'}</p>
 								<p className={classNames('hold_content_text')}>{toolNumberToPercentage(holderData?.scale??'0')}</p>
 							</div>
-							<ComponentLayoutLoading showLoading={holderData === null}></ComponentLayoutLoading>
+							<ComponentLayoutLoading showLoading={holderData === null && lpContractAddress !== undefined}></ComponentLayoutLoading>
 						</div>
 					</div>
 				)
